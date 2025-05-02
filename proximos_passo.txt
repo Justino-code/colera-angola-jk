@@ -1,0 +1,41 @@
+    Criar Seeders para popular dados iniciais (ex: Províncias de Angola)?
+
+    Implementar API REST com autenticação JWT?
+
+    Configurar Google Maps API no front-end?
+
+
+    ⚠️ Requisitos Parcialmente Cumpridos:
+
+    Triagem com Encaminhamento Automático:
+
+        Falta: Integrar a geolocalização do paciente com a API do Google Maps para encontrar o hospital mais próximo durante a triagem.
+
+    Dashboard em Tempo Real:
+
+        Falta: Endpoints para fornecer dados agregados (ex: GET /api/dashboard/casos-por-regiao).
+
+    Permissões Granulares:
+
+        Parcial: Policies criadas, mas falta restringir acesso por role (ex: médico só pode ver pacientes do seu hospital).
+
+    Documentação da API:
+
+        Parcial: Swagger mencionado, mas não implementado com annotations.
+
+
+        Requisitos Faltantes:
+
+    Logs de Auditoria:
+
+        Registro de ações críticas (ex: exclusão de pacientes) não implementado.
+
+    Testes Automatizados:
+
+        Testes unitários e de integração não foram escritos.
+
+    Deploy e Monitoramento:
+
+        Configuração para Docker, AWS ou Heroku.
+
+        Integração com ferramentas como New Relic ou Sentry.
