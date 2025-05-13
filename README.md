@@ -1,5 +1,5 @@
 # 🚰 Sistema de Gestão de Casos de Cólera em Angola  
-![Logo do Sistema de Cólera Angola](public/logo.svg)  
+![Logo do Sistema de Cólera Angola](assets/logo.svg)  
 *Um sistema para triagem, monitoramento e encaminhamento de pacientes com sintomas de cólera, integrando hospitais, ambulâncias e gabinetes de saúde.*  
 
 ## 📌 Visão Geral  
