@@ -18,14 +18,14 @@ class RelatorioController extends Controller
     public function generatePDF(Request $request)
     {
         $request->validate([
-            'tipo' => 'required|in:casos_por_regiao,evolucao_temporal',
+            'tipo' => 'required|in:casos_por_regiao,evolucao_temporal,distribuicao_demografica,outro',
             'dados' => 'required|json'
         ]);
 
         $relatorio = Relatorio::create([
             'tipo' => $request->tipo,
             'dados' => $request->dados,
-            'usuario_id' => auth()->id()
+            'id_usuario' => auth()->id()
         ]);
 
         $pdf = PDF::loadView('relatorio', ['data' => $relatorio->dados]);

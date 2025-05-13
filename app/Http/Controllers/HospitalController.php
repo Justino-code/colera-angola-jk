@@ -4,53 +4,82 @@ namespace App\Http\Controllers;
 
 use App\Models\Hospital;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class HospitalController extends Controller
 {
-    // Listar hospitais de um município
-    public function index($municipioId)
+    /**
+     * Listar todos os hospitais.
+     */
+    public function index(): JsonResponse
     {
-        return Hospital::where('municipio_id', $municipioId)->get();
+        $hospitais = Hospital::with('municipio')->get(); // Carrega relacionamento opcional
+        return response()->json($hospitais, 200);
     }
 
-    // Criar hospital
-    public function store(Request $request)
+    /**
+     * Criar um novo hospital.
+     */
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'nome' => 'required|string|max:255',
-            'tipo' => 'required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
-            'municipio_id' => 'required|exists:municipios,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric'
+        try {
+            $validated = $request->validate([
+                'nome' => 'required|string|max:255',
+                'tipo' => 'required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
+                'endereco' => 'required|string|max:255',
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'capacidade_leitos' => 'required|integer',
+                'id_municipio' => 'required|exists:municipio,id_municipio'
+            ]);
+
+            $hospital = Hospital::create($validated);
+
+            return response()->json($hospital, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+    }
+
+    /**
+     * Exibir detalhes de um hospital específico pelo ID.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $hospital = Hospital::with('municipio')->findOrFail($id);
+        return response()->json($hospital, 200);
+    }
+
+    /**
+     * Atualizar um hospital existente pelo ID.
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $hospital = Hospital::findOrFail($id);
+
+        $validated = $request->validate([
+            'nome' => 'sometimes|required|string|max:255',
+            'tipo' => 'sometimes|required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
+            'endereco' => 'sometimes|string|max:255',
+            'latitude' => 'sometimes|required|numeric',
+            'longitude' => 'sometimes|required|numeric',
+            'capacidade_leitos' => 'sometimes|integer'
         ]);
 
-        return Hospital::create($request->all());
+        $hospital->update($validated);
+
+        return response()->json($hospital, 200);
     }
 
-    // Detalhes de um hospital
-    public function show(Hospital $hospital)
+    /**
+     * Excluir um hospital pelo ID.
+     */
+    public function destroy(int $id): JsonResponse
     {
-        return $hospital;
-    }
-
-    // Atualizar hospital
-    public function update(Request $request, Hospital $hospital)
-    {
-        $request->validate([
-            'nome' => 'sometimes|string|max:255',
-            'tipo' => 'sometimes|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
-            'latitude' => 'sometimes|numeric',
-            'longitude' => 'sometimes|numeric'
-        ]);
-
-        $hospital->update($request->all());
-        return $hospital;
-    }
-
-    // Excluir hospital
-    public function destroy(Hospital $hospital)
-    {
+        $hospital = Hospital::findOrFail($id);
         $hospital->delete();
+
         return response()->json(null, 204);
     }
 }

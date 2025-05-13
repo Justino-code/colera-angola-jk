@@ -10,11 +10,11 @@ class Relatorio extends Model {
     protected $fillable = [
         'tipo',
         'dados',
-        'usuario_id'
+        'id_usuario'
     ];
 
     protected $casts = [
-        'dados' => 'array', // Converte automaticamente JSON para array
+        'dados' => 'encrypted:array', // Converte automaticamente JSON para array
         'data_geracao' => 'datetime'
     ];
 

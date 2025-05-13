@@ -1,3 +1,4 @@
+<?php
 // app/Models/Paciente.php
 namespace App\Models;
 
@@ -5,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Paciente extends Model {
+    protected $table = 'paciente';
+    protected $primaryKey = 'id_paciente';
+
     protected $fillable = [
-        'nome', 'bi_number', 'telefone', 'idade', 'sexo',
-        'sintomas', 'resultado_triagem', 'qr_code', 'hospital_id'
+        'nome', 'numero_bi', 'telefone', 'idade', 'sexo',
+        'sintomas', 'resultado_triagem', 'qr_code', 'nome_hospital', 'id_hospital'
     ];
 
     protected $casts = [

@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Hospital extends Model {
+    protected $table = 'hospital';
+    protected $primaryKey = 'id_hospital';
+
     protected $fillable = [
         'nome', 'tipo', 'endereco', 'latitude', 'longitude',
-        'capacidade_leitos', 'municipio_id'
+        'capacidade_leitos', 'id_municipio'
     ];
 
     public function municipio(): BelongsTo {

@@ -15,35 +15,39 @@ class ProvinciaController extends Controller
     // Criar nova província
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'codigo_iso' => 'required|string|max:5|unique:provinces'
+            'codigo_iso' => 'required|string|max:5|unique:provincia,codigo_iso'
         ]);
 
-        return Provincia::create($request->all());
+        $provincia = Provincia::create($validated);
+        return response()->json($provincia, 201);
     }
 
     // Detalhes de uma província
-    public function show(Provincia $provincia)
+    public function show($idProvincia)
     {
-        return $provincia;
+        return Provincia::findOrFail($idProvincia);
     }
 
     // Atualizar província
-    public function update(Request $request, Provincia $provincia)
+    public function update(Request $request, $idProvincia)
     {
-        $request->validate([
+        $provincia = Provincia::findOrFail($idProvincia);
+
+        $validated = $request->validate([
             'nome' => 'sometimes|string|max:255',
-            'codigo_iso' => 'sometimes|string|max:5|unique:provinces,codigo_iso,'.$provincia->id
+            'codigo_iso' => 'sometimes|string|max:5|unique:provincia,codigo_iso,' . $idProvincia . ',id_provincia'
         ]);
 
-        $provincia->update($request->all());
-        return $provincia;
+        $provincia->update($validated);
+        return response()->json($provincia);
     }
 
     // Excluir província
-    public function destroy(Provincia $provincia)
+    public function destroy($idProvincia)
     {
+        $provincia = Provincia::findOrFail($idProvincia);
         $provincia->delete();
         return response()->json(null, 204);
     }

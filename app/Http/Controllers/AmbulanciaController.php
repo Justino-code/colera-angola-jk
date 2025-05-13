@@ -8,18 +8,18 @@ use Illuminate\Http\Request;
 class AmbulanciaController extends Controller
 {
     // Listar ambulâncias de um hospital
-    public function index($hospitalId)
+    public function index()
     {
-        return Ambulancia::where('hospital_id', $hospitalId)->get();
+        return Ambulancia::all();
     }
 
     // Criar ambulância
     public function store(Request $request)
     {
         $request->validate([
-            'placa' => 'required|string|unique:ambulances',
+            'placa' => 'required|string|unique:ambulancia',
             'status' => 'required|in:disponivel,em_viagem,ocupada',
-            'hospital_id' => 'required|exists:hospitals,id',
+            'id_hospital' => 'required',//'required|exists:hospitals,id',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric'
         ]);
@@ -37,6 +37,11 @@ class AmbulanciaController extends Controller
 
         $ambulancia->update($request->only(['latitude', 'longitude']));
         return $ambulancia;
+    }
+
+    public function show($idHospital)
+    {
+        return Ambulancia::where('id_hospital', $idHospital)->get();
     }
 
     // Excluir ambulância

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('provincia', function (Blueprint $table) {
-    $table->id();
+    $table->id('id_provincia');
     $table->string('nome');
     $table->string('codigo_iso', 5)->unique();
     $table->timestamps();
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('provincias');
+        Schema::dropIfExists('provincia');
     }
 };

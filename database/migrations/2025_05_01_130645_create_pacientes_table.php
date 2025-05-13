@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('patiente', function (Blueprint $table) {
-    $table->id();
+        Schema::create('paciente', function (Blueprint $table) {
+    $table->id('id_paciente');
     $table->string('nome');
-    $table->string('bi_number')->unique();
-    $table->encrypted('telefone');
+    $table->string('numero_bi')->unique();
+    $table->string('telefone');
     $table->integer('idade');
-    $table->enum('sexo', ['M', 'F', 'Outro']);
+    $table->enum('sexo', ['M', 'F']);
     $table->json('sintomas');
-    $table->encrypted('resultado_triagem');
+    $table->string('resultado_triagem');
     $table->string('qr_code')->unique();
-    $table->foreignId('hospital_id')->constrained('hospitals');
+    $table->string('nome_hospital')->nullable();
+    $table->unsignedBigInteger('id_hospital')->nullable();
+    $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->onDelete('set null');
     $table->timestamps();
 });
     }
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pacientes');
+        Schema::dropIfExists('paciente');
     }
 };

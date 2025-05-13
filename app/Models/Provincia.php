@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Provincia extends Model {
+    protected $table = 'provincia';
+
+    protected $primaryKey = 'id_provincia';
+
     protected $fillable = ['nome', 'codigo_iso'];
 
     public function municipios(): HasMany {

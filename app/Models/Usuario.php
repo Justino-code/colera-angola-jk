@@ -5,16 +5,26 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
 
-class Usuario extends Authenticatable {
+class Usuario extends Authenticatable implements MustVerifyEmail{
+    use HasApiTokens, Notifiable;
+
+    protected $table = 'usuario';
+    protected $primaryKey = 'id_usuario';
+
+
     protected $fillable = [
-        'nome', 'email', 'password', 'role', 'permissoes', 'hospital_id'
+        'nome', 'email', 'password', 'role', 'permissoes', 'id_hospital'
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
-        'permissoes' => 'array'
+        'permissoes' => 'array',
+        'email' => 'encrypted',
+        'email_verified_at' => 'datetime',
     ];
 
     public function hospital(): BelongsTo {

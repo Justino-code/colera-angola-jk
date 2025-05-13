@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Municipio extends Model {
-    protected $fillable = ['nome', 'provincia_id'];
+    protected $table = 'municipio';
+    protected $primaryKey = 'id_municipio';
+
+    protected $fillable = ['nome', 'id_provincia'];
 
     public function provincia(): BelongsTo {
         return $this->belongsTo(Provincia::class);

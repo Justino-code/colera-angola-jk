@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('relatorios', function (Blueprint $table) {
-            $table->id();
+       Schema::create('relatorio', function (Blueprint $table) {
+            $table->id('id_relatorio');
             $table->enum('tipo', [
-                'casos_por_regiao', 
-                'evolucao_temporal', 
-                'distribuicao_demografica'
+                'casos_por_regiao',
+                'evolucao_temporal',
+                'distribuicao_demografica',
+                'outro'
             ]);
             $table->json('dados');
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade'); // Quem gerou
+            $table->unsignedBigInteger('id_usuario');
+            $table->foreign('id_usuario')->references('id_usuario')->on('usuario')->onDelete('cascade'); // Quem gerou
             $table->timestamp('data_geracao')->useCurrent();
             $table->timestamps();
         });
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('relatorios');
+        Schema::dropIfExists('relatorio');
     }
 };

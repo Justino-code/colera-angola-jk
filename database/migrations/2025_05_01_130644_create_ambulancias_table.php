@@ -11,22 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('hospital', function (Blueprint $table) {
-    $table->id();
-    $table->string('nome');
-    $table->enum('tipo', [
-        'Geral', 
-        'Municipal', 
-        'Centro de Saúde', 
-        'Posto Médico', 
-        'Clínica', 
-        'Outros'
+       Schema::create('ambulancia', function (Blueprint $table) {
+    $table->id('id_ambulancia');
+    $table->string('placa')->unique();
+    $table->enum('status', [
+        'disponivel',
+        'em_viagem',
+        'ocupada'
     ]);
-    $table->string('endereco');
     $table->decimal('latitude', 10, 8);
     $table->decimal('longitude', 11, 8);
-    $table->integer('capacidade_leitos');
-    $table->foreignId('municipio_id')->constrained('municipios');
+    $table->unsignedBigInteger('id_hospital');
+    $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->onDelete('cascade');
     $table->timestamps();
 });
     }
@@ -36,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hospitals');
+        Schema::dropIfExists('ambulancia');
     }
 };
