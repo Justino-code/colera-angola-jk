@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UsuarioController extends Controller
 {
+    use AuthorizesRequests;
     // Listar todos os usuários (restrito a gestores)
     public function index(): JsonResponse
     {
@@ -27,32 +29,34 @@ class UsuarioController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-                                        'password' => 'required|string|min:6',
-                                        'role' => ['required', Rule::in([
-                                            'gestor',
-                                            'medico',
-                                            'tecnico',
-                                            'enfermeiro',
-                                            'epidemiologista',
-                                            'administrativo',
-                                            'agente_sanitario',
-                                            'farmaceutico',
-                                            'analista_dados',
-                                            'coordenador_regional',
-                                        ])],
-                                        'permissoes' => 'required|array',
-                                        'permissoes.*' => 'string',
-                                        'id_hospital' => 'required|exists:hospitais,id_hospital',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => ['required', Rule::in([
+                'gestor',
+                'medico',
+                'tecnico',
+                'enfermeiro',
+                'epidemiologista',
+                'administrativo',
+                'agente_sanitario',
+                'farmaceutico',
+                'analista_dados',
+                'coordenador_regional',
+                ])],
+                'permissoes' => 'required|array',
+                'permissoes.*' => 'string',
+                'id_hospital' => 'required|exists:hospital,id_hospital',
         ]);
 
         $usuario = User::create([
             'nome' => $validated['nome'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-                                'role' => $validated['role'],
-                                'permissoes' => $validated['permissoes'],
-                                'id_hospital' => $validated['id_hospital'],
+            'role' => $validated['role'],
+            'permissoes' => $validated['permissoes'],
+            'id_hospital' => $validated['id_hospital'],
         ]);
+
+        $token = $usuario->createToken('api-user-token',['post:read', 'post:create']);
 
         return response()->json($usuario, 201);
     }

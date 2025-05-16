@@ -10,26 +10,29 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine if the given user can view any users.
-     *
-     * @param  \App\Models\User  $user
-     * @return bool
-     */
-    public function viewAny(User $user)
-    {
-        return $user->role === 'gestor'; // Apenas gestores podem listar usuários
+    // Gestores gerenciam usuários; outros só veem seu próprio perfil
+    public function viewAny(User $user) {
+        return $user->role === 'gestor';
     }
 
-    /**
-     * Determine if the given user can view the user.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return bool
-     */
-    public function view(User $user, User $model)
-    {
-        return $user->role === 'gestor'; // Apenas gestores podem visualizar usuários
+    public function view(User $user, User $targetUser) {
+        return $user->role === 'gestor' || $user->id === $targetUser->id;
+    }
+
+    public function create(User $user) {
+        return $user->role === 'gestor';
+    }
+
+    public function update(User $user, User $targetUser) {
+        return $user->role === 'gestor' || $user->id === $targetUser->id;
+    }
+
+    public function delete(User $user, User $targetUser) {
+        return $user->role === 'gestor';
+    }
+
+    // Permissão específica para atualizar roles
+    public function updateRole(User $user) {
+        return $user->role === 'gestor';
     }
 }

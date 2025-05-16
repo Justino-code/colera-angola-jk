@@ -38,8 +38,8 @@ return new class extends Migration
             $table->json('permissoes');
 
             // Relacionamento com hospital
-            $table->unsignedBigInteger('id_hospital');
-            $table->foreign('id_hospital')->references('id_hospital')->on('hospital');
+            $table->unsignedBigInteger('id_hospital')->nullable();
+            $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->OnDelete('cascade');
 
             // Campos para autenticação e verificação de email
             $table->timestamp('email_verified_at')->nullable();

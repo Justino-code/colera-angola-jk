@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+
 
 class Usuario extends Authenticatable implements MustVerifyEmail{
     use HasApiTokens, Notifiable;
@@ -16,14 +18,22 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
 
 
     protected $fillable = [
-        'nome', 'email', 'password', 'role', 'permissoes', 'id_hospital'
+        'nome',
+        'email',
+        'password',
+        'role',
+        'permissoes',
+        'id_hospital',
+        'email_verified_at',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = [
+        'password',
+        'remember_token'
+    ];
 
     protected $casts = [
         'permissoes' => 'array',
-        'email' => 'encrypted',
         'email_verified_at' => 'datetime',
     ];
 
