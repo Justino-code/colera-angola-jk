@@ -8,7 +8,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const res = await api.get('/hospitals');
+        const res = await api.get('/hospital');
         setHospitals(res.data);
       } catch (error) {
         console.error('Erro ao buscar hospitais:', error);
