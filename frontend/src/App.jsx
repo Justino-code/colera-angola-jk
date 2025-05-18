@@ -1,19 +1,25 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
+import { Toaster } from 'react-hot-toast';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute';
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
+    return (
+        <BrowserRouter>
+        <Routes>
+        {/* Rotas Públicas */}
         <Route path="/login" element={<Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/" element={<Dashboard />} />
+        <Route path="/cadastro" element={<Register />} />
+
+        {/* Rotas Protegidas */}
+        <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<Dashboard />} />
         </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+        </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
