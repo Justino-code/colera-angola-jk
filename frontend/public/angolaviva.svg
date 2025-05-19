@@ -12,6 +12,6 @@
   <!-- Texto central elegante -->
   <text x="50" y="90" font-size="20" text-anchor="middle" fill="white"
         font-family="'Poppins', 'Helvetica Neue', sans-serif" font-weight="600">
-    EpiTrack
+    AV
   </text>
 </svg>

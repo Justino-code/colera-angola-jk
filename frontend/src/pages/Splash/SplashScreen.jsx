@@ -1,19 +1,31 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import LogoLoader from '../../components/cammon/LogoLoader';
 
-const SplashScreen = () => {
-  const navigate = useNavigate();
+const SplashScreen = ({ children }) => {
+  const [showLoader, setShowLoader] = useState(true);
 
-  // Simula carregamento e navega após 2.5 segundos
   useEffect(() => {
-    const timer = setTimeout(() => {
-      //navigate('/login', { replace: true });
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, [navigate]);
+    const hasVisited = localStorage.getItem('hasVisited');
 
-  return <LogoLoader />;
+    if (hasVisited) {
+      // Já visitou antes → pula o loader
+      setShowLoader(false);
+    } else {
+      // Primeira visita → mostra o loader e marca como visitado
+      const timer = setTimeout(() => {
+        localStorage.setItem('hasVisited', 'true');
+        setShowLoader(false);
+      }, 2500); // Tempo do loader (2.5s)
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  if (showLoader) {
+    return <LogoLoader />;
+  }
+
+  return children;
 };
 
 export default SplashScreen;

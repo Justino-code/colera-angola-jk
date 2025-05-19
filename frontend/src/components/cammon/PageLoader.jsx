@@ -1,21 +1,29 @@
 import { useState, useEffect } from 'react';
 import LogoLoader from './LogoLoader';
 
-const PageLoader = ({ children }) => {
-  const [loading, setLoading] = useState(false);
+const PageLoader = ({ children, onLoadingComplete }) => {
+  const [loading, setLoading] = useState(true);
 
-  // Simula o carregamento por 2.5s sempre que a rota muda
   useEffect(() => {
     setLoading(true);
+
     const timer = setTimeout(() => {
-      setLoading(false);
-    }, 6500);
+      // Se não tiver função de carregamento real, libera direto
+      if (typeof onLoadingComplete === 'function') {
+        onLoadingComplete()
+          .catch((err) => console.error('Erro no carregamento:', err))
+          .finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    }, 500); // Tempo inicial do loader
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [onLoadingComplete]);
 
   if (loading) return <LogoLoader />;
 
   return children;
 };
+
 export default PageLoader;
