@@ -8,7 +8,7 @@ const RootLayout = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 15000); // Tempo do loader
+    }, 1500); // Tempo do loader
 
     return () => clearTimeout(timer);
   }, []);

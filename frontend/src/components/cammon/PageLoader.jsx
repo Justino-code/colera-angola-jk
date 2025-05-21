@@ -1,3 +1,4 @@
+// src/components/PageLoader.js
 import { useState, useEffect } from 'react';
 import LogoLoader from './LogoLoader';
 
@@ -7,16 +8,19 @@ const PageLoader = ({ children, onLoadingComplete }) => {
   useEffect(() => {
     setLoading(true);
 
+    // Simula carregamento inicial ou executa função customizada
     const timer = setTimeout(() => {
-      // Se não tiver função de carregamento real, libera direto
       if (typeof onLoadingComplete === 'function') {
         onLoadingComplete()
-          .catch((err) => console.error('Erro no carregamento:', err))
-          .finally(() => setLoading(false));
+          .then(() => setLoading(false))
+          .catch((err) => {
+            console.error('Erro no carregamento:', err);
+            setLoading(false);
+          });
       } else {
         setLoading(false);
       }
-    }, 500); // Tempo inicial do loader
+    }, 1000); // Ajuste conforme necessário
 
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);

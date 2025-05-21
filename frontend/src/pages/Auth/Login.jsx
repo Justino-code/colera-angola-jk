@@ -78,9 +78,10 @@ export default function Login() {
                 {/* Cabeçalho */}
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2">
-                        HealthGuard
+                        AngolaViva
                     </h1>
                     <p className="text-gray-300">Sistema de Gestão Epidemiológica</p>
+		    <p className="text-gray-300">(Colera)</p>
                 </div>
 
                 {/* Formulário */}
@@ -155,43 +156,11 @@ export default function Login() {
       disabled={loading}
       className="bg-gradient-to-r from-cyan-500 to-blue-600 py-3 px-6 rounded-xl font-semibold text-white shadow-md hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 disabled:cursor-not-allowed w-full"
     >
-      Acessar Sistema
+      Entrar
     </motion.button>
   )}
 </motion.div>
-
-                    {/* Link para cadastro */}
-                    <div className="text-center mt-6">
-                        <Link
-                            to="/cadastro"
-                            className="text-cyan-400 hover:text-cyan-300 font-medium inline-flex items-center gap-2 group"
-                        >
-                            Criar nova conta
-                            <FiLogIn className="group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                    </div>
                 </form>
-
-                {/* Divisor */}
-                <div className="mt-8">
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-white/20"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-transparent text-gray-400">
-                                Ou continue com
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Botões Sociais */}
-                    <div className="mt-6 grid grid-cols-3 gap-3">
-                        <SocialButton icon="Google" color="bg-red-500" />
-                        <SocialButton icon="GitHub" color="bg-gray-800" />
-                        <SocialButton icon="Facebook" color="bg-blue-600" />
-                    </div>
-                </div>
             </motion.div>
         </div>
     );
