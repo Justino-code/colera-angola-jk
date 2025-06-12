@@ -11,15 +11,16 @@ class UsuarioSeeder extends Seeder
     public function run(): void
     {
         Usuario::updateOrCreate(
-            ['email' => 'admin@example.com'], // evita duplicidade
-            [
-                'nome' => 'Administrador',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('admin'),
-                                'role' => 'gestor',
-                                'permissoes' => ['gerenciar_usuarios', 'ver_dashboard'],
-                                'id_hospital' => 1, // ajuste se necessário
-                                'email_verified_at' => now()
+        ['email' => 'admin@example.com'], // evita duplicidade
+        [
+            'nome' => 'Administrador',
+            'email' => 'admin@me.com',
+            'password' => Hash::make('admin123'),
+            'role' => 'gestor',
+            'permissoes' => ['gerenciar_usuarios', 
+            'ver_dashboard'],
+            'id_hospital' => 1, // ajuste se necessário
+            'email_verified_at' => now()
             ]
         );
     }

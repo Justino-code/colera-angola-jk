@@ -40,6 +40,9 @@ return new class extends Migration
             // Relacionamento com hospital
             $table->unsignedBigInteger('id_hospital')->nullable();
             $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->OnDelete('cascade');
+            // Relacionamento com gabinete
+            $table->unsignedBigInteger('id_gabinete')->nullable();
+            $table->foreign('id_gabinete')->references('id_gabinete')->on('gabinete')->OnDelete('cascade');
 
             // Campos para autenticação e verificação de email
             $table->timestamp('email_verified_at')->nullable();

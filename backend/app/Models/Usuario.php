@@ -24,6 +24,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
         'role',
         'permissoes',
         'id_hospital',
+        'id_gabinete',
         'email_verified_at',
     ];
 
@@ -44,4 +45,10 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
     public function relatorios() {
         return $this->hasMany(Relatorio::class);
     }
+
+    public function gabinete()
+    {
+        return $this->belongsTo(Gabinete::class);
+    }
+
 }

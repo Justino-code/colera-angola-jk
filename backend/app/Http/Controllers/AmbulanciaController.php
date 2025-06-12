@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ambulancia;
+use App\Models\Viatura as Ambulancia;
 use Illuminate\Http\Request;
 
 class AmbulanciaController extends Controller
@@ -10,21 +10,23 @@ class AmbulanciaController extends Controller
     // Listar ambulâncias de um hospital
     public function index()
     {
-        return Ambulancia::all();
+        return Ambulancia::where('tipo', 'ambulancia')->all();
     }
 
     // Criar ambulância
     public function store(Request $request)
     {
-        $request->validate([
+        $validate = $request->validate([
             'placa' => 'required|string|unique:ambulancia',
             'status' => 'required|in:disponivel,em_viagem,ocupada',
-            'id_hospital' => 'required',//'required|exists:hospitals,id',
+            'id_hospital' => 'required|exists:hospital,id_hospital',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric'
         ]);
 
-        return Ambulancia::create($request->all());
+        $validated['tipo'] = 'ambulancia';
+
+        return Ambulancia::create($validated);
     }
 
     // Atualizar localização em tempo real

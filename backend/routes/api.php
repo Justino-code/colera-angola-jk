@@ -12,6 +12,9 @@ use App\Http\Controllers\AmbulanciaController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\GabineteController;
+use App\Http\Controllers\ViaturaController;
+
 
 /*Route::get('/user', function (Request $request) {
     return $request->user();
@@ -38,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('ambulancia', AmbulanciaController::class);
     Route::apiResource('relatorio', RelatorioController::class);
     Route::apiResource('usuario',  UsuarioController::class);
+    Route::apiResource('gabinetes', GabineteController::class);
+    Route::apiResource('viaturas', ViaturaController::class);
+
 
     // Rotas customizadas
     Route::post('/ambulancia/{ambulancia}/location', [AmbulanciaController::class, 'updateLocation']);

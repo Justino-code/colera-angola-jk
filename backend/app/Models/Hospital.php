@@ -27,4 +27,10 @@ class Hospital extends Model {
     public function ambulancias(): HasMany {
         return $this->hasMany(Ambulancia::class);
     }
+
+    public function viaturas()
+    {
+        return $this->hasMany(Viatura::class);
+    }
+
 }
