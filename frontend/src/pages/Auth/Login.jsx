@@ -53,12 +53,14 @@ export default function Login() {
         try {
             const response = await api.post('/login', data);
 
-            if (response.data.original.token) {
-                localStorage.setItem('access_token', response.data.original.token);
+            //console.log(response.original.token);
+
+            if (response.original.token) {
+                localStorage.setItem('access_token', response.original.token);
                 toast.success('Login realizado com sucesso!');
                 window.location.href = '/';
             } else {
-                toast.error(response.data.original.message || 'Erro ao fazer login.');
+                toast.error(response.original.message || 'Erro ao fazer login.');
             }
         } catch (error) {
             toast.error('Erro inesperado. Tente novamente.');

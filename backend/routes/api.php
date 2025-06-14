@@ -15,6 +15,8 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\GabineteController;
 use App\Http\Controllers\ViaturaController;
 
+use App\Http\Controllers\DashboardController;
+
 
 /*Route::get('/user', function (Request $request) {
     return $request->user();
@@ -22,6 +24,7 @@ use App\Http\Controllers\ViaturaController;
 
 /*Teste*/
 Route::get('/ping', fn() => response()->json(['pong' => true]));
+Route::get('/dashboard_test', [DashboardController::class, 'overview']);
 /*Fim teste*/
 
 // Rotas públicas
@@ -43,6 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('usuario',  UsuarioController::class);
     Route::apiResource('gabinetes', GabineteController::class);
     Route::apiResource('viaturas', ViaturaController::class);
+
+    Route::get('/dashboard', [DashboardController::class, 'overview']);
 
 
     // Rotas customizadas

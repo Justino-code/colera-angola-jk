@@ -8,7 +8,7 @@ export default function OverviewPage() {
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    api.get('/dashboard/overview')
+    api.get('/dashboard')
       .then(setData)
       .catch(err => {
         console.error('Erro ao buscar dados:', err);
