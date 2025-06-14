@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { apiGet } from '../services/api';
+import api from '../services/api';
 import { BarChart, PieChart } from '../components/Charts';
 
 export default function OverviewPage() {
@@ -8,7 +8,7 @@ export default function OverviewPage() {
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    apiGet('/dashboard/overview')
+    api.get('/dashboard/overview')
       .then(setData)
       .catch(err => {
         console.error('Erro ao buscar dados:', err);

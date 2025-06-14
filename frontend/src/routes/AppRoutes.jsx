@@ -39,8 +39,9 @@ import UsuarioEditar from '../pages/Usuario/Editar';
 import UsuarioDetalhes from '../pages/Usuario/Detalhes';
 
 // Relatório
-//import RelatorioGeral from '../pages/Relatorio/Geral';
-//import RelatorioEstatistico from '../pages/Relatorio/Estatistico';
+import RelatorioGerar from '../pages/Relatorio/Gerar';
+import RelatorioDetalhes from '../pages/Relatorio/Detalhes';
+import RelatorioListar from '../pages/Relatorio/Listar';
 
 // Província
 import ProvinciaListar from '../pages/Provincia/Listar';
@@ -61,7 +62,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Rotas públicas */}
       <Route path="/" element={<AuthLayout />}>
-        <Route path="login" element={<LoginPage />} />
+        <Route path="login" element={<Login />} />
       </Route>
 
       {/* Rotas protegidas */}
@@ -100,8 +101,9 @@ export default function AppRoutes() {
         <Route path="usuario/detalhes/:id" element={<UsuarioDetalhes />} />
 
         {/* Relatórios */}
-        <Route path="relatorio/geral" element={<RelatorioGeral />} />
-        <Route path="relatorio/estatistico" element={<RelatorioEstatistico />} />
+        <Route path="relatorio/gerar" element={<RelatorioGerar />} />
+        <Route path="relatorio/detalhes/:id" element={<RelatorioDetalhes />} />
+        <Route path="relatorio" element={<RelatorioListar />} />
 
         {/* Província */}
         <Route path="provincia" element={<ProvinciaListar />} />

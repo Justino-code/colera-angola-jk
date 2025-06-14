@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
-export default function RelatoriosGerar() {
+export default function RelatorioGerar() {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [hospitalId, setHospitalId] = useState('');

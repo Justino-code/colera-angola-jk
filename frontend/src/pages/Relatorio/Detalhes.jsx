@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 
-export default function RelatoriosDetalhes() {
+export default function RelatorioDetalhes() {
   const { id } = useParams();
   const [relatorio, setRelatorio] = useState(null);
   const [loading, setLoading] = useState(true);
