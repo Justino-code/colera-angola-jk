@@ -1,0 +1,48 @@
+@import 'nprogress/nprogress.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos customizados */
+.leaflet-popup-content-wrapper {
+  @apply rounded-lg shadow-lg;
+}
+
+.risk-high {
+  @apply bg-red-100 text-red-800;
+}
+
+.risk-low {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Animações */
+@keyframes dash-wave {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.dashboard-card {
+  @apply bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300;
+}
+
+.gradient-border {
+  background: linear-gradient(45deg, #3B82F6, #8B5CF6, #EC4899);
+  background-size: 300% 300%;
+  animation: dash-wave 6s ease infinite;
+}
+
+#nprogress .bar {
+  background: #3B82F6; /* Azul - Tailwind blue-500 */
+  height: 3px;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #3B82F6, 0 0 5px #3B82F6;
+}
+
+#nprogress .spinner-icon {
+  border-top-color: #3B82F6;
+  border-left-color: #3B82F6;
+}

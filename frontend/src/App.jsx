@@ -1,136 +1,35 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-
-// Páginas
-import Login from './pages/Auth/Login';
-import Register from './pages/Auth/Register';
-import SplashScreen from './pages/Splash/SplashScreen';
-import RouteProgress from './components/cammon/RouteProgress'; // Barra de progresso
-
-// Layouts
-import DashboardLayout from './layouts/DashboardLayout';
-import RootLayout from './layouts/RootLayout'; // ← Novo layout global com LogoLoader
-
-// Páginas do Dashboard
-import Overview from './pages/Dashboard/Overview';
-import PatientList from './pages/Paciente/PacienteList';
-import PatientDetails from './pages/Paciente/PacienteDetails';
-import EpidemicMap from './pages/Map/EpidemicMap';
-import Reports from './pages/Reports/Reports';
-import Settings from './pages/Settings/Settings';
-
-// Hospitais
-import HospitalList from './pages/Hospital/HospitalList';
-import HospitalForm from './pages/Hospital/HospitalForm';
-
-// Pontos de Atendimento
-import PontosAtendimento from './pages/Hospital/PontosAtendimento';
-import PontosAtendimentoForm from './pages/Hospital/PontosAtendimentoForm';
-
-// Usuários
-import UserList from './pages/Usuario/UserList';
-import UserForm from './pages/Usuario/UserForm';
-
-// Componentes
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Layout global com PageLoader
-const AppWrapper = ({ children }) => (
-  <RootLayout>{children}</RootLayout>
-);
+import LoginPage from './pages/LoginPage';
+import DashboardLayout from './layouts/DashboardLayout';
+import OverviewPage from './pages/OverviewPage';
+import PatientsPage from './pages/PatientsPage';
+import MapPage from './pages/MapPage';
+import ReportsPage from './pages/ReportsPage';
+import SettingsPage from './pages/SettingsPage';
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      {/* Barra de progresso superior */}
-      <RouteProgress />
-
-      {/* Toast global */}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: '#2D2D2D',
-            color: '#F1F1F1',
-            padding: '14px 20px',
-            borderRadius: '10px',
-            fontSize: '15px',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-            fontFamily: `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`,
-          },
-          success: {
-            iconTheme: {
-              primary: '#22c55e',
-              secondary: '#ffffff',
-            },
-            style: {
-              background: '#1E3A2F',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#ffffff',
-            },
-            style: {
-              background: '#3B1F1F',
-            },
-          },
-        }}
-      />
-
+    <AuthProvider>
       <Routes>
-        {/* Rota Inicial - Splash Screen */}
-        <Route path="/" element={<SplashScreen />} />
+        <Route path="/login" element={<LoginPage />} />
 
-        {/* Rotas Públicas */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastro" element={<Register />} />
-
-        {/* Rotas com Loader Automático */}
-        <Route element={<AppWrapper />}>
-          {/* Rotas Protegidas com Layout de Dashboard */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<DashboardLayout />}>
-              {/* Página Inicial/Dashboard */}
-              <Route index element={<Overview />} />
-
-              {/* Gestão de Pacientes */}
-              <Route path="/pacientes" element={<PatientList />} />
-              <Route path="/pacientes/:id" element={<PatientDetails />} />
-
-              {/* Mapa Epidemiológico */}
-              <Route path="/mapa" element={<EpidemicMap />} />
-
-              {/* Relatórios */}
-              <Route path="/relatorios" element={<Reports />} />
-
-              {/* Configurações */}
-              <Route path="/configuracoes" element={<Settings />} />
-
-              {/* Hospitais */}
-              <Route path="/hospital" element={<HospitalList />} />
-              <Route path="/hospital/novo" element={<HospitalForm />} />
-              <Route path="/hospital/:id" element={<HospitalForm />} />
-
-              {/* Usuários */}
-              <Route path="/usuario" element={<UserList />} />
-              <Route path="/usuario/novo" element={<UserForm />} />
-              <Route path="/usuario/:id" element={<UserForm />} />
-
-              {/* Pontos de Atendimento */}
-              <Route path="/pontos-atendimento" element={<PontosAtendimento />} />
-              <Route path="/pontos-atendimento/novo" element={<PontosAtendimentoForm />} />
-              <Route path="/pontos-atendimento/:id" element={<PontosAtendimentoForm />} />
-
-              {/* 404 */}
-              <Route path="*" element={<div className="p-6 text-center">Página não encontrada</div>} />
-            </Route>
-          </Route>
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<OverviewPage />} />
+          <Route path="pacientes" element={<PatientsPage />} />
+          <Route path="mapa" element={<MapPage />} />
+          <Route path="relatorios" element={<ReportsPage />} />
+          <Route path="configuracoes" element={<SettingsPage />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;
