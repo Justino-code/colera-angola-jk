@@ -19,7 +19,6 @@ class UsuarioSeeder extends Seeder
             'role' => 'gestor',
             'permissoes' => ['gerenciar_usuarios', 
             'ver_dashboard'],
-            'id_hospital' => 1, // ajuste se necessário
             'email_verified_at' => now()
             ]
         );
