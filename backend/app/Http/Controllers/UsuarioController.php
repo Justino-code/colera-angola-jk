@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -15,8 +15,8 @@ class UsuarioController extends Controller
     // Listar todos os usuários (restrito a gestores)
     public function index(): JsonResponse
     {
-        $this->authorize('viewAny', User::class);
-        $usuarios = User::all();
+        //$this->authorize('viewAny', User::class);
+        $usuarios = Usuario::all();
 
         return response()->json($usuarios);
     }

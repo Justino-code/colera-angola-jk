@@ -13,7 +13,7 @@ export default function EditarUsuario() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const { data } = await api.get(`/usuarios/${id}`);
+        const { data } = await api.get(`/usuario/${id}`);
         setForm(data);
       } catch (error) {
         console.error('Erro ao carregar usuário:', error);

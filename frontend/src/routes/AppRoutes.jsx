@@ -33,10 +33,10 @@ const GabineteEditar = lazy(() => import("../pages/Gabinete/Editar"));
 const GabineteDetalhes = lazy(() => import("../pages/Gabinete/Detalhes"));
 
 // Usuario
-const UsuarioListar = lazy(() => import("../pages/Usuario/Listar"));
-const UsuarioCriar = lazy(() => import("../pages/Usuario/Criar"));
-const UsuarioEditar = lazy(() => import("../pages/Usuario/Editar"));
-const UsuarioDetalhes = lazy(() => import("../pages/Usuario/Detalhes"));
+const ListarUsuarios = lazy(() => import("../pages/Usuario/Listar"));
+const CriarUsuario = lazy(() => import("../pages/Usuario/Criar"));
+const EditarUsuario = lazy(() => import("../pages/Usuario/Editar"));
+const DetalhesUsuario = lazy(() => import("../pages/Usuario/Detalhes"));
 
 // Relatório
 const RelatorioGerar = lazy(() => import("../pages/Relatorio/Gerar"));
@@ -82,10 +82,10 @@ export default function AppRoutes() {
           <Route path="/gabinete/:id" element={<GabineteDetalhes />} />
 
           {/* Usuario */}
-          <Route path="/usuario" element={<UsuarioListar />} />
-          <Route path="/usuario/criar" element={<UsuarioCriar />} />
-          <Route path="/usuario/:id/editar" element={<UsuarioEditar />} />
-          <Route path="/usuario/:id" element={<UsuarioDetalhes />} />
+          <Route path="/usuario" element={<ListarUsuarios />} />
+          <Route path="/usuario/criar" element={<CriarUsuario />} />
+          <Route path="/usuario/:id/editar" element={<EditarUsuario />} />
+          <Route path="/usuario/:id" element={<DetalhesUsuario />} />
 
           {/* Relatórios */}
           <Route path="/relatorio/gerar" element={<RelatorioGerar />} />

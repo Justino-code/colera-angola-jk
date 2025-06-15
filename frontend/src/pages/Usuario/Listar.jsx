@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import Skeleton from '../../components/common/Skeleton';
 
 export default function ListarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,10 +9,22 @@ export default function ListarUsuarios() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const { data } = await api.get('/usuarios');
-        setUsuarios(data);
+        const response = await api.get('/usuario');
+        console.log('Resposta da API:', response);
+
+        const data = response;
+
+        if (Array.isArray(data)) {
+          setUsuarios(data);
+        } else if (Array.isArray(data?.usuarios)) {
+          setUsuarios(data.usuarios);
+        } else {
+          console.warn('Formato inesperado:', data);
+          setUsuarios([]);
+        }
       } catch (error) {
-        console.error('Erro ao carregar usuários:', error);
+        console.error('Erro ao buscar usuários:', error);
+        setUsuarios([]);
       } finally {
         setLoading(false);
       }
@@ -22,39 +33,59 @@ export default function ListarUsuarios() {
     fetchUsuarios();
   }, []);
 
-  if (loading) return <Skeleton />;
+  if (loading) {
+    return (
+      <div className="space-y-2">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="animate-pulse bg-slate-200 rounded h-16"></div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-bold">Usuários</h2>
-        <Link to="/usuarios/criar" className="bg-cyan-600 text-white px-4 py-2 rounded">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-slate-700">Usuários</h1>
+        <Link
+          to="/usuario/criar"
+          className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
+        >
           Novo Usuário
         </Link>
       </div>
-      <table className="w-full bg-white rounded shadow">
-        <thead className="bg-slate-100">
-          <tr>
-            <th className="text-left p-2">Nome</th>
-            <th className="text-left p-2">Email</th>
-            <th className="text-left p-2">Cargo</th>
-            <th className="text-left p-2">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
+
+      {usuarios.length === 0 ? (
+        <p className="text-slate-500">Nenhum usuário cadastrado.</p>
+      ) : (
+        <div className="space-y-2">
           {usuarios.map((usuario) => (
-            <tr key={usuario.id} className="border-b">
-              <td className="p-2">{usuario.nome}</td>
-              <td className="p-2">{usuario.email}</td>
-              <td className="p-2">{usuario.cargo}</td>
-              <td className="p-2 space-x-2">
-                <Link to={`/usuarios/${usuario.id}`} className="text-cyan-600">Detalhes</Link>
-                <Link to={`/usuarios/${usuario.id}/editar`} className="text-amber-600">Editar</Link>
-              </td>
-            </tr>
+            <div
+              key={usuario.id_usuario}
+              className="p-4 bg-white rounded shadow flex justify-between items-center"
+            >
+              <div>
+                <p className="font-medium">{usuario.nome}</p>
+                <p className="text-sm text-slate-500">{usuario.email}</p>
+              </div>
+              <div className="space-x-2">
+                <Link
+                  to={`/usuario/${usuario.id_usuario}`}
+                  className="text-cyan-600 hover:underline"
+                >
+                  Detalhes
+                </Link>
+                <Link
+                  to={`/usuario/${usuario.id_usuario}/editar`}
+                  className="text-amber-600 hover:underline"
+                >
+                  Editar
+                </Link>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,7 +11,7 @@ export default function CriarUsuario() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/usuarios', form);
+      await api.post('/usuario', form);
       navigate('/usuarios');
     } catch (error) {
       console.error('Erro ao criar usuário:', error);
