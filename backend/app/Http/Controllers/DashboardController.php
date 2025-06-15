@@ -13,8 +13,8 @@ class DashboardController extends Controller
     public function overview(): JsonResponse
     {
         // --- Pacientes ativos ---
-        $casosAtivosHoje = Paciente::where('status', 'ativo')->count();
-        $casosAtivosOntem = Paciente::where('status', 'ativo')
+        $casosAtivosHoje = Paciente::where('resultado_triagem', 'alto_risco')->count();
+        $casosAtivosOntem = Paciente::where('resultado_triagem', 'baixo_risco')
             ->whereDate('updated_at', now()->subDay())->count();
 
         // --- Novos casos ---
