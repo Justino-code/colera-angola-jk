@@ -39,8 +39,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Recursos principais
     Route::apiResource('provincia', ProvinciaController::class);
     Route::apiResource('municipio', MunicipioController::class);
-    Route::apiResource('hospital', HospitalController::class);
-    Route::apiResource('paciente', PacienteController::class);
+    Route::apiResource('hospitais', HospitalController::class);
+    Route::apiResource('pacientes', PacienteController::class);
     Route::apiResource('ambulancia', AmbulanciaController::class);
     Route::apiResource('relatorio', RelatorioController::class);
     Route::apiResource('usuario',  UsuarioController::class);

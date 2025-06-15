@@ -10,7 +10,7 @@ class Gabinete extends Model
     use HasFactory;
 
     protected $table = 'gabinete';
-    protected $table = 'id_gabinete';
+    protected $primaryKey = 'id_gabinete';
 
     protected $fillable = [
         'nome',

@@ -10,7 +10,7 @@ export default function ViaturaListar() {
     const fetchViaturas = async () => {
       try {
         const response = await api.get('/viaturas');
-        setViaturas(response.data);
+        setViaturas(response);
       } catch (error) {
         console.error('Erro ao carregar viaturas:', error);
         alert('Erro ao carregar viaturas');

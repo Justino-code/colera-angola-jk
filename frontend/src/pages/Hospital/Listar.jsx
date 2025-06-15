@@ -10,7 +10,17 @@ export default function HospitalListar() {
     const fetchHospitais = async () => {
       try {
         const response = await api.get('/hospitais');
-        setHospitais(response.data);
+        console.log('Dados recebidos:', response);
+
+        // Garante que o estado será um array
+        if (Array.isArray(response)) {
+          setHospitais(response);
+        } else if (Array.isArray(response.hospitais)) {
+          // Caso a API retorne { hospitais: [...] }
+          setHospitais(response.hospitais);
+        } else {
+          setHospitais([]);
+        }
       } catch (error) {
         console.error('Erro ao buscar hospitais:', error);
       } finally {
@@ -35,7 +45,10 @@ export default function HospitalListar() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Hospitais</h1>
-        <Link to="/hospital/criar" className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">
+        <Link
+          to="/hospital/criar"
+          className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
+        >
           Novo Hospital
         </Link>
       </div>
@@ -45,20 +58,23 @@ export default function HospitalListar() {
       ) : (
         <div className="space-y-2">
           {hospitais.map((hospital) => (
-            <div key={hospital.id} className="p-4 bg-white rounded shadow flex justify-between items-center">
+            <div
+              key={hospital.id}
+              className="p-4 bg-white rounded shadow flex justify-between items-center"
+            >
               <div>
                 <p className="font-medium">{hospital.nome}</p>
                 <p className="text-sm text-slate-500">{hospital.local}</p>
               </div>
               <div className="space-x-2">
                 <Link
-                  to={`/hospital/detalhes/${hospital.id}`}
+                  to={`/hospital/detalhes/${hospital.id_hospital}`}
                   className="text-cyan-600 hover:underline"
                 >
                   Detalhes
                 </Link>
                 <Link
-                  to={`/hospital/editar/${hospital.id}`}
+                  to={`/hospital/editar/${hospital.id_hospital}`}
                   className="text-amber-600 hover:underline"
                 >
                   Editar

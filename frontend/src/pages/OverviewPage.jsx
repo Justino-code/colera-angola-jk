@@ -9,7 +9,7 @@ export default function OverviewPage() {
 
   useEffect(() => {
     api.get('/dashboard')
-      .then(setData)
+      .then(response => setData(response.data)) // Corrigido para usar response.data
       .catch(err => {
         console.error('Erro ao buscar dados:', err);
         setErro('Erro ao carregar dados do dashboard');
@@ -37,10 +37,10 @@ export default function OverviewPage() {
           ))
         ) : (
           <>
-            <StatCard title="Casos Ativos" value={data.casos_ativos} color="bg-red-100 text-red-600" />
-            <StatCard title="Curados" value={data.curados} color="bg-green-100 text-green-600" />
-            <StatCard title="Óbitos" value={data.obitos} color="bg-gray-100 text-gray-600" />
-            <StatCard title="Novos Casos (24h)" value={data.novos_casos_24h} color="bg-blue-100 text-blue-600" />
+            <StatCard title="Casos Ativos" value={data?.casos_ativos ?? 0} color="bg-red-100 text-red-600" />
+            <StatCard title="Curados" value={data?.curados ?? 0} color="bg-green-100 text-green-600" />
+            <StatCard title="Óbitos" value={data?.obitos ?? 0} color="bg-gray-100 text-gray-600" />
+            <StatCard title="Novos Casos (24h)" value={data?.novos_casos_24h ?? 0} color="bg-blue-100 text-blue-600" />
           </>
         )}
       </div>
@@ -56,11 +56,11 @@ export default function OverviewPage() {
           <>
             <div className="bg-white p-4 rounded shadow">
               <h2 className="font-semibold mb-2">Distribuição por Região</h2>
-              <BarChart data={data.regional_distribution} />
+              <BarChart data={data?.regional_distribution ?? []} />
             </div>
             <div className="bg-white p-4 rounded shadow">
               <h2 className="font-semibold mb-2">Classificação de Risco</h2>
-              <PieChart data={data.risk_classification} />
+              <PieChart data={data?.risk_classification ?? []} />
             </div>
           </>
         )}
@@ -73,7 +73,7 @@ export default function OverviewPage() {
         <div className="bg-white p-4 rounded shadow">
           <h2 className="font-semibold mb-2">Ambulâncias Ativas</h2>
           <p className="text-lg">
-            {data.ambulancias_ativas.ativas} de {data.ambulancias_ativas.total} ativas
+            {data?.ambulancias_ativas?.ativas ?? 0} de {data?.ambulancias_ativas?.total ?? 0} ativas
           </p>
         </div>
       )}
