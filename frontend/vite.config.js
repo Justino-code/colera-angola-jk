@@ -7,9 +7,6 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
-    allowedHosts: [
-      '*'
-      //'7495-102-218-85-39.ngrok-free.app'  // 🟢 adicione o domínio gerado pelo ngrok
-    ]
+    allowedHosts: ['*']
   }
 });

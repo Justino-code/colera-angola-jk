@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:8000/api';
+const API_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://0.0.0.0:8000/api';
 
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem('access_token');
@@ -9,7 +9,13 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  // Remove / inicial duplicado no endpoint
+  const cleanEndpoint = endpoint.replace(/^\//, '');
+
+  console.log('➡ URL chamada:', `${API_URL}/${cleanEndpoint}`);
+  console.log('➡ Método:', options.method, 'Headers:', headers, 'Body:', options.body);
+
+  const response = await fetch(`${API_URL}/${cleanEndpoint}`, {
     ...options,
     headers,
   });

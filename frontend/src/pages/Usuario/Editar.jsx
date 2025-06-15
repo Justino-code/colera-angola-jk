@@ -6,7 +6,7 @@ import Skeleton from '../../components/common/Skeleton';
 export default function EditarUsuario() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nome: '', email: '', cargo: '' });
+  const [form, setForm] = useState({ nome: '', email: '', role: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -14,7 +14,12 @@ export default function EditarUsuario() {
     const fetchUsuario = async () => {
       try {
         const response = await api.get(`/usuario/${id}`);
-        setForm(response);
+        // Extrai apenas os campos editáveis
+        setForm({
+          nome: response.nome || '',
+          email: response.email || '',
+          role: response.role || '',
+        });
       } catch (error) {
         console.error('Erro ao carregar usuário:', error);
       } finally {
@@ -29,7 +34,12 @@ export default function EditarUsuario() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put(`/usuario/${id}`, form);
+      // Envie apenas os campos necessários
+      await api.put(`/usuario/${id}`, {
+        nome: form.nome,
+        email: form.email,
+        role: form.role,
+      });
       navigate('/usuarios');
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
@@ -43,7 +53,7 @@ export default function EditarUsuario() {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {['nome', 'email', 'role'].map((field) => (
           <div key={field}>
             <label className="block mb-1 capitalize">{field}</label>
@@ -56,8 +66,11 @@ export default function EditarUsuario() {
             />
           </div>
         ))}
-        <button type="submit" disabled={saving}
-                className="bg-amber-600 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          disabled={saving}
+          className="bg-amber-600 text-white px-4 py-2 rounded"
+        >
           {saving ? 'Salvando...' : 'Salvar Alterações'}
         </button>
       </form>

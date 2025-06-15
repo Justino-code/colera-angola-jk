@@ -46,6 +46,7 @@ class PacienteController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        dd($request);
         // Valida os dados do paciente
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
