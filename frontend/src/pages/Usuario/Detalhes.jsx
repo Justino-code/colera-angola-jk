@@ -11,8 +11,9 @@ export default function DetalhesUsuario() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const { data } = await api.get(`/usuario/${id}`);
-        setUsuario(data);
+        const response = await api.get(`/usuario/${id}`);
+        console.log(response);
+        setUsuario(response);
       } catch (error) {
         console.error('Erro ao carregar detalhes:', error);
       } finally {
@@ -31,7 +32,7 @@ export default function DetalhesUsuario() {
       <div className="bg-white rounded shadow p-4 space-y-2">
         <p><strong>Nome:</strong> {usuario.nome}</p>
         <p><strong>Email:</strong> {usuario.email}</p>
-        <p><strong>Cargo:</strong> {usuario.cargo}</p>
+        <p><strong>Cargo:</strong> {usuario.role}</p>
       </div>
     </div>
   );

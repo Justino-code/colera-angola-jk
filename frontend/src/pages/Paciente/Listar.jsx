@@ -19,7 +19,7 @@ export default function PacienteLista() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Lista de Pacientes</h1>
         <Link 
-          to="/paciente/novo" 
+          to="/paciente/criar" 
           className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
         >
           Novo Paciente

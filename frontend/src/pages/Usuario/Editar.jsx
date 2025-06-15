@@ -13,8 +13,8 @@ export default function EditarUsuario() {
   useEffect(() => {
     const fetchUsuario = async () => {
       try {
-        const { data } = await api.get(`/usuario/${id}`);
-        setForm(data);
+        const response = await api.get(`/usuario/${id}`);
+        setForm(response);
       } catch (error) {
         console.error('Erro ao carregar usuário:', error);
       } finally {
@@ -29,7 +29,7 @@ export default function EditarUsuario() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put(`/usuarios/${id}`, form);
+      await api.put(`/usuario/${id}`, form);
       navigate('/usuarios');
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
@@ -44,7 +44,7 @@ export default function EditarUsuario() {
     <div>
       <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {['nome', 'email', 'cargo'].map((field) => (
+        {['nome', 'email', 'role'].map((field) => (
           <div key={field}>
             <label className="block mb-1 capitalize">{field}</label>
             <input

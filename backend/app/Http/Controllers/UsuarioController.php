@@ -47,7 +47,7 @@ class UsuarioController extends Controller
                 'id_hospital' => 'required|exists:hospital,id_hospital',
         ]);
 
-        $usuario = User::create([
+        $usuario = Usuario::create([
             'nome' => $validated['nome'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -79,9 +79,9 @@ class UsuarioController extends Controller
     }
 
     // Atualizar dados básicos do usuário
-    public function update(Request $request, User $user): JsonResponse
+    public function update(Request $request, Usuario $user): JsonResponse
     {
-        $this->authorize('update', $user);
+        //$this->authorize('update', $user);
 
         $validated = $request->validate([
             'nome' => 'sometimes|required|string|max:255',
@@ -112,16 +112,18 @@ class UsuarioController extends Controller
     }
 
     // Exibir um usuário específico
-    public function show(User $user): JsonResponse
+    public function show($id): JsonResponse
     {
-        $this->authorize('view', $user);
+        //$this->authorize('view', $user);
+        $user = Usuario::findOrFail($id);
         return response()->json($user);
     }
 
     // Excluir um usuário
-    public function destroy(User $user): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
         $this->authorize('delete', $user);
+        $user = Usuario::findOrFail($id);
         $user->delete();
 
         return response()->json(null, 204);

@@ -9,13 +9,40 @@ export default function PacienteEditar() {
   const [paciente, setPaciente] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [location, setLocation] = useState({ latitude: null, longitude: null });
 
   useEffect(() => {
     api.get(`/pacientes/${id}`)
-      .then(data => setPaciente(data))
+      .then(data => {
+        setPaciente(data);
+        setLocation({
+          latitude: data.latitude || null,
+          longitude: data.longitude || null
+        });
+      })
       .catch(err => alert('Erro ao carregar paciente: ' + err))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setLocation({ latitude, longitude });
+          setPaciente(prev => ({
+            ...prev,
+            latitude,
+            longitude
+          }));
+        },
+        (err) => {
+          console.error("Erro ao obter localização: ", err.message);
+          alert("Não foi possível obter sua localização automaticamente.");
+        }
+      );
+    }
+  }, []);
 
   const handleChange = (e) => {
     setPaciente({
@@ -88,6 +115,16 @@ export default function PacienteEditar() {
             required
           />
         </div>
+
+        {/* Latitude e longitude - automáticas e ocultas */}
+        {location.latitude && location.longitude && (
+          <div className="text-green-600 text-sm">
+            Localização detectada: {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+          </div>
+        )}
+        <input type="hidden" name="latitude" value={location.latitude || ''} />
+        <input type="hidden" name="longitude" value={location.longitude || ''} />
+
         <button 
           type="submit"
           disabled={saving}

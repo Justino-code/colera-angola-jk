@@ -43,6 +43,18 @@ const RelatorioGerar = lazy(() => import("../pages/Relatorio/Gerar"));
 const RelatorioListar = lazy(() => import("../pages/Relatorio/Listar"));
 const RelatorioDetalhes = lazy(() => import("../pages/Relatorio/Detalhes"));
 
+// Provincia
+const ProvinciaListar = lazy(() => import("../pages/Provincia/Listar"));
+const ProvinciaCriar = lazy(() => import("../pages/Provincia/Criar"));
+const ProvinciaEditar = lazy(() => import("../pages/Provincia/Editar"));
+const ProvinciaDetalhes = lazy(() => import("../pages/Provincia/Detalhes"));
+
+// Município
+const MunicipioListar = lazy(() => import("../pages/Municipio/Listar"));
+const MunicipioCriar = lazy(() => import("../pages/Municipio/Criar"));
+const MunicipioEditar = lazy(() => import("../pages/Municipio/Editar"));
+const MunicipioDetalhes = lazy(() => import("../pages/Municipio/Detalhes"));
+
 export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -91,6 +103,18 @@ export default function AppRoutes() {
           <Route path="/relatorio/gerar" element={<RelatorioGerar />} />
           <Route path="/relatorio/detalhes/:id" element={<RelatorioDetalhes />} />
           <Route path="/relatorio" element={<RelatorioListar />} />
+
+          {/* Provincia */}
+          <Route path="/provincia" element={<ProvinciaListar />} />
+          <Route path="/provincia/criar" element={<ProvinciaCriar />} />
+          <Route path="/provincia/:id/editar" element={<ProvinciaEditar />} />
+          <Route path="/provincia/:id" element={<ProvinciaDetalhes />} />
+
+          {/* Município */}
+          <Route path="/municipio" element={<MunicipioListar />} />
+          <Route path="/municipio/criar" element={<MunicipioCriar />} />
+          <Route path="/municipio/:id/editar" element={<MunicipioEditar />} />
+          <Route path="/municipio/:id" element={<MunicipioDetalhes />} />
         </Route>
 
         {/* Fallback para rotas não encontradas */}
