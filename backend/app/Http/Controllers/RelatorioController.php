@@ -4,39 +4,93 @@ namespace App\Http\Controllers;
 
 use App\Models\Relatorio;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 use PDF;
 
 class RelatorioController extends Controller
 {
     // Listar relatórios do usuário logado
-    public function index()
+    public function index(): JsonResponse
     {
-        return auth()->user()->relatorios;
+        try {
+            $relatorios = auth()->user()->relatorios;
+
+            return response()->json([
+                'success' => true,
+                'data' => $relatorios
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao listar relatórios: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Gerar relatório em PDF
-    public function generatePDF(Request $request)
+    public function generatePDF(Request $request): JsonResponse
     {
-        $request->validate([
-            'tipo' => 'required|in:casos_por_regiao,evolucao_temporal,distribuicao_demografica,outro',
-            'dados' => 'required|json'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'tipo' => 'required|in:casos_por_regiao,evolucao_temporal,distribuicao_demografica,outro',
+                'dados' => 'required|json'
+            ]);
 
-        $relatorio = Relatorio::create([
-            'tipo' => $request->tipo,
-            'dados' => $request->dados,
-            'id_usuario' => auth()->id()
-        ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        $pdf = PDF::loadView('relatorio', ['data' => $relatorio->dados]);
-        return $pdf->download('relatorio.pdf');
+            $validated = $validator->validated();
+
+            $relatorio = Relatorio::create([
+                'tipo' => $validated['tipo'],
+                'dados' => $validated['dados'],
+                'id_usuario' => auth()->id()
+            ]);
+
+            $pdf = PDF::loadView('relatorio', ['data' => json_decode($relatorio->dados, true)]);
+
+            // Salvar o PDF opcionalmente ou apenas retornar o download
+            return response()->json([
+                'success' => true,
+                'file' => base64_encode($pdf->output()) // Ou gerar um link se estiver salvando no servidor
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao gerar PDF: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     // Excluir relatório
-    public function destroy(Relatorio $relatorio)
+    public function destroy(Relatorio $relatorio): JsonResponse
     {
-        $this->authorize('delete', $relatorio); // Policy para verificar permissão
-        $relatorio->delete();
-        return response()->json(null, 204);
+        try {
+            $this->authorize('delete', $relatorio);
+
+            $relatorio->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Relatório removido com sucesso.'
+            ]);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso negado: ' . $e->getMessage()
+            ], 403);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao remover relatório: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
+

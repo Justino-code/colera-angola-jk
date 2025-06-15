@@ -2,57 +2,125 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Viatura;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
 class ViaturaController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        return Viatura::with('hospital')->get();
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'identificacao' => 'required|string|max:50',
-            'tipo' => 'required|string|max:50',
-            'status' => 'required|in:disponivel,em_viagem,ocupada',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'id_hospital' => 'required|exists:hospitail,id_hospital',
+        $viaturas = Viatura::with('hospital')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $viaturas
         ]);
-
-        $viatura = Viatura::create($validated);
-        return response()->json($viatura, 201);
     }
 
-    public function show($id)
+    public function store(Request $request): JsonResponse
     {
-        return Viatura::with('hospital')->findOrFail($id);
+        try {
+            $validator = Validator::make($request->all(), [
+                'identificacao' => 'required|string|max:50',
+                'tipo' => 'required|string|max:50',
+                'status' => 'required|in:disponivel,em_viagem,ocupada',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
+                'id_hospital' => 'required|exists:hospital,id_hospital',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $viatura = Viatura::create($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'data' => $viatura
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao criar viatura: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function update(Request $request, $id)
+    public function show($id): JsonResponse
     {
-        $viatura = Viatura::findOrFail($id);
+        try {
+            $viatura = Viatura::with('hospital')->findOrFail($id);
 
-        $validated = $request->validate([
-            'identificacao' => 'sometimes|string|max:50',
-            'tipo' => 'sometimes|string|max:50',
-            'status' => 'sometimes|in:disponivel,em_viagem,ocupada',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'id_hospital' => 'sometimes|exists:hospitail,id_hospital',
-        ]);
-
-        $viatura->update($validated);
-        return response()->json($viatura);
+            return response()->json([
+                'success' => true,
+                'data' => $viatura
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Viatura não encontrada'
+            ], 404);
+        }
     }
 
-    public function destroy($id)
+    public function update(Request $request, $id): JsonResponse
     {
-        Viatura::destroy($id);
-        return response()->json(['message' => 'Removida com sucesso.']);
+        try {
+            $viatura = Viatura::findOrFail($id);
+
+            $validator = Validator::make($request->all(), [
+                'identificacao' => 'sometimes|string|max:50',
+                'tipo' => 'sometimes|string|max:50',
+                'status' => 'sometimes|in:disponivel,em_viagem,ocupada',
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric',
+                'id_hospital' => 'sometimes|exists:hospital,id_hospital',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $viatura->update($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'data' => $viatura
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao atualizar viatura: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        try {
+            $viatura = Viatura::findOrFail($id);
+            $viatura->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Viatura removida com sucesso.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao remover viatura: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
+

@@ -5,72 +5,139 @@ namespace App\Http\Controllers;
 use App\Models\Municipio;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class MunicipioController extends Controller
 {
-    /**
-     * Listar todos os municípios.
-     */
     public function index(): JsonResponse
     {
-        $municipios = Municipio::with('provincia')->get();
-        return response()->json($municipios, 200);
+        try {
+            $municipios = Municipio::with('provincia')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $municipios
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao listar municípios: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Criar um novo município.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
+            $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'id_provincia' => 'required|exists:provincia,id_provincia'
             ]);
 
-            $municipio = Municipio::create($validated);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-            return response()->json($municipio, 201);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
+            $municipio = Municipio::create($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Município criado com sucesso.',
+                'data' => $municipio->load('provincia')
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao criar município: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    /**
-     * Exibir detalhes de um município específico pelo ID.
-     */
     public function show(int $id): JsonResponse
     {
-        $municipio = Municipio::with('provincia')->findOrFail($id);
-        return response()->json($municipio, 200);
+        try {
+            $municipio = Municipio::with('provincia')->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $municipio
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Município não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao buscar município: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Atualizar um município existente pelo ID.
-     */
     public function update(Request $request, int $id): JsonResponse
     {
-        $municipio = Municipio::findOrFail($id);
+        try {
+            $municipio = Municipio::findOrFail($id);
 
-        $validated = $request->validate([
-            'nome' => 'sometimes|required|string|max:255',
-            'id_provincia' => 'sometimes|required|exists:provincia,id_provincia'
-        ]);
+            $validator = Validator::make($request->all(), [
+                'nome' => 'sometimes|required|string|max:255',
+                'id_provincia' => 'sometimes|required|exists:provincia,id_provincia'
+            ]);
 
-        $municipio->update($validated);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        return response()->json($municipio, 200);
+            $municipio->update($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Município atualizado com sucesso.',
+                'data' => $municipio->load('provincia')
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Município não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao atualizar município: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Excluir um município pelo ID.
-     */
     public function destroy(int $id): JsonResponse
     {
-        $municipio = Municipio::findOrFail($id);
-        $municipio->delete();
+        try {
+            $municipio = Municipio::findOrFail($id);
+            $municipio->delete();
 
-        return response()->json(null, 204);
+            return response()->json([
+                'success' => true,
+                'message' => 'Município excluído com sucesso.'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Município não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao excluir município: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
+

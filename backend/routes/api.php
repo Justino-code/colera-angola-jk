@@ -24,8 +24,7 @@ use App\Http\Controllers\DashboardController;
 
 /*Teste*/
 Route::get('/ping', fn() => response()->json(['pong' => true]));
-Route::get('/dashboard_test', [DashboardController::class, 'overview']);
- Route::apiResource('usuario_test',  UsuarioController::class);
+//Route::get('/dashboard_test', [DashboardController::class, 'overview']);
 /*Fim teste*/
 
 // Rotas públicas

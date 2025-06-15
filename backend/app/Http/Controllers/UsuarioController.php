@@ -8,124 +8,137 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Validator;
 
 class UsuarioController extends Controller
 {
     use AuthorizesRequests;
-    // Listar todos os usuários (restrito a gestores)
+
+    // Listar todos os usuários
     public function index(): JsonResponse
     {
-        //$this->authorize('viewAny', User::class);
         $usuarios = Usuario::all();
-
         return response()->json($usuarios);
     }
 
     // Criar um novo usuário
     public function store(Request $request): JsonResponse
     {
-        $this->authorize('create', User::class);
-
-        $validated = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => 'required|string|min:6|confirmed',
-            'role' => ['required', Rule::in([
-                'gestor',
-                'medico',
-                'tecnico',
-                'enfermeiro',
-                'epidemiologista',
-                'administrativo',
-                'agente_sanitario',
-                'farmaceutico',
-                'analista_dados',
-                'coordenador_regional',
+        try {
+            $validator = Validator::make($request->all(), [
+                'nome' => 'required|string|max:255',
+                'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+                'password' => 'required|string|min:6|confirmed',
+                'role' => ['required', Rule::in([
+                    'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+                    'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
+                    'coordenador_regional',
                 ])],
                 'permissoes' => 'required|array',
                 'permissoes.*' => 'string',
                 'id_hospital' => 'required|exists:hospital,id_hospital',
-        ]);
+            ]);
 
-        $usuario = Usuario::create([
-            'nome' => $validated['nome'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'permissoes' => $validated['permissoes'],
-            'id_hospital' => $validated['id_hospital'],
-        ]);
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
 
-        $token = $usuario->createToken('api-user-token',['post:read', 'post:create']);
+            $validated = $validator->validated();
 
-        return response()->json($usuario, 201);
+            $usuario = Usuario::create([
+                'nome' => $validated['nome'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'],
+                'permissoes' => $validated['permissoes'],
+                'id_hospital' => $validated['id_hospital'],
+            ]);
+
+            $token = $usuario->createToken('api-user-token', ['post:read', 'post:create']);
+
+            return response()->json([
+                'usuario' => $usuario,
+                'token' => $token->plainTextToken
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erro inesperado: ' . $e->getMessage()], 500);
+        }
     }
 
     // Atualizar permissões de um usuário
-    public function updatePermissions(Request $request, User $user): JsonResponse
+    public function updatePermissions(Request $request, int $id): JsonResponse
     {
-        $this->authorize('update', $user);
+        $usuario = Usuario::findOrFail($id);
+        //$this->authorize('update', $usuario);
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'permissoes' => 'required|array',
             'permissoes.*' => 'string',
         ]);
 
-        $user->update([
-            'permissoes' => $request->permissoes,
-        ]);
-
-        return response()->json($user);
-    }
-
-    // Atualizar dados básicos do usuário
-    public function update(Request $request, Usuario $user): JsonResponse
-    {
-        //$this->authorize('update', $user);
-
-        $validated = $request->validate([
-            'nome' => 'sometimes|required|string|max:255',
-            'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users')->ignore($user->id, 'id_usuario')],
-                                        'password' => 'sometimes|nullable|string|min:6',
-                                        'role' => ['sometimes', 'required', Rule::in([
-                                            'gestor',
-                                            'medico',
-                                            'tecnico',
-                                            'enfermeiro',
-                                            'epidemiologista',
-                                            'administrativo',
-                                            'agente_sanitario',
-                                            'farmaceutico',
-                                            'analista_dados',
-                                            'coordenador_regional',
-                                        ])],
-                                        'id_hospital' => 'sometimes|required|exists:hospitais,id_hospital',
-        ]);
-
-        if (isset($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($validated);
+        $usuario->update([
+            'permissoes' => $validator->validated()['permissoes'],
+        ]);
 
-        return response()->json($user);
+        return response()->json($usuario);
+    }
+
+    // Atualizar dados do usuário
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $usuario = Usuario::findOrFail($id);
+        //$this->authorize('update', $usuario);
+
+        $validator = Validator::make($request->all(), [
+            'nome' => 'sometimes|required|string|max:255',
+            'email' => [
+                'sometimes', 'required', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($usuario->id_usuario, 'id_usuario')
+            ],
+            'password' => 'sometimes|nullable|string|min:6',
+            'role' => ['sometimes', 'required', Rule::in([
+                'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+                'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
+                'coordenador_regional',
+            ])],
+            'id_hospital' => 'sometimes|required|exists:hospital,id_hospital',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $data = $validator->validated();
+
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $usuario->update($data);
+
+        return response()->json($usuario);
     }
 
     // Exibir um usuário específico
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        //$this->authorize('view', $user);
-        $user = Usuario::findOrFail($id);
-        return response()->json($user);
+        $usuario = Usuario::findOrFail($id);
+        return response()->json($usuario);
     }
 
     // Excluir um usuário
     public function destroy(int $id): JsonResponse
     {
-        $this->authorize('delete', $user);
-        $user = Usuario::findOrFail($id);
-        $user->delete();
+        $usuario = Usuario::findOrFail($id);
+        //$this->authorize('delete', $usuario);
 
+        $usuario->delete();
         return response()->json(null, 204);
     }
 }
+

@@ -5,26 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\Hospital;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Validator;
 
 class HospitalController extends Controller
 {
-    /**
-     * Listar todos os hospitais.
-     */
     public function index(): JsonResponse
     {
-        $hospitais = Hospital::with('municipio')->get(); // Carrega relacionamento opcional
-        return response()->json($hospitais, 200);
+        try {
+            $hospitais = Hospital::with('municipio')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $hospitais
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao listar hospitais: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Criar um novo hospital.
-     */
     public function store(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
+            $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'tipo' => 'required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
                 'endereco' => 'required|string|max:255',
@@ -34,52 +39,115 @@ class HospitalController extends Controller
                 'id_municipio' => 'required|exists:municipio,id_municipio'
             ]);
 
-            $hospital = Hospital::create($validated);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-            return response()->json($hospital, 201);
-        } catch (ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
+            $hospital = Hospital::create($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Hospital criado com sucesso.',
+                'data' => $hospital->load('municipio')
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao criar hospital: ' . $e->getMessage()
+            ], 500);
         }
     }
 
-    /**
-     * Exibir detalhes de um hospital específico pelo ID.
-     */
     public function show(int $id): JsonResponse
     {
-        $hospital = Hospital::with('municipio')->findOrFail($id);
-        return response()->json($hospital, 200);
+        try {
+            $hospital = Hospital::with('municipio')->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $hospital
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Hospital não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao buscar hospital: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Atualizar um hospital existente pelo ID.
-     */
     public function update(Request $request, int $id): JsonResponse
     {
-        $hospital = Hospital::findOrFail($id);
+        try {
+            $hospital = Hospital::findOrFail($id);
 
-        $validated = $request->validate([
-            'nome' => 'sometimes|required|string|max:255',
-            'tipo' => 'sometimes|required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
-            'endereco' => 'sometimes|string|max:255',
-            'latitude' => 'sometimes|required|numeric',
-            'longitude' => 'sometimes|required|numeric',
-            'capacidade_leitos' => 'sometimes|integer'
-        ]);
+            $validator = Validator::make($request->all(), [
+                'nome' => 'sometimes|required|string|max:255',
+                'tipo' => 'sometimes|required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
+                'endereco' => 'sometimes|string|max:255',
+                'latitude' => 'sometimes|required|numeric',
+                'longitude' => 'sometimes|required|numeric',
+                'capacidade_leitos' => 'sometimes|integer',
+                'id_municipio' => 'sometimes|required|exists:municipio,id_municipio'
+            ]);
 
-        $hospital->update($validated);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        return response()->json($hospital, 200);
+            $hospital->update($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Hospital atualizado com sucesso.',
+                'data' => $hospital->load('municipio')
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Hospital não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao atualizar hospital: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Excluir um hospital pelo ID.
-     */
     public function destroy(int $id): JsonResponse
     {
-        $hospital = Hospital::findOrFail($id);
-        $hospital->delete();
+        try {
+            $hospital = Hospital::findOrFail($id);
+            $hospital->delete();
 
-        return response()->json(null, 204);
+            return response()->json([
+                'success' => true,
+                'message' => 'Hospital excluído com sucesso.'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Hospital não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao excluir hospital: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
+

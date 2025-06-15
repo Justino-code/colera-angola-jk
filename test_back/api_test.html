@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste API</title>
+</head>
+<body>
+  <h1>Teste API - Criar e Editar</h1>
+
+  <!-- Criar Provincia -->
+  <h2>Criar Provincia</h2>
+  <form action="http://localhost:8000/provincia_test" method="POST">
+    <input type="text" name="nome" placeholder="Nome da provincia" required>
+    <button type="submit">Criar Provincia</button>
+  </form>
+
+  <!-- Atualizar Provincia -->
+  <h2>Atualizar Provincia</h2>
+  <form action="http://localhost:8000/provincia_test/1" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+    <input type="text" name="nome" placeholder="Novo nome da provincia" required>
+    <button type="submit">Atualizar Provincia</button>
+  </form>
+
+  <!-- Apagar Provincia -->
+  <h2>Apagar Provincia</h2>
+  <form action="http://localhost:8000/provincia_test/1/delete" method="POST">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Apagar Provincia</button>
+  </form>
+
+  <hr>
+
+  <!-- Criar Paciente -->
+  <h2>Criar Paciente</h2>
+  <form action="http://localhost:8000/pacientes_test" method="POST">
+    <input type="text" name="nome" placeholder="Nome do paciente" required>
+    <input type="email" name="email" placeholder="Email do paciente" required>
+    <button type="submit">Criar Paciente</button>
+  </form>
+
+  <!-- Atualizar Paciente -->
+  <h2>Atualizar Paciente</h2>
+  <form action="http://localhost:8000/pacientes_test/1" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+    <input type="text" name="nome" placeholder="Novo nome do paciente" required>
+    <input type="email" name="email" placeholder="Novo email do paciente" required>
+    <button type="submit">Atualizar Paciente</button>
+  </form>
+
+  <!-- Apagar Paciente -->
+  <h2>Apagar Paciente</h2>
+  <form action="http://localhost:8000/pacientes_test/1/delete" method="POST">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Apagar Paciente</button>
+  </form>
+
+  <hr>
+
+  <!-- Consultar com GET -->
+  <h2>Consultar Provincia (GET)</h2>
+  <a href="http://localhost:8000/provincia_test" target="_blank">Listar Provincias</a>
+  <br>
+  <a href="http://localhost:8000/provincia_test/1" target="_blank">Ver Provincia ID 1</a>
+
+  <h2>Consultar Paciente (GET)</h2>
+  <a href="http://localhost:8000/pacientes_test" target="_blank">Listar Pacientes</a>
+  <br>
+  <a href="http://localhost:8000/pacientes_test/1" target="_blank">Ver Paciente ID 1</a>
+
+</body>
+</html>
+
