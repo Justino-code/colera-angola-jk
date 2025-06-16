@@ -119,7 +119,7 @@ export default function AppRoutes() {
           <Route path="/municipio/:id/editar" element={<MunicipioEditar />} />
           <Route path="/municipio/:id" element={<MunicipioDetalhes />} />
 
-          // MapaCasos
+          {/* MapaCasos */}
           <Route path="/mapacasos" element={<MapaCasos />} />
         </Route>
 
