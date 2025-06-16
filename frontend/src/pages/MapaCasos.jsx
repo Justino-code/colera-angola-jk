@@ -1,93 +1,99 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-markercluster";
-import { motion } from "framer-motion";
-import api from "../../services/api";
-import L from "leaflet";
-
-import "leaflet/dist/leaflet.css";
-import "react-leaflet-markercluster/dist/styles.min.css";
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+import { MapContainer, TileLayer } from "react-leaflet";
+import ClusterMarkers from "../components/map/ClusterMarkers";
+import api from "../services/api";
 
 export default function MapaCasos() {
   const [pacientes, setPacientes] = useState([]);
   const [filtro, setFiltro] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [showFilter, setShowFilter] = useState(true);
 
   useEffect(() => {
     api.get("/pacientes")
-      .then(setPacientes)
-      .catch(err => {
-        alert("Erro ao carregar pacientes: " + err);
-        console.error(err);
-      })
-      .finally(() => setLoading(false));
+      .then(data => setPacientes(data))
+      .catch(err => alert("Erro ao carregar casos: " + err));
+
+    const savedFiltro = localStorage.getItem("filtroSintoma");
+    if (savedFiltro !== null) setFiltro(savedFiltro);
   }, []);
 
-  const centroAngola = [-11.2027, 17.8739];
+  const pacientesFiltrados = filtro
+    ? pacientes.filter(p => p.sintomas?.includes(filtro))
+    : pacientes;
 
-  const pacientesFiltrados = pacientes.filter(p => {
-    if (!p.latitude || !p.longitude) return false;
-    if (!filtro) return true;
-    return p.sintomas?.includes(filtro);
-  });
+  const handleFiltroChange = value => {
+    setFiltro(value);
+    localStorage.setItem("filtroSintoma", value);
+  };
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => console.error(err));
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   return (
-    <motion.div
-      className="w-full h-[80vh] rounded shadow overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      <h1 className="text-2xl font-bold mb-2">Mapa de Casos</h1>
+    <div className="relative w-screen h-screen overflow-hidden">
+      <div
+        className={`fixed top-4 right-4 z-[1000] bg-white dark:bg-gray-800 bg-opacity-90 backdrop-blur rounded shadow p-2
+        transition-all duration-300 ${showFilter ? "translate-x-0" : "translate-x-full"}`}
+        style={{ width: "240px", maxWidth: "90vw" }}
+      >
+        <div className="flex justify-between items-center mb-1">
+          <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Mapa de Casos</h1>
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            className="ml-2 bg-blue-600 hover:bg-blue-700 text-white p-1 rounded"
+            title={showFilter ? "Ocultar painel" : "Mostrar painel"}
+          >
+            {showFilter ? "→" : "←"}
+          </button>
+        </div>
 
-      <div className="mb-2">
-        <label className="mr-2 font-medium">Filtrar por sintoma:</label>
-        <select
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          className="border rounded p-1"
+        <div className="flex items-center gap-2 mb-2">
+          <label className="text-sm text-gray-700 dark:text-gray-300">Sintoma:</label>
+          <select
+            value={filtro}
+            onChange={e => handleFiltroChange(e.target.value)}
+            className="p-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">Todos</option>
+            <option value="febre">Febre</option>
+            <option value="vomito">Vômito</option>
+            <option value="diarreia">Diarreia</option>
+            <option value="desidratacao">Desidratação</option>
+          </select>
+        </div>
+
+        <button
+          onClick={toggleFullscreen}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-sm"
         >
-          <option value="">Todos</option>
-          <option value="febre">Febre</option>
-          <option value="vomito">Vômito</option>
-          <option value="diarreia">Diarreia</option>
-          <option value="desidratacao">Desidratação</option>
-        </select>
+          Tela Cheia
+        </button>
       </div>
 
-      {loading ? (
-        <p className="text-gray-500">Carregando dados...</p>
-      ) : (
-        <MapContainer center={centroAngola} zoom={6} className="w-full h-full z-0">
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MarkerClusterGroup>
-            {pacientesFiltrados.map((p) => (
-              <Marker
-                key={p.id}
-                position={[
-                  parseFloat(p.latitude),
-                  parseFloat(p.longitude)
-                ]}
-              >
-                <Popup>
-                  <strong>{p.nome}</strong><br />
-                  Idade: {p.idade}<br />
-                  Sintomas: {p.sintomas?.join(", ") || "N/A"}
-                </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-        </MapContainer>
+      {!showFilter && (
+        <button
+          onClick={() => setShowFilter(true)}
+          className="fixed top-4 right-4 z-[1000] bg-blue-600 hover:bg-blue-700 text-white p-1 rounded"
+          title="Mostrar painel"
+        >
+          ←
+        </button>
       )}
-    </motion.div>
+
+      <MapContainer
+        center={[-11.2027, 17.8739]}
+        zoom={6}
+        bounds={[[-18.0421, 11.4600], [-4.3881, 24.0879]]} // Angola bounds
+        className="w-full h-full"
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <ClusterMarkers markers={pacientesFiltrados} />
+      </MapContainer>
+    </div>
   );
 }
