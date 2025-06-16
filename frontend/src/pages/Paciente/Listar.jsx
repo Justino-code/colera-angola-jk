@@ -13,10 +13,14 @@ export default function PacienteListar() {
 
   const carregarPacientes = async () => {
     const res = await api.get("/pacientes");
-    if (res.data.success) {
-      setPacientes(res.data.data);
-    } else {
-      toast.error(res.data.message || "Erro ao carregar pacientes");
+    console.log(res);
+    if (res.success == true && res.data.length != 0) {
+      setPacientes(res.data);
+    } else if(res.data.length == 0){
+      toast.error("Nenhum paciente cadastrado");
+    }
+    else {
+      toast.error(res.message || "Erro ao carregar pacientes");
     }
   };
 
