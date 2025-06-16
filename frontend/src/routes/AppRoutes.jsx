@@ -55,6 +55,9 @@ const MunicipioCriar = lazy(() => import("../pages/Municipio/Criar"));
 const MunicipioEditar = lazy(() => import("../pages/Municipio/Editar"));
 const MunicipioDetalhes = lazy(() => import("../pages/Municipio/Detalhes"));
 
+// Mapa
+const MapaCasos = lazy(() => import("../pages/MapaCasos"));
+
 export default function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -115,6 +118,9 @@ export default function AppRoutes() {
           <Route path="/municipio/criar" element={<MunicipioCriar />} />
           <Route path="/municipio/:id/editar" element={<MunicipioEditar />} />
           <Route path="/municipio/:id" element={<MunicipioDetalhes />} />
+
+          // MapaCasos
+          <Route path="/mapacasos" element={<MapaCasos />} />
         </Route>
 
         {/* Fallback para rotas não encontradas */}

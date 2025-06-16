@@ -12,7 +12,7 @@ const schema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
   password_confirmation: z.string(),
-  role: z.string().min(1, 'Role é obrigatório'),
+  role: z.string().min(1, 'Cargo obrigatório'),
   permissoes: z.string(),
   id_hospital: z.string().optional().nullable(),
   id_gabinete: z.string().optional().nullable()
@@ -49,15 +49,15 @@ export default function CriarUsuario() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [hospitaisRes, gabinetesRes] = await Promise.all([
+        const [hospRes, gabRes] = await Promise.all([
           api.get('/hospital'),
           api.get('/gabinete')
         ]);
-        setHospitais(hospitaisRes);
-        setGabinetes(gabinetesRes);
-      } catch (error) {
+        setHospitais(hospRes.data.success ? hospRes.data.data : []);
+        setGabinetes(gabRes.data.success ? gabRes.data.data : []);
+      } catch (err) {
         toast.error('Erro ao carregar hospitais/gabinetes');
-        console.error('Erro ao carregar hospitais/gabinetes:', error);
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -80,12 +80,17 @@ export default function CriarUsuario() {
         id_gabinete: data.id_gabinete || null
       };
 
-      await api.post('/usuario', payload);
-      toast.success('Usuário criado com sucesso!');
-      navigate('/usuarios');
-    } catch (error) {
+      const res = await api.post('/usuario', payload);
+
+      if (res.data.success) {
+        toast.success('Usuário criado com sucesso!');
+        navigate('/usuarios');
+      } else {
+        toast.error(res.data.message || 'Falha ao criar usuário');
+      }
+    } catch (err) {
       toast.error('Erro ao criar usuário');
-      console.error('Erro ao criar usuário:', error);
+      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -94,61 +99,83 @@ export default function CriarUsuario() {
   if (loading) return <Skeleton />;
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Criar Usuário</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div className="max-w-xl mx-auto space-y-4 p-4">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Criar Usuário</h1>
+
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="rounded-lg shadow space-y-4 p-4 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+      >
+        {[
+          { name: 'nome', label: 'Nome', type: 'text' },
+          { name: 'email', label: 'Email', type: 'text' },
+          { name: 'password', label: 'Senha', type: 'password' },
+          { name: 'password_confirmation', label: 'Confirmação de Senha', type: 'password' },
+          { name: 'permissoes', label: 'Permissões (separadas por vírgula)', type: 'text' }
+        ].map((field) => (
+          <div key={field.name}>
+            <label className="block font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+            <input
+              type={field.type}
+              {...register(field.name)}
+              className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            />
+            {errors[field.name] && (
+              <p className="text-red-500 text-sm">{errors[field.name].message}</p>
+            )}
+          </div>
+        ))}
 
         <div>
-          <label className="block mb-1">Nome</label>
-          <input {...register('nome')} className="w-full border rounded p-2" />
-          {errors.nome && <p className="text-red-500">{errors.nome.message}</p>}
+          <label className="block font-medium text-gray-700 dark:text-gray-300">Cargo</label>
+          <select
+            {...register('role')}
+            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">Selecione um cargo</option>
+            <option value="admin">Admin</option>
+            <option value="gestor">Gestor</option>
+            <option value="medico">Médico</option>
+            <option value="tecnico">Técnico</option>
+            <option value="enfermeiro">Enfermeiro</option>
+            <option value="epidemiologista">Epidemiologista</option>
+            <option value="administrativo">Administrativo</option>
+            <option value="agente_sanitario">Agente Sanitário</option>
+            <option value="farmaceutico">Farmacêutico</option>
+            <option value="analista_dados">Analista de Dados</option>
+            <option value="coordenador_regional">Coordenador Regional</option>
+          </select>
+          {errors.role && (
+            <p className="text-red-500 text-sm">{errors.role.message}</p>
+          )}
         </div>
 
         <div>
-          <label className="block mb-1">Email</label>
-          <input {...register('email')} className="w-full border rounded p-2" />
-          {errors.email && <p className="text-red-500">{errors.email.message}</p>}
-        </div>
-
-        <div>
-          <label className="block mb-1">Senha</label>
-          <input type="password" {...register('password')} className="w-full border rounded p-2" />
-          {errors.password && <p className="text-red-500">{errors.password.message}</p>}
-        </div>
-
-        <div>
-          <label className="block mb-1">Confirmação de senha</label>
-          <input type="password" {...register('password_confirmation')} className="w-full border rounded p-2" />
-          {errors.password_confirmation && <p className="text-red-500">{errors.password_confirmation.message}</p>}
-        </div>
-
-        <div>
-          <label className="block mb-1">Cargo (Role)</label>
-          <input {...register('role')} className="w-full border rounded p-2" />
-          {errors.role && <p className="text-red-500">{errors.role.message}</p>}
-        </div>
-
-        <div>
-          <label className="block mb-1">Permissões (separadas por vírgula)</label>
-          <input {...register('permissoes')} className="w-full border rounded p-2" />
-        </div>
-
-        <div>
-          <label className="block mb-1">Hospital</label>
-          <select {...register('id_hospital')} className="w-full border rounded p-2">
+          <label className="block font-medium text-gray-700 dark:text-gray-300">Hospital</label>
+          <select
+            {...register('id_hospital')}
+            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
             <option value="">Selecione um hospital</option>
-            {hospitais.map(h => (
-              <option key={h.id_hospital} value={h.id_hospital}>{h.nome}</option>
+            {hospitais.map((h) => (
+              <option key={h.id_hospital} value={h.id_hospital}>
+                {h.nome}
+              </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block mb-1">Gabinete</label>
-          <select {...register('id_gabinete')} className="w-full border rounded p-2">
+          <label className="block font-medium text-gray-700 dark:text-gray-300">Gabinete</label>
+          <select
+            {...register('id_gabinete')}
+            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          >
             <option value="">Selecione um gabinete</option>
-            {gabinetes.map(g => (
-              <option key={g.id_gabinete} value={g.id_gabinete}>{g.nome}</option>
+            {gabinetes.map((g) => (
+              <option key={g.id_gabinete} value={g.id_gabinete}>
+                {g.nome}
+              </option>
             ))}
           </select>
         </div>
@@ -156,7 +183,7 @@ export default function CriarUsuario() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-amber-600 text-white px-4 py-2 rounded"
+          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded transition disabled:opacity-50"
         >
           {saving ? 'Criando...' : 'Criar Usuário'}
         </button>
@@ -164,4 +191,3 @@ export default function CriarUsuario() {
     </div>
   );
 }
-

@@ -1,142 +1,145 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import api from '../../services/api';
 import Skeleton from '../../components/common/Skeleton';
 import { toast } from 'react-hot-toast';
 
-export default function EditarUsuario() {
+const schema = z
+  .object({
+    nome: z.string().min(2, 'Nome muito curto'),
+    email: z.string().email('Email inválido'),
+    role: z.string().min(1, 'Cargo obrigatório'),
+    permissoes: z.string(),
+    id_hospital: z.string().optional().nullable(),
+    id_gabinete: z.string().optional().nullable()
+  });
+
+export default function UsuarioEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    nome: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    role: '',
-    permissoes: [],
-    id_hospital: '',
-    id_gabinete: ''
-  });
   const [hospitais, setHospitais] = useState([]);
   const [gabinetes, setGabinetes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      nome: '',
+      email: '',
+      role: '',
+      permissoes: '',
+      id_hospital: '',
+      id_gabinete: ''
+    }
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usuarioRes, hospitaisRes, gabinetesRes] = await Promise.all([
+        const [userRes, hospRes, gabRes] = await Promise.all([
           api.get(`/usuario/${id}`),
-          api.get('/hospitais'),
-          api.get('/gabinetes')
+          api.get('/hospital'),
+          api.get('/gabinete')
         ]);
+        if (userRes.data.success) {
+          const u = userRes.data.data;
+          reset({
+            nome: u.nome,
+            email: u.email,
+            role: u.role,
+            permissoes: u.permissoes.join(', '),
+            id_hospital: u.id_hospital || '',
+            id_gabinete: u.id_gabinete || ''
+          });
+        } else {
+          toast.error('Usuário não encontrado');
+          navigate('/usuarios');
+        }
 
-        setForm({
-          nome: usuarioRes.nome || '',
-          email: usuarioRes.email || '',
-          password: '',
-          password_confirmation: '',
-          role: usuarioRes.role || '',
-          permissoes: usuarioRes.permissoes || [],
-          id_hospital: usuarioRes.id_hospital || '',
-          id_gabinete: usuarioRes.id_gabinete || ''
-        });
-
-        setHospitais(hospitaisRes);
-        setGabinetes(gabinetesRes);
-
-      } catch (error) {
+        setHospitais(hospRes.data.success ? hospRes.data.data : []);
+        setGabinetes(gabRes.data.success ? gabRes.data.data : []);
+      } catch (err) {
         toast.error('Erro ao carregar dados');
-        console.error('Erro ao carregar dados:', error);
+        console.error(err);
+        navigate('/usuarios');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, navigate, reset]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setSaving(true);
     try {
-      const dataToSend = { ...form };
-      if (!form.password) {
-        delete dataToSend.password;
-        delete dataToSend.password_confirmation;
+      const payload = {
+        nome: data.nome,
+        email: data.email,
+        role: data.role,
+        permissoes: data.permissoes.split(',').map(p => p.trim()),
+        id_hospital: data.id_hospital || null,
+        id_gabinete: data.id_gabinete || null
+      };
+
+      const res = await api.put(`/usuario/${id}`, payload);
+      if (res.data.success) {
+        toast.success('Usuário atualizado com sucesso!');
+        navigate('/usuarios');
+      } else {
+        toast.error(res.data.message || 'Falha ao atualizar usuário');
       }
-      await api.put(`/usuario/${id}`, dataToSend);
-      toast.success('Usuário atualizado com sucesso!');
-      navigate('/usuarios');
-    } catch (error) {
+    } catch (err) {
       toast.error('Erro ao atualizar usuário');
-      console.error('Erro ao atualizar usuário:', error);
+      console.error(err);
     } finally {
       setSaving(false);
     }
   };
 
-  const handlePermissoesChange = (e) => {
-    setForm({ ...form, permissoes: e.target.value.split(',').map(p => p.trim()) });
-  };
-
   if (loading) return <Skeleton />;
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-xl mx-auto space-y-4">
+      <h1 className="text-2xl font-bold text-slate-700">Editar Usuário</h1>
 
-        {['nome', 'email', 'role'].map(field => (
-          <div key={field}>
-            <label className="block mb-1 capitalize">{field}</label>
-            <input
-              type="text"
-              className="w-full border rounded p-2"
-              value={form[field]}
-              onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-              required
-            />
-          </div>
-        ))}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-4 rounded shadow space-y-4">
 
         <div>
-          <label className="block mb-1">Permissões (separadas por vírgula)</label>
-          <input
-            type="text"
-            className="w-full border rounded p-2"
-            value={form.permissoes.join(', ')}
-            onChange={handlePermissoesChange}
-          />
+          <label className="block font-medium">Nome</label>
+          <input {...register('nome')} className="w-full p-2 border rounded" />
+          {errors.nome && <p className="text-red-500 text-sm">{errors.nome.message}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Nova senha</label>
-          <input
-            type="password"
-            className="w-full border rounded p-2"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
+          <label className="block font-medium">Email</label>
+          <input {...register('email')} className="w-full p-2 border rounded" />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Confirmação da nova senha</label>
-          <input
-            type="password"
-            className="w-full border rounded p-2"
-            value={form.password_confirmation}
-            onChange={(e) => setForm({ ...form, password_confirmation: e.target.value })}
-          />
+          <label className="block font-medium">Cargo</label>
+          <input {...register('role')} className="w-full p-2 border rounded" />
+          {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
         </div>
 
         <div>
-          <label className="block mb-1">Hospital</label>
-          <select
-            className="w-full border rounded p-2"
-            value={form.id_hospital || ''}
-            onChange={(e) => setForm({ ...form, id_hospital: e.target.value })}
-          >
+          <label className="block font-medium">Permissões</label>
+          <input {...register('permissoes')} className="w-full p-2 border rounded" />
+        </div>
+
+        <div>
+          <label className="block font-medium">Hospital</label>
+          <select {...register('id_hospital')} className="w-full p-2 border rounded">
             <option value="">Selecione um hospital</option>
             {hospitais.map(h => (
               <option key={h.id_hospital} value={h.id_hospital}>{h.nome}</option>
@@ -145,12 +148,8 @@ export default function EditarUsuario() {
         </div>
 
         <div>
-          <label className="block mb-1">Gabinete</label>
-          <select
-            className="w-full border rounded p-2"
-            value={form.id_gabinete || ''}
-            onChange={(e) => setForm({ ...form, id_gabinete: e.target.value })}
-          >
+          <label className="block font-medium">Gabinete</label>
+          <select {...register('id_gabinete')} className="w-full p-2 border rounded">
             <option value="">Selecione um gabinete</option>
             {gabinetes.map(g => (
               <option key={g.id_gabinete} value={g.id_gabinete}>{g.nome}</option>
@@ -161,13 +160,11 @@ export default function EditarUsuario() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-amber-600 text-white px-4 py-2 rounded"
+          className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition disabled:opacity-50"
         >
           {saving ? 'Salvando...' : 'Salvar Alterações'}
         </button>
-
       </form>
     </div>
   );
 }
-
