@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import ClusterMarkers from "../components/map/ClusterMarkers";
 import api from "../services/api";
+import toast from 'react-hot-toast';
 
 export default function MapaCasos() {
   const [pacientes, setPacientes] = useState([]);
@@ -9,9 +10,17 @@ export default function MapaCasos() {
   const [showFilter, setShowFilter] = useState(true);
 
   useEffect(() => {
+    toast.loading("Carregando casos...");
     api.get("/pacientes")
-      .then(data => setPacientes(data))
-      .catch(err => alert("Erro ao carregar casos: " + err));
+      .then(data => {
+        setPacientes(data);
+        toast.dismiss();  // Remove o loading
+        toast.success("Casos carregados com sucesso!");
+      })
+      .catch(err => {
+        toast.dismiss();
+        toast.error("Erro ao carregar casos: " + err.message);
+      });
 
     const savedFiltro = localStorage.getItem("filtroSintoma");
     if (savedFiltro !== null) setFiltro(savedFiltro);
@@ -27,9 +36,12 @@ export default function MapaCasos() {
   };
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => console.error(err));
-    } else {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(err);
+        toast.error("Erro ao ativar tela cheia.");
+      });
+    } else if (document.exitFullscreen) {
       document.exitFullscreen();
     }
   };
