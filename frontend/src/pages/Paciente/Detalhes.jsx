@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function PacienteDetalhes() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [paciente, setPaciente] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await api.get(`/pacientes/${id}`);
-        setPaciente(data);
-      } catch (err) {
-        console.error(err);
-        toast.error("Erro ao carregar paciente");
-        navigate('/paciente');
-      }
-    };
-    load();
-  }, [id, navigate]);
+    carregarPaciente();
+  }, []);
+
+  const carregarPaciente = async () => {
+    const res = await api.get(`/pacientes/${id}`);
+    if (res.data.success) {
+      setPaciente(res.data.data);
+    } else {
+      toast.error(res.data.message || "Paciente não encontrado");
+      navigate("/paciente");
+    }
+  };
 
   if (!paciente) {
     return <div className="p-6 text-center text-slate-500">Carregando...</div>;

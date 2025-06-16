@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function RelatorioDetalhes() {
   const { id } = useParams();
@@ -10,10 +11,15 @@ export default function RelatorioDetalhes() {
   useEffect(() => {
     const fetchRelatorio = async () => {
       try {
-        const response = await api.get(`/relatorios/${id}`);
-        setRelatorio(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar relatório:', error);
+        const res = await api.get(`/relatorios/${id}`);
+        if (res.data && res.data.id) {
+          setRelatorio(res.data);
+        } else {
+          toast.error("Relatório não encontrado.");
+        }
+      } catch (err) {
+        console.error("Erro ao carregar relatório:", err);
+        toast.error("Erro ao carregar relatório");
       } finally {
         setLoading(false);
       }
@@ -22,7 +28,7 @@ export default function RelatorioDetalhes() {
   }, [id]);
 
   return (
-    <div>
+    <div className="max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Detalhes do Relatório</h1>
 
       {loading ? (
@@ -32,19 +38,17 @@ export default function RelatorioDetalhes() {
           <div className="h-40 bg-slate-200 rounded animate-pulse"></div>
         </div>
       ) : relatorio ? (
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded shadow space-y-2">
           <p><strong>ID:</strong> {relatorio.id}</p>
           <p><strong>Título:</strong> {relatorio.titulo}</p>
           <p><strong>Data:</strong> {new Date(relatorio.data).toLocaleDateString()}</p>
           <p><strong>Hospital:</strong> {relatorio.hospital_nome}</p>
-          <p><strong>Descrição:</strong></p>
-          <p className="mt-2">{relatorio.descricao}</p>
-
+          <div>
+            <p><strong>Descrição:</strong></p>
+            <p className="mt-1">{relatorio.descricao}</p>
+          </div>
           <div className="mt-4">
-            <Link
-              to="/relatorios"
-              className="text-blue-500 hover:underline"
-            >
+            <Link to="/relatorios" className="text-blue-500 hover:underline">
               Voltar para Relatórios
             </Link>
           </div>

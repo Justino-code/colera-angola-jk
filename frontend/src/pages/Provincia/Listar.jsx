@@ -8,9 +8,15 @@ export default function ProvinciaListar() {
 
   useEffect(() => {
     api.get('/provincias')
-      .then(res => setProvincias(res.data))
+      .then(res => {
+        if (res.data.success) {
+          setProvincias(res.data.data);
+        } else {
+          toast.error(res.data.message || 'Erro ao carregar províncias');
+        }
+      })
       .catch(err => {
-        console.error('Erro ao carregar províncias:', err);
+        console.error('Erro na requisição:', err);
         toast.error('Erro ao carregar províncias');
       });
   }, []);
@@ -18,11 +24,15 @@ export default function ProvinciaListar() {
   const handleDelete = async (id) => {
     if (!window.confirm('Tem certeza que deseja apagar esta província?')) return;
     try {
-      await api.delete(`/provincias/${id}`);
-      toast.success('Província eliminada');
-      setProvincias(prev => prev.filter(p => p.id !== id));
+      const res = await api.delete(`/provincias/${id}`);
+      if (res.data.success) {
+        toast.success(res.data.message || 'Província eliminada');
+        setProvincias(prev => prev.filter(p => p.id !== id));
+      } else {
+        toast.error(res.data.message || 'Erro ao eliminar província');
+      }
     } catch (err) {
-      console.error('Erro ao eliminar província:', err);
+      console.error('Erro na requisição:', err);
       toast.error('Erro ao eliminar província');
     }
   };

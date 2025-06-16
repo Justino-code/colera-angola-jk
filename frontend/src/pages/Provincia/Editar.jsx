@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -14,11 +14,16 @@ export default function ProvinciaEditar() {
   useEffect(() => {
     api.get(`/provincias/${id}`)
       .then(res => {
-        setNome(res.data.nome);
-        setCodigoIso(res.data.codigo_iso);
+        if (res.data.success) {
+          setNome(res.data.data.nome);
+          setCodigoIso(res.data.data.codigo_iso);
+        } else {
+          toast.error(res.data.message || 'Erro ao carregar província');
+          navigate('/provincia');
+        }
       })
       .catch(err => {
-        console.error('Erro ao carregar província:', err);
+        console.error('Erro na requisição:', err);
         toast.error('Erro ao carregar província');
         navigate('/provincia');
       })
@@ -29,11 +34,15 @@ export default function ProvinciaEditar() {
     e.preventDefault();
     setSalvando(true);
     try {
-      await api.put(`/provincias/${id}`, { nome, codigo_iso: codigoIso });
-      toast.success('Província atualizada com sucesso!');
-      navigate('/provincia');
+      const res = await api.put(`/provincias/${id}`, { nome, codigo_iso: codigoIso });
+      if (res.data.success) {
+        toast.success(res.data.message || 'Província atualizada com sucesso!');
+        navigate('/provincia');
+      } else {
+        toast.error(res.data.message || 'Erro ao atualizar província');
+      }
     } catch (error) {
-      console.error('Erro ao atualizar província:', error);
+      console.error('Erro na requisição:', error);
       toast.error('Erro ao atualizar província');
     } finally {
       setSalvando(false);

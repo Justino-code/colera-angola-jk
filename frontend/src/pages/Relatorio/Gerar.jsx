@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function RelatorioGerar() {
   const [titulo, setTitulo] = useState('');
@@ -14,10 +15,11 @@ export default function RelatorioGerar() {
   useEffect(() => {
     const fetchHospitais = async () => {
       try {
-        const response = await api.get('/hospitais');
-        setHospitais(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar hospitais:', error);
+        const res = await api.get('/hospitais');
+        setHospitais(res.data);
+      } catch (err) {
+        console.error("Erro ao carregar hospitais:", err);
+        toast.error("Erro ao carregar hospitais");
       }
     };
 
@@ -29,23 +31,29 @@ export default function RelatorioGerar() {
     setLoading(true);
 
     try {
-      await api.post('/relatorios', {
+      const res = await api.post('/relatorios', {
         titulo,
         descricao,
         hospital_id: hospitalId,
-        data: new Date().toISOString()
+        data: new Date().toISOString(),
       });
-      navigate('/relatorios');
-    } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
-      alert('Erro ao gerar relatório');
+
+      if (res.data.success) {
+        toast.success(res.data.message || "Relatório gerado com sucesso!");
+        navigate('/relatorios');
+      } else {
+        toast.error(res.data.message || "Erro ao gerar relatório");
+      }
+    } catch (err) {
+      console.error("Erro ao gerar relatório:", err);
+      toast.error("Erro ao gerar relatório");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
+    <div className="max-w-lg mx-auto">
       <h1 className="text-2xl font-bold mb-4">Gerar Relatório</h1>
 
       <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow space-y-4">
@@ -90,9 +98,9 @@ export default function RelatorioGerar() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition disabled:opacity-50"
         >
-          {loading ? 'Gerando...' : 'Gerar Relatório'}
+          {loading ? "Gerando..." : "Gerar Relatório"}
         </button>
       </form>
     </div>

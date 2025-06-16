@@ -11,15 +11,21 @@ export default function ProvinciaDetalhes() {
 
   useEffect(() => {
     api.get(`/provincias/${id}`)
-      .then(res => setProvincia(res.data))
+      .then(res => {
+        if (res.data.success) {
+          setProvincia(res.data.data);
+        } else {
+          toast.error(res.data.message || 'Erro ao carregar província');
+          navigate('/provincia');
+        }
+      })
       .catch(err => {
-        console.error('Erro ao carregar província:', err);
+        console.error('Erro na requisição:', err);
         toast.error('Erro ao carregar província');
         navigate('/provincia');
       })
       .finally(() => setCarregando(false));
   }, [id, navigate]);
-
   if (carregando) {
     return <div className="text-center py-10">Carregando...</div>;
   }

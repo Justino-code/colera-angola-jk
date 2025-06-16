@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import api from '../../services/api';
 import Skeleton from '../../components/common/Skeleton';
+import { toast } from 'react-hot-toast';
 
 const schema = z.object({
   nome: z.string().min(2, 'Nome muito curto'),
@@ -13,8 +14,8 @@ const schema = z.object({
   password_confirmation: z.string(),
   role: z.string().min(1, 'Role é obrigatório'),
   permissoes: z.string(),
-  id_hospital: z.string().optional(),
-  id_gabinete: z.string().optional()
+  id_hospital: z.string().optional().nullable(),
+  id_gabinete: z.string().optional().nullable()
 }).refine((data) => data.password === data.password_confirmation, {
   message: 'As senhas não coincidem',
   path: ['password_confirmation']
@@ -55,6 +56,7 @@ export default function CriarUsuario() {
         setHospitais(hospitaisRes);
         setGabinetes(gabinetesRes);
       } catch (error) {
+        toast.error('Erro ao carregar hospitais/gabinetes');
         console.error('Erro ao carregar hospitais/gabinetes:', error);
       } finally {
         setLoading(false);
@@ -68,12 +70,21 @@ export default function CriarUsuario() {
     setSaving(true);
     try {
       const payload = {
-        ...data,
-        permissoes: data.permissoes.split(',').map(p => p.trim())
+        nome: data.nome,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.password_confirmation,
+        role: data.role,
+        permissoes: data.permissoes.split(',').map(p => p.trim()),
+        id_hospital: data.id_hospital || null,
+        id_gabinete: data.id_gabinete || null
       };
+
       await api.post('/usuario', payload);
+      toast.success('Usuário criado com sucesso!');
       navigate('/usuarios');
     } catch (error) {
+      toast.error('Erro ao criar usuário');
       console.error('Erro ao criar usuário:', error);
     } finally {
       setSaving(false);

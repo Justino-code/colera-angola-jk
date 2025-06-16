@@ -1,56 +1,72 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
-export default function RelatorioDetalhes() {
-  const { id } = useParams();
-  const [relatorio, setRelatorio] = useState(null);
+export default function RelatorioListar() {
+  const [relatorios, setRelatorios] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRelatorio = async () => {
+    const fetchRelatorios = async () => {
       try {
-        const response = await api.get(`/relatorios/${id}`);
-        setRelatorio(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar relatório:', error);
+        const res = await api.get('/relatorios');
+        if (res.data.success) {
+          setRelatorios(res.data.data);
+        } else {
+          toast.error(res.data.message || 'Falha ao carregar relatórios');
+        }
+      } catch (err) {
+        console.error('Erro ao carregar relatórios:', err);
+        toast.error('Erro ao carregar relatórios');
       } finally {
         setLoading(false);
       }
     };
-    fetchRelatorio();
-  }, [id]);
+
+    fetchRelatorios();
+  }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Detalhes do Relatório</h1>
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-slate-700">Lista de Relatórios</h1>
+        <Link 
+          to="/relatorios/gerar" 
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+        >
+          Gerar Relatório
+        </Link>
+      </div>
 
       {loading ? (
         <div className="space-y-2">
-          <div className="h-6 bg-slate-200 rounded animate-pulse w-1/3"></div>
-          <div className="h-6 bg-slate-200 rounded animate-pulse w-1/2"></div>
-          <div className="h-40 bg-slate-200 rounded animate-pulse"></div>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-12 bg-slate-200 rounded animate-pulse"></div>
+          ))}
         </div>
-      ) : relatorio ? (
-        <div className="bg-white p-4 rounded shadow">
-          <p><strong>ID:</strong> {relatorio.id}</p>
-          <p><strong>Título:</strong> {relatorio.titulo}</p>
-          <p><strong>Data:</strong> {new Date(relatorio.data).toLocaleDateString()}</p>
-          <p><strong>Hospital:</strong> {relatorio.hospital_nome}</p>
-          <p><strong>Descrição:</strong></p>
-          <p className="mt-2">{relatorio.descricao}</p>
-
-          <div className="mt-4">
-            <Link
-              to="/relatorios"
-              className="text-blue-500 hover:underline"
+      ) : relatorios.length > 0 ? (
+        <div className="space-y-2">
+          {relatorios.map((r) => (
+            <div 
+              key={r.id}
+              className="bg-white p-3 rounded shadow flex justify-between items-center"
             >
-              Voltar para Relatórios
-            </Link>
-          </div>
+              <div>
+                <p className="font-medium">{r.titulo}</p>
+                <p className="text-sm text-slate-500">{new Date(r.data).toLocaleDateString()} - {r.hospital_nome}</p>
+              </div>
+              <Link 
+                to={`/relatorios/${r.id}`}
+                className="text-blue-500 hover:underline text-sm"
+              >
+                Ver detalhes
+              </Link>
+            </div>
+          ))}
         </div>
       ) : (
-        <p className="text-slate-500">Relatório não encontrado.</p>
+        <p className="text-slate-500">Nenhum relatório encontrado.</p>
       )}
     </div>
   );

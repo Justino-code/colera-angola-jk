@@ -1,36 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
+import { toast } from 'react-hot-toast';
+import Skeleton from '../../components/common/Skeleton';
 
 export default function ViaturaEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    matricula: '',
-    modelo: '',
-    capacidade: ''
+    identificacao: '',
+    tipo: 'ambulancia',
+    status: 'disponivel',
+    latitude: '',
+    longitude: '',
+    id_hospital: ''
   });
+  const [hospitais, setHospitais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchViatura = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await api.get(`/viaturas/${id}`);
+        const [viaturaRes, hospitaisRes] = await Promise.all([
+          api.get(`/viatura/${id}`),
+          api.get('/hospital')
+        ]);
+
+        if (!viaturaRes.success) {
+          toast.error(viaturaRes.message || 'Falha ao carregar viatura');
+          return;
+        }
+
+        if (!hospitaisRes.success) {
+          toast.error(hospitaisRes.message || 'Falha ao carregar hospitais');
+          return;
+        }
+
         setForm({
-          matricula: data.matricula,
-          modelo: data.modelo,
-          capacidade: data.capacidade
+          identificacao: viaturaRes.data.identificacao,
+          tipo: viaturaRes.data.tipo,
+          status: viaturaRes.data.status,
+          latitude: viaturaRes.data.latitude ?? '',
+          longitude: viaturaRes.data.longitude ?? '',
+          id_hospital: viaturaRes.data.id_hospital
         });
+        setHospitais(hospitaisRes.data);
       } catch (error) {
-        console.error('Erro ao buscar viatura:', error);
-        alert('Erro ao carregar viatura');
+        console.error('Erro na requisição:', error);
+        toast.error('Erro na comunicação com o servidor');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchViatura();
+    fetchData();
   }, [id]);
 
   const handleChange = (e) => {
@@ -41,46 +65,58 @@ export default function ViaturaEditar() {
     }));
   };
 
+  const getLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setForm(prev => ({
+            ...prev,
+            latitude: position.coords.latitude.toFixed(7),
+            longitude: position.coords.longitude.toFixed(7)
+          }));
+          toast.success('Localização atualizada');
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
+          toast.error('Não foi possível obter localização');
+        }
+      );
+    } else {
+      toast.error('Geolocalização não suportada');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put(`/viaturas/${id}`, form);
-      alert('Viatura atualizada com sucesso!');
-      navigate('/viatura');
+      const res = await api.put(`/viatura/${id}`, form);
+      if (res.success) {
+        toast.success(res.message || 'Viatura atualizada com sucesso');
+        navigate('/viatura');
+      } else {
+        toast.error(res.message || 'Erro ao atualizar viatura');
+      }
     } catch (error) {
-      console.error('Erro ao atualizar viatura:', error);
-      alert('Erro ao atualizar viatura');
+      console.error('Erro na requisição:', error);
+      toast.error('Erro na comunicação com o servidor');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-slate-200 rounded w-1/3"></div>
-          <div className="h-10 bg-slate-200 rounded"></div>
-          <div className="h-6 bg-slate-200 rounded w-1/3"></div>
-          <div className="h-10 bg-slate-200 rounded"></div>
-          <div className="h-6 bg-slate-200 rounded w-1/3"></div>
-          <div className="h-10 bg-slate-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <Skeleton />;
 
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Viatura</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 text-sm font-medium">Matrícula</label>
+          <label className="block mb-1 text-sm font-medium">Identificação</label>
           <input
             type="text"
-            name="matricula"
-            value={form.matricula}
+            name="identificacao"
+            value={form.identificacao}
             onChange={handleChange}
             required
             className="w-full border rounded p-2"
@@ -88,37 +124,90 @@ export default function ViaturaEditar() {
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium">Modelo</label>
-          <input
-            type="text"
-            name="modelo"
-            value={form.modelo}
+          <label className="block mb-1 text-sm font-medium">Tipo</label>
+          <select
+            name="tipo"
+            value={form.tipo}
             onChange={handleChange}
-            required
             className="w-full border rounded p-2"
-          />
+          >
+            <option value="ambulancia">Ambulância</option>
+            <option value="outros">Outros</option>
+          </select>
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium">Capacidade</label>
-          <input
-            type="number"
-            name="capacidade"
-            value={form.capacidade}
+          <label className="block mb-1 text-sm font-medium">Status</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full border rounded p-2"
+          >
+            <option value="disponivel">Disponível</option>
+            <option value="em_viagem">Em Viagem</option>
+            <option value="ocupada">Ocupada</option>
+          </select>
+        </div>
+
+        <div className="flex gap-2">
+          <div className="w-1/2">
+            <label className="block mb-1 text-sm font-medium">Latitude</label>
+            <input
+              type="number"
+              name="latitude"
+              value={form.latitude}
+              readOnly
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div className="w-1/2">
+            <label className="block mb-1 text-sm font-medium">Longitude</label>
+            <input
+              type="number"
+              name="longitude"
+              value={form.longitude}
+              readOnly
+              className="w-full border rounded p-2"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={getLocation}
+          className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 transition"
+        >
+          Obter Localização
+        </button>
+
+        <div>
+          <label className="block mb-1 text-sm font-medium">Hospital</label>
+          <select
+            name="id_hospital"
+            value={form.id_hospital}
             onChange={handleChange}
             required
             className="w-full border rounded p-2"
-          />
+          >
+            <option value="">Selecione um hospital</option>
+            {hospitais.map(h => (
+              <option key={h.id_hospital} value={h.id_hospital}>
+                {h.nome}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className={`w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition ${saving ? 'opacity-50' : ''}`}
+          className={`w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          {saving ? 'Salvando...' : 'Salvar Alterações'}
+          {saving ? 'Salvando...' : 'Salvar'}
         </button>
       </form>
     </div>
   );
 }
+

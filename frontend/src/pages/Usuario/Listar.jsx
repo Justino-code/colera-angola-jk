@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import { toast } from 'react-hot-toast';
 
 export default function ListarUsuarios() {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,8 +11,6 @@ export default function ListarUsuarios() {
     const fetchUsuarios = async () => {
       try {
         const response = await api.get('/usuario');
-        console.log('Resposta da API:', response);
-
         const data = response;
 
         if (Array.isArray(data)) {
@@ -20,9 +19,11 @@ export default function ListarUsuarios() {
           setUsuarios(data.usuarios);
         } else {
           console.warn('Formato inesperado:', data);
+          toast.error('Formato inesperado dos dados');
           setUsuarios([]);
         }
       } catch (error) {
+        toast.error('Erro ao buscar usuários');
         console.error('Erro ao buscar usuários:', error);
         setUsuarios([]);
       } finally {
@@ -65,8 +66,18 @@ export default function ListarUsuarios() {
               className="p-4 bg-white rounded shadow flex justify-between items-center"
             >
               <div>
-                <p className="font-medium">{usuario.nome}</p>
+                <p className="font-medium text-lg">{usuario.nome}</p>
                 <p className="text-sm text-slate-500">{usuario.email}</p>
+                <p className="text-sm text-slate-500">Cargo: {usuario.role}</p>
+                <p className="text-sm text-slate-500">
+                  Hospital: {usuario.hospital_nome || 'N/A'}
+                </p>
+                <p className="text-sm text-slate-500">
+                  Gabinete: {usuario.gabinete_nome || 'N/A'}
+                </p>
+                <p className="text-sm text-slate-500">
+                  Permissões: {usuario.permissoes?.join(', ') || 'Nenhuma'}
+                </p>
               </div>
               <div className="space-x-2">
                 <Link
@@ -89,3 +100,4 @@ export default function ListarUsuarios() {
     </div>
   );
 }
+

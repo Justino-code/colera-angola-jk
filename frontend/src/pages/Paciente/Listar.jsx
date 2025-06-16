@@ -1,33 +1,36 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 export default function PacienteListar() {
   const [pacientes, setPacientes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get("/pacientes")
-      .then(({ data }) => setPacientes(data))
-      .catch((err) => {
-        console.error(err);
-        toast.error("Erro ao carregar pacientes");
-      });
+    carregarPacientes();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Tem certeza que deseja excluir?")) return;
-    try {
-      await api.delete(`/pacientes/${id}`);
-      setPacientes(pacientes.filter(p => p.id !== id));
-      toast.success("Paciente excluído!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro ao excluir paciente");
+  const carregarPacientes = async () => {
+    const res = await api.get("/pacientes");
+    if (res.data.success) {
+      setPacientes(res.data.data);
+    } else {
+      toast.error(res.data.message || "Erro ao carregar pacientes");
     }
   };
 
+  const excluirPaciente = async (id) => {
+    if (!window.confirm("Tem certeza que deseja excluir?")) return;
+
+    const res = await api.delete(`/pacientes/${id}`);
+    if (res.data.success) {
+      toast.success(res.data.message || "Paciente excluído!");
+      carregarPacientes();
+    } else {
+      toast.error(res.data.message || "Erro ao excluir paciente");
+    }
+  };
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
       <div className="flex justify-between items-center mb-4">

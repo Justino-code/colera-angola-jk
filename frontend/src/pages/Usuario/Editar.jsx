@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import Skeleton from '../../components/common/Skeleton';
+import { toast } from 'react-hot-toast';
 
 export default function EditarUsuario() {
   const { id } = useParams();
@@ -45,6 +46,7 @@ export default function EditarUsuario() {
         setGabinetes(gabinetesRes);
 
       } catch (error) {
+        toast.error('Erro ao carregar dados');
         console.error('Erro ao carregar dados:', error);
       } finally {
         setLoading(false);
@@ -64,8 +66,10 @@ export default function EditarUsuario() {
         delete dataToSend.password_confirmation;
       }
       await api.put(`/usuario/${id}`, dataToSend);
+      toast.success('Usuário atualizado com sucesso!');
       navigate('/usuarios');
     } catch (error) {
+      toast.error('Erro ao atualizar usuário');
       console.error('Erro ao atualizar usuário:', error);
     } finally {
       setSaving(false);
@@ -83,7 +87,6 @@ export default function EditarUsuario() {
       <h2 className="text-xl font-bold mb-4">Editar Usuário</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* Campos básicos */}
         {['nome', 'email', 'role'].map(field => (
           <div key={field}>
             <label className="block mb-1 capitalize">{field}</label>
@@ -97,7 +100,6 @@ export default function EditarUsuario() {
           </div>
         ))}
 
-        {/* Permissões */}
         <div>
           <label className="block mb-1">Permissões (separadas por vírgula)</label>
           <input
@@ -108,7 +110,6 @@ export default function EditarUsuario() {
           />
         </div>
 
-        {/* Senha */}
         <div>
           <label className="block mb-1">Nova senha</label>
           <input
@@ -129,7 +130,6 @@ export default function EditarUsuario() {
           />
         </div>
 
-        {/* Hospital */}
         <div>
           <label className="block mb-1">Hospital</label>
           <select
@@ -144,7 +144,6 @@ export default function EditarUsuario() {
           </select>
         </div>
 
-        {/* Gabinete */}
         <div>
           <label className="block mb-1">Gabinete</label>
           <select

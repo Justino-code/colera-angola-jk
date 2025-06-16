@@ -22,6 +22,7 @@ const schema = z.object({
 export default function PacienteCriar() {
   const navigate = useNavigate();
   const [localizacao, setLocalizacao] = useState(null);
+  
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -48,11 +49,34 @@ export default function PacienteCriar() {
     );
   }, [setValue]);
 
+  const handleAtualizarLocalizacao = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude
+        };
+        setLocalizacao(coords);
+        setValue("localizacao.latitude", coords.latitude);
+        setValue("localizacao.longitude", coords.longitude);
+        toast.success("Localização atualizada!");
+      },
+      (err) => {
+        console.error(err);
+        toast.error("Não foi possível obter localização.");
+      }
+    );
+  };
+
   const onSubmit = async (data) => {
     try {
-      await api.post('/pacientes', data);
-      toast.success("Paciente criado com sucesso!");
-      navigate('/paciente');
+      const res = await api.post('/pacientes', data);
+      if (res.data.success) {
+        toast.success(res.data.message || "Paciente criado com sucesso!");
+        navigate('/paciente');
+      } else {
+        toast.error(res.data.message || "Erro ao criar paciente");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Erro ao criar paciente");
@@ -63,6 +87,7 @@ export default function PacienteCriar() {
     <div className="max-w-lg mx-auto bg-white p-4 rounded shadow space-y-4">
       <h1 className="text-2xl font-bold text-slate-700">Novo Paciente</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        
         <div>
           <label className="block mb-1">Nome</label>
           <input {...register("nome")} className="w-full border rounded p-2" />
@@ -109,11 +134,40 @@ export default function PacienteCriar() {
           {errors.sintomas && <p className="text-red-500 text-sm">{errors.sintomas.message}</p>}
         </div>
 
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block mb-1">Latitude</label>
+            <input
+              type="number"
+              step="any"
+              {...register("localizacao.latitude", { valueAsNumber: true })}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Longitude</label>
+            <input
+              type="number"
+              step="any"
+              {...register("localizacao.longitude", { valueAsNumber: true })}
+              className="w-full border rounded p-2"
+            />
+          </div>
+        </div>
+
         {localizacao && (
           <p className="text-sm text-slate-500">
             Localização automática: {localizacao.latitude}, {localizacao.longitude}
           </p>
         )}
+
+        <button
+          type="button"
+          onClick={handleAtualizarLocalizacao}
+          className="bg-slate-500 text-white px-3 py-1 rounded hover:bg-slate-600 transition"
+        >
+          Atualizar Localização
+        </button>
 
         <button
           type="submit"

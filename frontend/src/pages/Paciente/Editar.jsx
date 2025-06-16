@@ -23,22 +23,28 @@ export default function PacienteEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { register, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
   });
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await api.get(`/pacientes/${id}`);
-        setValue("nome", data.nome);
-        setValue("numero_bi", data.numero_bi);
-        setValue("telefone", data.telefone);
-        setValue("idade", data.idade);
-        setValue("sexo", data.sexo);
-        setValue("sintomas", data.sintomas || []);
-        setValue("localizacao.latitude", data.localizacao?.latitude || 0);
-        setValue("localizacao.longitude", data.localizacao?.longitude || 0);
+        const res = await api.get(`/pacientes/${id}`);
+        if (res.data.success) {
+          const paciente = res.data.data;
+          setValue("nome", paciente.nome);
+          setValue("numero_bi", paciente.numero_bi);
+          setValue("telefone", paciente.telefone);
+          setValue("idade", paciente.idade);
+          setValue("sexo", paciente.sexo);
+          setValue("sintomas", paciente.sintomas || []);
+          setValue("localizacao.latitude", paciente.localizacao?.latitude || 0);
+          setValue("localizacao.longitude", paciente.localizacao?.longitude || 0);
+        } else {
+          toast.error(res.data.message || "Erro ao carregar paciente");
+          navigate('/paciente');
+        }
       } catch (err) {
         console.error(err);
         toast.error("Erro ao carregar paciente");
@@ -50,9 +56,13 @@ export default function PacienteEditar() {
 
   const onSubmit = async (data) => {
     try {
-      await api.put(`/pacientes/${id}`, data);
-      toast.success("Paciente atualizado");
-      navigate('/paciente');
+      const res = await api.put(`/pacientes/${id}`, data);
+      if (res.data.success) {
+        toast.success(res.data.message || "Paciente atualizado");
+        navigate('/paciente');
+      } else {
+        toast.error(res.data.message || "Erro ao atualizar paciente");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Erro ao atualizar paciente");
