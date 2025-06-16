@@ -17,7 +17,7 @@
 
     <div class="section">
         <h2>➕ Criar Usuário</h2>
-        <form method="POST" action="/usuario_test">
+        <form method="POST" action="/pacientes_test">
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
             <label>Nome</label>

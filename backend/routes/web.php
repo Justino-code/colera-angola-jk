@@ -101,7 +101,8 @@ Route::get('/testes/usuarios/form-criar', function () {
     return view('testes.create');
 });
 
-// Envia para a API
+
+// Envia para o controller
 Route::post('/usuario_test/create', function (\Illuminate\Http\Request $request) {
     $permissoes = explode(',', $request->input('permissoes'));
     $response = Http::post(url('/usuario_test'), [
@@ -113,6 +114,34 @@ Route::post('/usuario_test/create', function (\Illuminate\Http\Request $request)
         'id_hospital' => $request->id_hospital,
         'permissoes' => $permissoes,
     ]);
+    return $response->json();
+});
+
+
+Route::get('/pacientes_test', fn() => view('testes.teste_pacientes'));
+
+Route::post('/paciente_test/create', function (Request $request) {
+    // Processa sintomas como array
+    $sintomas = explode(',', $request->input('sintomas'));
+
+    dd($sintomas);
+
+    // Monta os dados
+    $dados = [
+        'nome' => $request->nome,
+        'numero_bi' => $request->numero_bi,
+        'telefone' => $request->telefone,
+        'idade' => $request->idade,
+        'sexo' => $request->sexo,
+        'sintomas' => $sintomas,
+        'latitude' => $request->latitude,
+        'longitude' => $request->longitude,
+    ];
+
+    // Faz o POST para o endpoint da API
+    $response = Http::post(url('/pacientes_test'), $dados);
+
+    // Retorna o JSON da API
     return $response->json();
 });
 

@@ -37,6 +37,7 @@ class PacienteController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        //dd($request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
