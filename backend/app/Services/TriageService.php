@@ -24,6 +24,7 @@ class TriageService
         $opcoesValidas = array_keys(config('triagem.sintomas'));
 
         if (!empty(array_diff($sintomas, $opcoesValidas))) {
+            //dd($sintomas);
             throw new \InvalidArgumentException("Um ou mais sintomas não são válidos.");
         }
 
@@ -73,8 +74,6 @@ class TriageService
                     $hospitalMaisProximo = $hospital;
                 }
             }
-
-            dd($o);
 
             return $hospitalMaisProximo ?? $this->obterHospitalPadrao();
 

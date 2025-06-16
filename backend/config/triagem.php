@@ -20,6 +20,7 @@ return [
         'pressao_baixa'         => 'Pressão arterial baixa',
         'urinacao_reduzida'     => 'Diminuição da urina',
         'letargia'              => 'Letargia / sonolência',
+        'febre'                 => '',
     ],
 
     /*
@@ -35,6 +36,7 @@ return [
         'diarreia_aquosa',
         'desidratacao',
         'vomito',
+        'frebe',
         'pressao_baixa',
         'batimento_acelerado',
         'letargia',

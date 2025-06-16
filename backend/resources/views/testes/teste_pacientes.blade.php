@@ -26,7 +26,7 @@
                 <option value="M">Masculino</option>
                 <option value="F">Feminino</option>
             </select><br>
-            <input type="text" name="sintomas[]" placeholder="Sintomas (separados por vírgula)" ><br>
+            <input type="text" name="sintomas" placeholder="Sintomas (separados por vírgula)" ><br>
             <input type="text" name="latitude" placeholder="Latitude"><br>
             <input type="text" name="longitude" placeholder="Longitude"><br>
             <button type="submit">Criar Paciente</button>

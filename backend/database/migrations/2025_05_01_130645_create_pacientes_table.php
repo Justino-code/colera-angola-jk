@@ -20,7 +20,7 @@ return new class extends Migration
     $table->enum('sexo', ['M', 'F']);
     $table->json('sintomas');
     $table->string('resultado_triagem');
-    $table->string('qr_code')->unique();
+    $table->string('qr_code')->unique()->nullable();
     $table->string('nome_hospital')->nullable();
     $table->unsignedBigInteger('id_hospital')->nullable();
     $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->onDelete('set null');

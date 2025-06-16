@@ -31,8 +31,8 @@ export default function PacienteEditar() {
     const load = async () => {
       try {
         const res = await api.get(`/pacientes/${id}`);
-        if (res.data.success) {
-          const paciente = res.data.data;
+        if (res.success) {
+          const paciente = res.data;
           setValue("nome", paciente.nome);
           setValue("numero_bi", paciente.numero_bi);
           setValue("telefone", paciente.telefone);
@@ -42,7 +42,7 @@ export default function PacienteEditar() {
           setValue("localizacao.latitude", paciente.localizacao?.latitude || 0);
           setValue("localizacao.longitude", paciente.localizacao?.longitude || 0);
         } else {
-          toast.error(res.data.message || "Erro ao carregar paciente");
+          toast.error(res.message || "Erro ao carregar paciente");
           navigate('/paciente');
         }
       } catch (err) {
@@ -57,11 +57,11 @@ export default function PacienteEditar() {
   const onSubmit = async (data) => {
     try {
       const res = await api.put(`/pacientes/${id}`, data);
-      if (res.data.success) {
-        toast.success(res.data.message || "Paciente atualizado");
+      if (res.success) {
+        toast.success(res.message || "Paciente atualizado");
         navigate('/paciente');
       } else {
-        toast.error(res.data.message || "Erro ao atualizar paciente");
+        toast.error(res.message || "Erro ao atualizar paciente");
       }
     } catch (err) {
       console.error(err);

@@ -71,15 +71,20 @@ export default function PacienteCriar() {
   const onSubmit = async (data) => {
     try {
       const res = await api.post('/pacientes', data);
-      if (res.data.success) {
-        toast.success(res.data.message || "Paciente criado com sucesso!");
+      console.log(res);
+      if (res.success) {
+        toast.success(res.message || "Paciente criado com sucesso!");
         navigate('/paciente');
-      } else {
-        toast.error(res.data.message || "Erro ao criar paciente");
+      } else if(res.success == false && res.errors){
+        //toast(res.message);
+        console.log(res.errors);
+      }
+      else {
+        toast.error(res.message || "Erro ao criar paciente");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Erro ao criar paciente");
+      toast.error("Erro ao criar paciente x");
     }
   };
 
@@ -125,7 +130,7 @@ export default function PacienteCriar() {
         <div>
           <label className="block mb-1">Sintomas</label>
           <div className="flex flex-col space-y-1">
-            {["Diarreia", "Febre", "Vómito", "Desidratação"].map(s => (
+            {["Diarreia", "febre", "Vómito", "Desidratação"].map(s => (
               <label key={s}>
                 <input type="checkbox" value={s} {...register("sintomas")} className="mr-1" /> {s}
               </label>

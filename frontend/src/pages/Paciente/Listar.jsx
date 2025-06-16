@@ -53,19 +53,19 @@ export default function PacienteListar() {
         </thead>
         <tbody>
           {pacientes.map(p => (
-            <tr key={p.id} className="hover:bg-slate-50">
+            <tr key={p.id_paciente} className="hover:bg-slate-50">
               <td className="border p-2">{p.nome}</td>
               <td className="border p-2">{p.numero_bi}</td>
               <td className="border p-2 space-x-2">
                 <button
                   className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                  onClick={() => navigate(`/paciente/editar/${p.id}`)}
+                  onClick={() => navigate(`/paciente/${p.id_paciente}/editar`)}
                 >
                   Editar
                 </button>
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  onClick={() => handleDelete(p.id)}
+                  onClick={() => handleDelete(p.id_paciente)}
                 >
                   Excluir
                 </button>
