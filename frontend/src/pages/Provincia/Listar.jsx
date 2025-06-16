@@ -1,51 +1,65 @@
-// src/pages/provincia/Listar.jsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function ProvinciaListar() {
   const [provincias, setProvincias] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProvincias = async () => {
-      try {
-        const response = await api.get('/provincias');
-        setProvincias(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar províncias:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProvincias();
+    api.get('/provincias')
+      .then(res => setProvincias(res.data))
+      .catch(err => {
+        console.error('Erro ao carregar províncias:', err);
+        toast.error('Erro ao carregar províncias');
+      });
   }, []);
 
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Provincias</h1>
-      <Link to="/provincia/criar" className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">Criar Nova Provincia</Link>
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem certeza que deseja apagar esta província?')) return;
+    try {
+      await api.delete(`/provincias/${id}`);
+      toast.success('Província eliminada');
+      setProvincias(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error('Erro ao eliminar província:', err);
+      toast.error('Erro ao eliminar província');
+    }
+  };
 
-      {loading ? (
-        <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-10 bg-slate-200 rounded animate-pulse"></div>
-          ))}
-        </div>
+  return (
+    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-slate-700">Provincias</h1>
+        <Link to="/provincia/criar" className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">Nova</Link>
+      </div>
+      {provincias.length === 0 ? (
+        <p className="text-slate-500">Nenhuma província cadastrada.</p>
       ) : (
-        <ul className="space-y-2">
-          {provincias.map((provincia) => (
-            <li key={provincia.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
-              <span>{provincia.nome}</span>
-              <div className="space-x-2">
-                <Link to={`/provincia/${provincia.id}`} className="text-blue-500">Detalhes</Link>
-                <Link to={`/provincia/editar/${provincia.id}`} className="text-green-500">Editar</Link>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <table className="w-full text-left border">
+          <thead>
+            <tr className="bg-slate-100">
+              <th className="p-2">Nome</th>
+              <th className="p-2">Código ISO</th>
+              <th className="p-2">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {provincias.map(p => (
+              <tr key={p.id} className="border-t">
+                <td className="p-2">{p.nome}</td>
+                <td className="p-2">{p.codigo_iso}</td>
+                <td className="p-2 space-x-2">
+                  <Link to={`/provincia/${p.id}`} className="text-cyan-600 hover:underline">Ver</Link>
+                  <Link to={`/provincia/editar/${p.id}`} className="text-yellow-600 hover:underline">Editar</Link>
+                  <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">Apagar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
 }
+

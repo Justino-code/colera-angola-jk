@@ -1,70 +1,78 @@
-// src/pages/provincia/Editar.jsx
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function ProvinciaEditar() {
   const { id } = useParams();
-  const [nome, setNome] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
   const navigate = useNavigate();
+  const [nome, setNome] = useState('');
+  const [codigoIso, setCodigoIso] = useState('');
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
-    const fetchProvincia = async () => {
-      try {
-        const response = await api.get(`/provincias/${id}`);
-        setNome(response.data.nome);
-      } catch (error) {
-        console.error('Erro ao buscar província:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProvincia();
-  }, [id]);
+    api.get(`/provincias/${id}`)
+      .then(res => {
+        setNome(res.data.nome);
+        setCodigoIso(res.data.codigo_iso);
+      })
+      .catch(err => {
+        console.error('Erro ao carregar província:', err);
+        toast.error('Erro ao carregar província');
+        navigate('/provincia');
+      })
+      .finally(() => setCarregando(false));
+  }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSalvando(true);
     try {
-      await api.put(`/provincias/${id}`, { nome });
+      await api.put(`/provincias/${id}`, { nome, codigo_iso: codigoIso });
+      toast.success('Província atualizada com sucesso!');
       navigate('/provincia');
     } catch (error) {
       console.error('Erro ao atualizar província:', error);
+      toast.error('Erro ao atualizar província');
     } finally {
       setSalvando(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <div className="h-10 bg-slate-200 rounded animate-pulse"></div>
-        <div className="h-10 bg-slate-200 rounded animate-pulse"></div>
-      </div>
-    );
+  if (carregando) {
+    return <div className="text-center py-10">Carregando...</div>;
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Editar Província</h1>
+    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
+      <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Província</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1">Nome</label>
+          <label className="block text-slate-600 mb-1">Nome</label>
           <input
             type="text"
-            className="w-full border rounded p-2"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
+            className="w-full border rounded p-2"
             required
           />
         </div>
-        <button disabled={salvando} className="bg-green-500 text-white px-4 py-2 rounded">
-          {salvando ? 'Salvando...' : 'Salvar'}
+        <div>
+          <label className="block text-slate-600 mb-1">Código ISO</label>
+          <input
+            type="text"
+            value={codigoIso}
+            onChange={(e) => setCodigoIso(e.target.value.toUpperCase())}
+            className="w-full border rounded p-2"
+            required
+          />
+        </div>
+        <button disabled={salvando} className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">
+          {salvando ? 'Salvando...' : 'Salvar Alterações'}
         </button>
       </form>
     </div>
   );
 }
+

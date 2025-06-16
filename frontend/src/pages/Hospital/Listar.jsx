@@ -9,20 +9,15 @@ export default function HospitalListar() {
   useEffect(() => {
     const fetchHospitais = async () => {
       try {
-        const response = await api.get('/hospitais');
-        console.log('Dados recebidos:', response);
-
-        // Garante que o estado será um array
-        if (Array.isArray(response)) {
-          setHospitais(response);
-        } else if (Array.isArray(response.hospitais)) {
-          // Caso a API retorne { hospitais: [...] }
-          setHospitais(response.hospitais);
+        const { data } = await api.get('/hospitais');
+        if (data.success) {
+          setHospitais(data.data);
         } else {
-          setHospitais([]);
+          alert(data.message || 'Erro ao carregar hospitais');
         }
       } catch (error) {
-        console.error('Erro ao buscar hospitais:', error);
+        console.error('Erro ao carregar hospitais:', error);
+        alert('Erro ao carregar hospitais');
       } finally {
         setLoading(false);
       }
@@ -33,16 +28,14 @@ export default function HospitalListar() {
 
   if (loading) {
     return (
-      <div className="space-y-2">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="animate-pulse bg-slate-200 rounded h-16"></div>
-        ))}
+      <div className="p-6">
+        <p className="animate-pulse text-slate-500">Carregando hospitais...</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="p-6 max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Hospitais</h1>
         <Link
@@ -57,33 +50,19 @@ export default function HospitalListar() {
         <p className="text-slate-500">Nenhum hospital cadastrado.</p>
       ) : (
         <div className="space-y-2">
-          {hospitais.map((hospital) => (
-            <div
-              key={hospital.id}
-              className="p-4 bg-white rounded shadow flex justify-between items-center"
+          {hospitais.map((hosp) => (
+            <Link
+              to={`/hospital/${hosp.id}`}
+              key={hosp.id}
+              className="block border rounded p-3 hover:bg-slate-50 transition"
             >
-              <div>
-                <p className="font-medium">{hospital.nome}</p>
-                <p className="text-sm text-slate-500">{hospital.local}</p>
-              </div>
-              <div className="space-x-2">
-                <Link
-                  to={`/hospital/detalhes/${hospital.id_hospital}`}
-                  className="text-cyan-600 hover:underline"
-                >
-                  Detalhes
-                </Link>
-                <Link
-                  to={`/hospital/editar/${hospital.id_hospital}`}
-                  className="text-amber-600 hover:underline"
-                >
-                  Editar
-                </Link>
-              </div>
-            </div>
+              <div className="font-semibold text-slate-700">{hosp.nome}</div>
+              <div className="text-slate-500 text-sm">{hosp.local} - Capacidade: {hosp.capacidade}</div>
+            </Link>
           ))}
         </div>
       )}
     </div>
   );
 }
+

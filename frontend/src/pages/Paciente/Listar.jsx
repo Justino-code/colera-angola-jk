@@ -1,90 +1,73 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import api from '../../services/api';
-import Skeleton from '../../components/common/Skeleton';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { toast } from "react-toastify";
 
-export default function PacienteLista() {
+export default function PacienteListar() {
   const [pacientes, setPacientes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/pacientes')
-      .then(data => setPacientes(data))
-      .catch(err => console.error('Erro ao buscar pacientes:', err))
-      .finally(() => setLoading(false));
+    api.get("/pacientes")
+      .then(({ data }) => setPacientes(data))
+      .catch((err) => {
+        console.error(err);
+        toast.error("Erro ao carregar pacientes");
+      });
   }, []);
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Tem certeza que deseja excluir?")) return;
+    try {
+      await api.delete(`/pacientes/${id}`);
+      setPacientes(pacientes.filter(p => p.id !== id));
+      toast.success("Paciente excluído!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao excluir paciente");
+    }
+  };
+
   return (
-    <div>
+    <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-slate-700">Lista de Pacientes</h1>
-        <Link 
-          to="/paciente/criar" 
-          className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
-        >
-          Novo Paciente
+        <h1 className="text-2xl font-bold">Pacientes</h1>
+        <Link to="/paciente/criar" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Novo
         </Link>
       </div>
-
-      {loading ? (
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
+      <table className="w-full border">
+        <thead className="bg-slate-100">
+          <tr>
+            <th className="border p-2">Nome</th>
+            <th className="border p-2">BI</th>
+            <th className="border p-2">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pacientes.map(p => (
+            <tr key={p.id} className="hover:bg-slate-50">
+              <td className="border p-2">{p.nome}</td>
+              <td className="border p-2">{p.numero_bi}</td>
+              <td className="border p-2 space-x-2">
+                <button
+                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
+                  onClick={() => navigate(`/paciente/editar/${p.id}`)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  onClick={() => handleDelete(p.id)}
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
           ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded shadow overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="text-left p-2">Nome</th>
-                <th className="text-left p-2">Idade</th>
-                <th className="text-left p-2">Local</th>
-                <th className="text-left p-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pacientes.map(p => (
-                <tr key={p.id} className="border-t">
-                  <td className="p-2">{p.nome}</td>
-                  <td className="p-2">{p.idade}</td>
-                  <td className="p-2">{p.local}</td>
-                  <td className="p-2 space-x-2">
-                    <Link 
-                      to={`/paciente/${p.id}`} 
-                      className="text-cyan-600 hover:underline"
-                    >
-                      Ver
-                    </Link>
-                    <Link 
-                      to={`/paciente/editar/${p.id}`} 
-                      className="text-yellow-600 hover:underline"
-                    >
-                      Editar
-                    </Link>
-                    <button 
-                      className="text-red-600 hover:underline"
-                      onClick={() => handleDelete(p.id)}
-                    >
-                      Apagar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        </tbody>
+      </table>
     </div>
   );
-
-  function handleDelete(id) {
-    if (confirm('Tem certeza que deseja apagar este paciente?')) {
-      api.delete(`/pacientes/${id}`)
-        .then(() => {
-          setPacientes(pacientes.filter(p => p.id !== id));
-        })
-        .catch(err => alert('Erro ao apagar paciente: ' + err));
-    }
-  }
 }
+

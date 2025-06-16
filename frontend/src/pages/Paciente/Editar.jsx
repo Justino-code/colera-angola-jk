@@ -1,138 +1,170 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
-import Skeleton from '../../components/common/Skeleton';
+
+const schema = z.object({
+  nome: z.string().min(3, "Nome obrigatório"),
+  numero_bi: z.string().min(5, "Número de BI inválido"),
+  telefone: z.string().min(6, "Telefone inválido"),
+  idade: z.number().min(0, "Idade inválida"),
+  sexo: z.enum(["M", "F"], "Sexo obrigatório"),
+  sintomas: z.array(z.string()).min(1, "Selecione ao menos 1 sintoma"),
+  localizacao: z.object({
+    latitude: z.number(),
+    longitude: z.number(),
+  }),
+});
 
 export default function PacienteEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [paciente, setPaciente] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
+
+  const { register, handleSubmit, setValue, getValues, formState: { errors, isSubmitting } } = useForm({
+    resolver: zodResolver(schema),
+  });
 
   useEffect(() => {
-    api.get(`/pacientes/${id}`)
-      .then(data => {
-        setPaciente(data);
-        setLocation({
-          latitude: data.latitude || null,
-          longitude: data.longitude || null
-        });
-      })
-      .catch(err => alert('Erro ao carregar paciente: ' + err))
-      .finally(() => setLoading(false));
-  }, [id]);
+    const load = async () => {
+      try {
+        const { data } = await api.get(`/pacientes/${id}`);
+        setValue("nome", data.nome);
+        setValue("numero_bi", data.numero_bi);
+        setValue("telefone", data.telefone);
+        setValue("idade", data.idade);
+        setValue("sexo", data.sexo);
+        setValue("sintomas", data.sintomas || []);
+        setValue("localizacao.latitude", data.localizacao?.latitude || 0);
+        setValue("localizacao.longitude", data.localizacao?.longitude || 0);
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao carregar paciente");
+        navigate('/paciente');
+      }
+    };
+    load();
+  }, [id, navigate, setValue]);
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setLocation({ latitude, longitude });
-          setPaciente(prev => ({
-            ...prev,
-            latitude,
-            longitude
-          }));
-        },
-        (err) => {
-          console.error("Erro ao obter localização: ", err.message);
-          alert("Não foi possível obter sua localização automaticamente.");
-        }
-      );
+  const onSubmit = async (data) => {
+    try {
+      await api.put(`/pacientes/${id}`, data);
+      toast.success("Paciente atualizado");
+      navigate('/paciente');
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao atualizar paciente");
     }
-  }, []);
-
-  const handleChange = (e) => {
-    setPaciente({
-      ...paciente,
-      [e.target.name]: e.target.value
-    });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSaving(true);
-    api.put(`/pacientes/${id}`, paciente)
-      .then(() => {
-        alert('Paciente atualizado com sucesso');
-        navigate('/pacientes');
-      })
-      .catch(err => alert('Erro ao salvar: ' + err))
-      .finally(() => setSaving(false));
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <Skeleton className="h-10 w-1/2" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-      </div>
+  const handleAtualizarLocalizacao = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude
+        };
+        setValue("localizacao.latitude", coords.latitude);
+        setValue("localizacao.longitude", coords.longitude);
+        toast.success("Localização atualizada!");
+      },
+      (err) => {
+        console.error(err);
+        toast.error("Não foi possível obter a localização.");
+      }
     );
-  }
-
-  if (!paciente) {
-    return <p className="text-red-500">Paciente não encontrado.</p>;
-  }
+  };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-700 mb-4">Editar Paciente</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
+    <div className="max-w-lg mx-auto bg-white p-4 rounded shadow space-y-4">
+      <h1 className="text-2xl font-bold text-slate-700">Editar Paciente</h1>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         <div>
-          <label className="block text-slate-600 mb-1">Nome</label>
-          <input 
-            type="text"
-            name="nome"
-            value={paciente.nome || ''}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-slate-600 mb-1">Idade</label>
-          <input 
-            type="number"
-            name="idade"
-            value={paciente.idade || ''}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-slate-600 mb-1">Local</label>
-          <input 
-            type="text"
-            name="local"
-            value={paciente.local || ''}
-            onChange={handleChange}
-            className="w-full border rounded p-2"
-            required
-          />
+          <label className="block mb-1">Nome</label>
+          <input {...register("nome")} className="w-full border rounded p-2" />
+          {errors.nome && <p className="text-red-500 text-sm">{errors.nome.message}</p>}
         </div>
 
-        {/* Latitude e longitude - automáticas e ocultas */}
-        {location.latitude && location.longitude && (
-          <div className="text-green-600 text-sm">
-            Localização detectada: {location.latitude.toFixed(5)}, {location.longitude.toFixed(5)}
+        <div>
+          <label className="block mb-1">Número de BI</label>
+          <input {...register("numero_bi")} className="w-full border rounded p-2" />
+          {errors.numero_bi && <p className="text-red-500 text-sm">{errors.numero_bi.message}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1">Telefone</label>
+          <input {...register("telefone")} className="w-full border rounded p-2" />
+          {errors.telefone && <p className="text-red-500 text-sm">{errors.telefone.message}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1">Idade</label>
+          <input type="number" {...register("idade", { valueAsNumber: true })} className="w-full border rounded p-2" />
+          {errors.idade && <p className="text-red-500 text-sm">{errors.idade.message}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1">Sexo</label>
+          <select {...register("sexo")} className="w-full border rounded p-2">
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+          {errors.sexo && <p className="text-red-500 text-sm">{errors.sexo.message}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1">Sintomas</label>
+          <div className="flex flex-col space-y-1">
+            {["Diarreia", "Febre", "Vómito", "Desidratação"].map(s => (
+              <label key={s}>
+                <input type="checkbox" value={s} {...register("sintomas")} className="mr-1" /> {s}
+              </label>
+            ))}
           </div>
-        )}
-        <input type="hidden" name="latitude" value={location.latitude || ''} />
-        <input type="hidden" name="longitude" value={location.longitude || ''} />
+          {errors.sintomas && <p className="text-red-500 text-sm">{errors.sintomas.message}</p>}
+        </div>
 
-        <button 
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block mb-1">Latitude</label>
+            <input
+              type="number"
+              step="any"
+              {...register("localizacao.latitude", { valueAsNumber: true })}
+              className="w-full border rounded p-2"
+            />
+          </div>
+          <div>
+            <label className="block mb-1">Longitude</label>
+            <input
+              type="number"
+              step="any"
+              {...register("localizacao.longitude", { valueAsNumber: true })}
+              className="w-full border rounded p-2"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAtualizarLocalizacao}
+          className="bg-slate-500 text-white px-3 py-1 rounded hover:bg-slate-600 transition"
+        >
+          Atualizar Localização
+        </button>
+
+        <button
           type="submit"
-          disabled={saving}
+          disabled={isSubmitting}
           className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
         >
-          {saving ? 'Salvando...' : 'Salvar'}
+          {isSubmitting ? "Salvando..." : "Salvar"}
         </button>
       </form>
     </div>
   );
 }
+

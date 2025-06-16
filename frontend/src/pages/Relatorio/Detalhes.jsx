@@ -1,4 +1,3 @@
-// src/pages/relatorios/Detalhes.jsx
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -19,7 +18,6 @@ export default function RelatorioDetalhes() {
         setLoading(false);
       }
     };
-
     fetchRelatorio();
   }, [id]);
 
@@ -57,3 +55,4 @@ export default function RelatorioDetalhes() {
     </div>
   );
 }
+

@@ -1,7 +1,7 @@
-// src/pages/provincia/Criar.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function ProvinciaCriar() {
   const [nome, setNome] = useState('');
@@ -13,32 +13,48 @@ export default function ProvinciaCriar() {
     setSalvando(true);
     try {
       await api.post('/provincias', { nome });
+      toast.success('Província criada com sucesso!');
       navigate('/provincia');
     } catch (error) {
       console.error('Erro ao criar província:', error);
+      toast.error('Erro ao criar província');
     } finally {
       setSalvando(false);
     }
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Criar Província</h1>
+    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
+      <h1 className="text-2xl font-bold text-slate-700 mb-4">Criar Província</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1">Nome</label>
+          <label className="block text-slate-600 mb-1">Nome</label>
           <input
             type="text"
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 focus:outline-none focus:ring focus:border-cyan-400"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             required
           />
         </div>
-        <button disabled={salvando} className="bg-green-500 text-white px-4 py-2 rounded">
-          {salvando ? 'Salvando...' : 'Salvar'}
-        </button>
+        <div className="flex space-x-2">
+          <button
+            type="submit"
+            disabled={salvando}
+            className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition disabled:opacity-50"
+          >
+            {salvando ? 'Salvando...' : 'Salvar'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/provincia')}
+            className="bg-slate-300 text-slate-700 px-4 py-2 rounded hover:bg-slate-400 transition"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );
 }
+

@@ -1,45 +1,50 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import Skeleton from '../../components/common/Skeleton';
+import toast from 'react-hot-toast';
 
 export default function PacienteDetalhes() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [paciente, setPaciente] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get(`/pacientes/${id}`)
-      .then(data => setPaciente(data))
-      .catch(err => alert('Erro ao carregar paciente: ' + err))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-6 w-1/2" />
-        <Skeleton className="h-6 w-2/3" />
-        <Skeleton className="h-6 w-1/4" />
-      </div>
-    );
-  }
+    const load = async () => {
+      try {
+        const { data } = await api.get(`/pacientes/${id}`);
+        setPaciente(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao carregar paciente");
+        navigate('/paciente');
+      }
+    };
+    load();
+  }, [id, navigate]);
 
   if (!paciente) {
-    return <p className="text-red-500">Paciente não encontrado.</p>;
+    return <div className="p-6 text-center text-slate-500">Carregando...</div>;
   }
 
   return (
-    <div className="bg-white p-6 rounded shadow space-y-4">
-      <h1 className="text-2xl font-bold text-slate-700">Detalhes do Paciente</h1>
-      <div>
-        <p className="text-slate-600"><span className="font-semibold">Nome:</span> {paciente.nome}</p>
-        <p className="text-slate-600"><span className="font-semibold">Idade:</span> {paciente.idade}</p>
-        <p className="text-slate-600"><span className="font-semibold">Local:</span> {paciente.local}</p>
-        <p className="text-slate-600"><span className="font-semibold">Estado:</span> {paciente.estado}</p>
-        <p className="text-slate-600"><span className="font-semibold">Data de Registro:</span> {new Date(paciente.created_at).toLocaleDateString()}</p>
+    <div className="max-w-lg mx-auto bg-white p-4 rounded shadow">
+      <h1 className="text-2xl font-bold mb-4">Detalhes do Paciente</h1>
+      <div className="space-y-2">
+        <p><strong>Nome:</strong> {paciente.nome}</p>
+        <p><strong>BI:</strong> {paciente.numero_bi}</p>
+        <p><strong>Telefone:</strong> {paciente.telefone}</p>
+        <p><strong>Idade:</strong> {paciente.idade}</p>
+        <p><strong>Sexo:</strong> {paciente.sexo}</p>
+        <p><strong>Sintomas:</strong> {paciente.sintomas.join(', ')}</p>
+        {paciente.localizacao && (
+          <p><strong>Localização:</strong> {paciente.localizacao.latitude}, {paciente.localizacao.longitude}</p>
+        )}
+      </div>
+      <div className="mt-4 flex gap-2">
+        <button onClick={() => navigate(`/paciente/editar/${paciente.id}`)} className="bg-cyan-600 text-white px-4 py-2 rounded">Editar</button>
+        <button onClick={() => navigate('/paciente')} className="bg-slate-300 text-slate-700 px-4 py-2 rounded">Voltar</button>
       </div>
     </div>
   );
 }
+

@@ -14,8 +14,14 @@ export default function GabineteEditar() {
     const fetchGabinete = async () => {
       try {
         const { data } = await api.get(`/gabinetes/${id}`);
-        setNome(data.nome);
-        setResponsavel(data.responsavel);
+        if (data.success) {
+          const g = data.data;
+          setNome(g.nome || '');
+          setResponsavel(g.responsavel || '');
+        } else {
+          alert(data.message || 'Gabinete não encontrado');
+          navigate('/gabinete');
+        }
       } catch (error) {
         console.error('Erro ao carregar gabinete:', error);
         alert('Erro ao carregar gabinete');
@@ -32,9 +38,14 @@ export default function GabineteEditar() {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put(`/gabinetes/${id}`, { nome, responsavel });
-      alert('Gabinete atualizado com sucesso!');
-      navigate('/gabinete');
+      const payload = { nome, responsavel };
+      const { data } = await api.put(`/gabinetes/${id}`, payload);
+      if (data.success) {
+        alert('Gabinete atualizado com sucesso!');
+        navigate('/gabinete');
+      } else {
+        alert(data.message || 'Erro ao atualizar gabinete');
+      }
     } catch (error) {
       console.error('Erro ao atualizar gabinete:', error);
       alert('Erro ao atualizar gabinete');
@@ -80,14 +91,24 @@ export default function GabineteEditar() {
             className="w-full border rounded p-2 focus:outline-none focus:ring focus:border-cyan-400"
           />
         </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition disabled:opacity-50"
-        >
-          {saving ? 'Salvando...' : 'Salvar Alterações'}
-        </button>
+        <div className="flex space-x-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition disabled:opacity-50"
+          >
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/gabinete')}
+            className="bg-slate-300 text-slate-700 py-2 px-4 rounded hover:bg-slate-400 transition"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );
 }
+

@@ -1,82 +1,58 @@
-// src/pages/relatorios/Listar.jsx
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 
-export default function RelatorioListar() {
-  const [relatorios, setRelatorios] = useState([]);
+export default function RelatorioDetalhes() {
+  const { id } = useParams();
+  const [relatorio, setRelatorio] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filtro, setFiltro] = useState('');
 
   useEffect(() => {
-    const fetchRelatorios = async () => {
+    const fetchRelatorio = async () => {
       try {
-        const response = await api.get('/relatorios', {
-          params: { search: filtro }
-        });
-        setRelatorios(response.data);
+        const response = await api.get(`/relatorios/${id}`);
+        setRelatorio(response.data);
       } catch (error) {
-        console.error('Erro ao buscar relatórios:', error);
+        console.error('Erro ao carregar relatório:', error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchRelatorios();
-  }, [filtro]);
+    fetchRelatorio();
+  }, [id]);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Relatórios</h1>
-
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Filtrar por título, hospital..."
-          value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
-          className="w-full md:w-1/3 p-2 border rounded-lg"
-        />
-      </div>
+      <h1 className="text-2xl font-bold mb-4">Detalhes do Relatório</h1>
 
       {loading ? (
         <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-slate-200 rounded animate-pulse"></div>
-          ))}
+          <div className="h-6 bg-slate-200 rounded animate-pulse w-1/3"></div>
+          <div className="h-6 bg-slate-200 rounded animate-pulse w-1/2"></div>
+          <div className="h-40 bg-slate-200 rounded animate-pulse"></div>
+        </div>
+      ) : relatorio ? (
+        <div className="bg-white p-4 rounded shadow">
+          <p><strong>ID:</strong> {relatorio.id}</p>
+          <p><strong>Título:</strong> {relatorio.titulo}</p>
+          <p><strong>Data:</strong> {new Date(relatorio.data).toLocaleDateString()}</p>
+          <p><strong>Hospital:</strong> {relatorio.hospital_nome}</p>
+          <p><strong>Descrição:</strong></p>
+          <p className="mt-2">{relatorio.descricao}</p>
+
+          <div className="mt-4">
+            <Link
+              to="/relatorios"
+              className="text-blue-500 hover:underline"
+            >
+              Voltar para Relatórios
+            </Link>
+          </div>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-lg shadow-sm">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="p-3 text-left">#</th>
-                <th className="p-3 text-left">Título</th>
-                <th className="p-3 text-left">Data</th>
-                <th className="p-3 text-left">Hospital</th>
-                <th className="p-3 text-left">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {relatorios.length > 0 ? relatorios.map((r) => (
-                <tr key={r.id} className="border-b">
-                  <td className="p-3">{r.id}</td>
-                  <td className="p-3">{r.titulo}</td>
-                  <td className="p-3">{new Date(r.data).toLocaleDateString()}</td>
-                  <td className="p-3">{r.hospital_nome}</td>
-                  <td className="p-3 space-x-2">
-                    <Link to={`/relatorios/${r.id}`} className="text-blue-500 hover:underline">Ver</Link>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan="5" className="p-3 text-center text-slate-500">Nenhum relatório encontrado</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <p className="text-slate-500">Relatório não encontrado.</p>
       )}
     </div>
   );
 }
+

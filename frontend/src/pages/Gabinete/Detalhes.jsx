@@ -12,7 +12,12 @@ export default function GabineteDetalhes() {
     const fetchGabinete = async () => {
       try {
         const { data } = await api.get(`/gabinetes/${id}`);
-        setGabinete(data);
+        if (data.success) {
+          setGabinete(data.data); // assume resposta { success, data }
+        } else {
+          alert(data.message || 'Gabinete não encontrado');
+          navigate('/gabinete');
+        }
       } catch (error) {
         console.error('Erro ao buscar gabinete:', error);
         alert('Erro ao buscar gabinete');
@@ -38,6 +43,8 @@ export default function GabineteDetalhes() {
     );
   }
 
+  if (!gabinete) return null;
+
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Detalhes do Gabinete</h1>
@@ -50,6 +57,12 @@ export default function GabineteDetalhes() {
           <span className="font-semibold text-slate-600">Responsável:</span>
           <p className="text-slate-700">{gabinete.responsavel}</p>
         </div>
+        {gabinete.municipio && (
+          <div>
+            <span className="font-semibold text-slate-600">Município:</span>
+            <p className="text-slate-700">{gabinete.municipio.nome}</p>
+          </div>
+        )}
         <div>
           <span className="font-semibold text-slate-600">Criado em:</span>
           <p className="text-slate-700">{new Date(gabinete.created_at).toLocaleString()}</p>
@@ -63,7 +76,7 @@ export default function GabineteDetalhes() {
       </div>
       <div className="mt-4 flex space-x-2">
         <button
-          onClick={() => navigate(`/gabinete/editar/${gabinete.id}`)}
+          onClick={() => navigate(`/gabinete/editar/${gabinete.id || gabinete.id_gabinete}`)}
           className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
         >
           Editar
@@ -78,3 +91,4 @@ export default function GabineteDetalhes() {
     </div>
   );
 }
+

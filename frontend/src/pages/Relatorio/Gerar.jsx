@@ -1,5 +1,4 @@
-// src/pages/relatorios/Gerar.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -7,8 +6,23 @@ export default function RelatorioGerar() {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [hospitalId, setHospitalId] = useState('');
+  const [hospitais, setHospitais] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchHospitais = async () => {
+      try {
+        const response = await api.get('/hospitais');
+        setHospitais(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar hospitais:', error);
+      }
+    };
+
+    fetchHospitais();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,17 +61,6 @@ export default function RelatorioGerar() {
         </div>
 
         <div>
-          <label className="block font-medium">Hospital ID</label>
-          <input
-            type="text"
-            value={hospitalId}
-            onChange={(e) => setHospitalId(e.target.value)}
-            required
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <div>
           <label className="block font-medium">Descrição</label>
           <textarea
             value={descricao}
@@ -65,6 +68,23 @@ export default function RelatorioGerar() {
             required
             className="w-full p-2 border rounded"
           ></textarea>
+        </div>
+
+        <div>
+          <label className="block font-medium">Hospital</label>
+          <select
+            value={hospitalId}
+            onChange={(e) => setHospitalId(e.target.value)}
+            required
+            className="w-full p-2 border rounded"
+          >
+            <option value="">Selecione um hospital</option>
+            {hospitais.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.nome}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button
@@ -78,3 +98,4 @@ export default function RelatorioGerar() {
     </div>
   );
 }
+

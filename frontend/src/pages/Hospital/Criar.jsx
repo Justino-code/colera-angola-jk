@@ -14,12 +14,20 @@ export default function HospitalCriar() {
     setSaving(true);
 
     try {
-      await api.post('/hospitais', {
+      const payload = {
         nome,
         local,
         capacidade: parseInt(capacidade, 10),
-      });
-      navigate('/hospital');
+      };
+
+      const { data } = await api.post('/hospitais', payload);
+
+      if (data.success) {
+        alert('Hospital criado com sucesso!');
+        navigate('/hospital');
+      } else {
+        alert(data.message || 'Erro ao criar hospital');
+      }
     } catch (error) {
       console.error('Erro ao criar hospital:', error);
       alert('Erro ao criar hospital');
@@ -39,7 +47,7 @@ export default function HospitalCriar() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-cyan-400"
           />
         </div>
 
@@ -50,7 +58,7 @@ export default function HospitalCriar() {
             value={local}
             onChange={(e) => setLocal(e.target.value)}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-cyan-400"
           />
         </div>
 
@@ -61,7 +69,8 @@ export default function HospitalCriar() {
             value={capacidade}
             onChange={(e) => setCapacidade(e.target.value)}
             required
-            className="w-full border rounded px-3 py-2"
+            min="0"
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-cyan-400"
           />
         </div>
 
@@ -69,7 +78,7 @@ export default function HospitalCriar() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
+            className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition disabled:opacity-50"
           >
             {saving ? 'Salvando...' : 'Salvar'}
           </button>
@@ -85,3 +94,4 @@ export default function HospitalCriar() {
     </div>
   );
 }
+

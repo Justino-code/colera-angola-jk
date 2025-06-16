@@ -12,11 +12,11 @@ export default function GabineteListar() {
         const response = await api.get('/gabinetes');
         console.log('Dados recebidos:', response);
 
-        const data = response?.data;
+        const { data } = response;
 
-        if (Array.isArray(data)) {
-          setGabinetes(data);
-        } else if (Array.isArray(data?.gabinetes)) {
+        if (data.success && Array.isArray(data.data)) {
+          setGabinetes(data.data);
+        } else if (data.success && Array.isArray(data.gabinetes)) {
           setGabinetes(data.gabinetes);
         } else {
           console.warn('Formato inesperado:', data);
@@ -44,7 +44,7 @@ export default function GabineteListar() {
   }
 
   return (
-    <div>
+    <div className="p-6 max-w-3xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Gabinetes</h1>
         <Link
@@ -61,22 +61,24 @@ export default function GabineteListar() {
         <div className="space-y-2">
           {gabinetes.map((gabinete) => (
             <div
-              key={gabinete.id}
+              key={gabinete.id || gabinete.id_gabinete}
               className="p-4 bg-white rounded shadow flex justify-between items-center"
             >
               <div>
                 <p className="font-medium">{gabinete.nome}</p>
-                <p className="text-sm text-slate-500">{gabinete.local}</p>
+                {gabinete.local && (
+                  <p className="text-sm text-slate-500">{gabinete.local}</p>
+                )}
               </div>
               <div className="space-x-2">
                 <Link
-                  to={`/gabinete/detalhes/${gabinete.id}`}
+                  to={`/gabinete/detalhes/${gabinete.id || gabinete.id_gabinete}`}
                   className="text-cyan-600 hover:underline"
                 >
                   Detalhes
                 </Link>
                 <Link
-                  to={`/gabinete/editar/${gabinete.id}`}
+                  to={`/gabinete/editar/${gabinete.id || gabinete.id_gabinete}`}
                   className="text-amber-600 hover:underline"
                 >
                   Editar
@@ -89,3 +91,4 @@ export default function GabineteListar() {
     </div>
   );
 }
+
