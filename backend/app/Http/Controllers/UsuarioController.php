@@ -27,20 +27,20 @@ class UsuarioController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
-                'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+                'email' => ['required', 'email', 'max:255', Rule::unique('usuario', 'email')],
                 'password' => 'required|string|min:6|confirmed',
                 'role' => ['required', Rule::in([
-                    'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+                    'admin', 'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
                     'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
                     'coordenador_regional',
                 ])],
                 'permissoes' => 'required|array',
                 'permissoes.*' => 'string',
-                'id_hospital' => 'required|exists:hospital,id_hospital',
+                'id_hospital' => 'nullable|exists:hospital,id_hospital',
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+                return response()->json(['success' => false, 'errors' => $validator->errors(), 'request' => $request->all()], 422);
             }
 
             $validated = $validator->validated();
@@ -102,11 +102,11 @@ class UsuarioController extends Controller
             ],
             'password' => 'sometimes|nullable|string|min:6',
             'role' => ['sometimes', 'required', Rule::in([
-                'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+                'admin', 'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
                 'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
                 'coordenador_regional',
             ])],
-            'id_hospital' => 'sometimes|required|exists:hospital,id_hospital',
+            'id_hospital' => 'nullable|exists:hospital,id_hospital',
         ]);
 
         if ($validator->fails()) {

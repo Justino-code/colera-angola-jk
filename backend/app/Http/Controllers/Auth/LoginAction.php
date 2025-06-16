@@ -11,26 +11,37 @@ class LoginAction
 {
     public function handle(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        $user = Usuario::where('email', $request->email)->first();
+        $user = Usuario::where('email', $validated['email'])->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Credenciais inválidas'], 401);
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Credenciais inválidas.'
+            ], 401);
         }
 
         if (!$user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email não verificado.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Email não verificado.'
+            ], 403);
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'usuario' => $user
-        ]);
+            'success' => true,
+            'message' => 'Login realizado com sucesso.',
+            'data' => [
+                'token' => $token,
+                'usuario' => $user
+            ]
+        ], 200);
     }
 }
+

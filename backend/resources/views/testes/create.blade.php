@@ -55,7 +55,7 @@
                 <option value="acessar_configuracoes">Acessar Configurações</option>
             </select>
 
-            <label>ID do Hospital</label>
+            <label>Hospital</label>
             <input type="number" name="id_hospital">
 
             <button type="submit">Criar Usuário</button>
