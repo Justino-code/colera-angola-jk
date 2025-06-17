@@ -14,7 +14,18 @@ const schema = z
     role: z.string().min(1, 'Cargo obrigatório'),
     permissoes: z.string(),
     id_hospital: z.string().optional().nullable(),
-    id_gabinete: z.string().optional().nullable()
+    id_gabinete: z.string().optional().nullable(),
+    senha: z.string().optional().nullable(),
+    confirmarSenha: z.string().optional().nullable()
+  })
+  .refine((data) => {
+    if (data.senha || data.confirmarSenha) {
+      return data.senha === data.confirmarSenha;
+    }
+    return true;
+  }, {
+    message: 'As senhas não correspondem',
+    path: ['confirmarSenha']
   });
 
 export default function UsuarioEditar() {
@@ -38,7 +49,9 @@ export default function UsuarioEditar() {
       role: '',
       permissoes: '',
       id_hospital: '',
-      id_gabinete: ''
+      id_gabinete: '',
+      senha: '',
+      confirmarSenha: ''
     }
   });
 
@@ -47,30 +60,32 @@ export default function UsuarioEditar() {
       try {
         const [userRes, hospRes, gabRes] = await Promise.all([
           api.get(`/usuario/${id}`),
-          api.get('/hospital'),
-          api.get('/gabinete')
+          api.get('/hospitais'),
+          api.get('/gabinetes')
         ]);
-        if (userRes.data.success) {
-          const u = userRes.data.data;
+        if (userRes.success) {
+          const u = userRes.data;
           reset({
             nome: u.nome,
             email: u.email,
             role: u.role,
             permissoes: u.permissoes.join(', '),
             id_hospital: u.id_hospital || '',
-            id_gabinete: u.id_gabinete || ''
+            id_gabinete: u.id_gabinete || '',
+            senha: '',
+            confirmarSenha: ''
           });
         } else {
           toast.error('Usuário não encontrado');
-          navigate('/usuarios');
+          navigate('/usuario');
         }
 
-        setHospitais(hospRes.data.success ? hospRes.data.data : []);
-        setGabinetes(gabRes.data.success ? gabRes.data.data : []);
+        setHospitais(hospRes.success ? hospRes.data : []);
+        setGabinetes(gabRes.success ? gabRes.data : []);
       } catch (err) {
         toast.error('Erro ao carregar dados');
         console.error(err);
-        navigate('/usuarios');
+        navigate('/usuario');
       } finally {
         setLoading(false);
       }
@@ -91,12 +106,16 @@ export default function UsuarioEditar() {
         id_gabinete: data.id_gabinete || null
       };
 
+      if (data.senha) {
+        payload.senha = data.senha;
+      }
+
       const res = await api.put(`/usuario/${id}`, payload);
-      if (res.data.success) {
+      if (res.success) {
         toast.success('Usuário atualizado com sucesso!');
-        navigate('/usuarios');
+        navigate('/usuario');
       } else {
-        toast.error(res.data.message || 'Falha ao atualizar usuário');
+        toast.error(res.message || 'Falha ao atualizar usuário');
       }
     } catch (err) {
       toast.error('Erro ao atualizar usuário');
@@ -155,6 +174,17 @@ export default function UsuarioEditar() {
               <option key={g.id_gabinete} value={g.id_gabinete}>{g.nome}</option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block font-medium">Senha (opcional)</label>
+          <input type="password" {...register('senha')} className="w-full p-2 border rounded" />
+        </div>
+
+        <div>
+          <label className="block font-medium">Confirmar Senha</label>
+          <input type="password" {...register('confirmarSenha')} className="w-full p-2 border rounded" />
+          {errors.confirmarSenha && <p className="text-red-500 text-sm">{errors.confirmarSenha.message}</p>}
         </div>
 
         <button

@@ -14,8 +14,8 @@ export default function UsuarioDetalhes() {
     const fetchUsuario = async () => {
       try {
         const res = await api.get(`/usuario/${id}`);
-        if (res.data.success) {
-          setUsuario(res.data.data);
+        if (res.success) {
+          setUsuario(res.data);
         } else {
           toast.error('Usuário não encontrado');
           navigate('/usuarios');
@@ -77,13 +77,13 @@ export default function UsuarioDetalhes() {
 
       <div className="flex space-x-2">
         <Link
-          to={`/usuarios/editar/${usuario.id_usuario}`}
+          to={`/usuario/${usuario.id_usuario}/editar`}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
           Editar
         </Link>
         <Link
-          to="/usuarios"
+          to="/usuario"
           className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition"
         >
           Voltar

@@ -79,13 +79,13 @@ export default function UsuarioListar() {
                 <td className="p-2">{u.role}</td>
                 <td className="p-2 space-x-2">
                   <Link
-                    to={`/usuarios/editar/${u.id_usuario}`}
+                    to={`/usuario/${u.id_usuario}/editar`}
                     className="text-blue-600 hover:underline"
                   >
                     Editar
                   </Link>
                   <button
-                    onClick={() => navigate(`/usuarios/${u.id_usuario}`)}
+                    onClick={() => navigate(`/usuario/${u.id_usuario}`)}
                     className="text-green-600 hover:underline"
                   >
                     Detalhes

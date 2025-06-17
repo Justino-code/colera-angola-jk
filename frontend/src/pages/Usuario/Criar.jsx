@@ -50,11 +50,11 @@ export default function CriarUsuario() {
     const fetchData = async () => {
       try {
         const [hospRes, gabRes] = await Promise.all([
-          api.get('/hospital'),
-          api.get('/gabinete')
+          api.get('/hospitais'),
+          api.get('/gabinetes')
         ]);
-        setHospitais(hospRes.data.success ? hospRes.data.data : []);
-        setGabinetes(gabRes.data.success ? gabRes.data.data : []);
+        setHospitais(hospRes.success ? hospRes.data : []);
+        setGabinetes(gabRes.success ? gabRes.data : []);
       } catch (err) {
         toast.error('Erro ao carregar hospitais/gabinetes');
         console.error(err);
@@ -82,11 +82,11 @@ export default function CriarUsuario() {
 
       const res = await api.post('/usuario', payload);
 
-      if (res.data.success) {
+      if (res.success) {
         toast.success('Usuário criado com sucesso!');
         navigate('/usuarios');
       } else {
-        toast.error(res.data.message || 'Falha ao criar usuário');
+        toast.error(res.message || 'Falha ao criar usuário');
       }
     } catch (err) {
       toast.error('Erro ao criar usuário');
