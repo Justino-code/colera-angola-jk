@@ -207,7 +207,7 @@ class PacienteController extends Controller
                     'distancia_metros' => $openRoute->obterDistanciaTotal(),
                     'duracao_segundos' => $openRoute->obterDuracaoTotal(),
                     'geometry' => $openRoute->getGeometry(),
-                    'instrucoes' => $openRoute->obterInstrucoes()
+                    'instrucoes' => $openRoute->obterInstrucoes(),
                 ] : null
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {

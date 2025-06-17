@@ -25,11 +25,11 @@ export default function PacienteEncaminhamento() {
   const carregarEncaminhamento = async () => {
     try {
       const res = await api.get(`/pacientes/${id}/encaminhamento`);
-      console.log(res);
+      console.log(res.data);
 
       if (res.success) {
-        setPaciente(res.data.paciente);
-        setRota(res.data.rota);
+        setPaciente(res.paciente);
+        setRota(res.data);
       } else {
         toast.error(res.message || "Erro ao carregar encaminhamento");
       }
