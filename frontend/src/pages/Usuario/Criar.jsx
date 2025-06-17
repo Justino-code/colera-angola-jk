@@ -84,7 +84,7 @@ export default function CriarUsuario() {
 
       if (res.success) {
         toast.success('Usuário criado com sucesso!');
-        navigate('/usuarios');
+        navigate('/usuario');
       } else {
         toast.error(res.message || 'Falha ao criar usuário');
       }
