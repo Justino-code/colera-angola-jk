@@ -12,7 +12,7 @@ class GabineteController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $gabinetes = Gabinete::with('municipio')->get();
+            $gabinetes = Gabinete::with(['municipio', 'responsavel'])->get();
 
             return response()->json([
                 'success' => true,
@@ -31,10 +31,12 @@ class GabineteController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
-                'municipio_id' => 'required|exists:municipio,id_municipio',
-                'responsavel' => 'nullable|string|max:255',
+                'id_municipio' => 'required|exists:municipio,id_municipio',
                 'contacto' => 'nullable|string|max:20',
+                'id_responsavel' => 'nullable|exists:usuario,id_usuario'
             ]);
+
+            //dd($request->all());
 
             if ($validator->fails()) {
                 return response()->json([
@@ -43,12 +45,14 @@ class GabineteController extends Controller
                 ], 422);
             }
 
+            //dd($validator->validated());
+
             $gabinete = Gabinete::create($validator->validated());
 
             return response()->json([
                 'success' => true,
                 'message' => 'Gabinete criado com sucesso.',
-                'data' => $gabinete->load('municipio')
+                'data' => $gabinete->load(['municipio', 'responsavel'])
             ], 201);
 
         } catch (\Exception $e) {
@@ -62,7 +66,7 @@ class GabineteController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            $gabinete = Gabinete::with('municipio')->findOrFail($id);
+            $gabinete = Gabinete::with(['municipio', 'responsavel'])->findOrFail($id);
 
             return response()->json([
                 'success' => true,
@@ -88,9 +92,9 @@ class GabineteController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'nome' => 'sometimes|required|string|max:255',
-                'municipio_id' => 'sometimes|required|exists:municipio,id_municipio',
-                'responsavel' => 'nullable|string|max:255',
+                'id_municipio' => 'sometimes|required|exists:municipio,id_municipio',
                 'contacto' => 'nullable|string|max:20',
+                'id_responsavel' => 'nullable|exists:usuario,id_usuario'
             ]);
 
             if ($validator->fails()) {
@@ -100,12 +104,14 @@ class GabineteController extends Controller
                 ], 422);
             }
 
-            $gabinete->update($validator->validated());
+            $validated = $validator->validated();
+
+            $gabinete->update($validated);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Gabinete atualizado com sucesso.',
-                'data' => $gabinete->load('municipio')
+                'data' => $gabinete->load(['municipio', 'responsavel'])
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -144,4 +150,3 @@ class GabineteController extends Controller
         }
     }
 }
-

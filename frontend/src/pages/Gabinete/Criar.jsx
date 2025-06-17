@@ -1,21 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { toast, Toaster } from 'react-hot-toast';
 
 export default function GabineteCriar() {
   const [nome, setNome] = useState('');
   const [responsavel, setResponsavel] = useState('');
   const [municipio, setMunicipio] = useState('');
   const [municipios, setMunicipios] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Carregar municípios para o select
     api.get('/municipios')
-      .then((res) => setMunicipios(res.data.data || []))
-      .catch(() => alert('Erro ao carregar municípios'));
+      .then((res) => setMunicipios(res.data || []))
+      .catch(() => toast.error('Erro ao carregar municípios'));
+
+    api.get('/usuario')
+      .then((res) => setUsuarios(res.data || []))
+      .catch(() => toast.error('Erro ao carregar usuários'));
   }, []);
 
   const cleanData = (data) => {
@@ -31,24 +36,25 @@ export default function GabineteCriar() {
 
     const payload = cleanData({
       nome,
-      responsavel,
-      municipio_id: municipio // enviar apenas o ID
+      id_responsavel: responsavel,
+      id_municipio: municipio,
     });
 
     try {
-      const response = await api.post('/gabinetes', payload);
+      const res = await api.post('/gabinetes', payload);
 
-      if (response.data.success) {
-        alert(response.data.message || 'Gabinete criado com sucesso!');
-        navigate('/gabinete');
-      } else if (response.data.errors) {
-        setErrors(response.data.errors);
+      if (res.success) {
+        toast.success(res.message || 'Gabinete criado com sucesso!');
+        setTimeout(() => navigate('/gabinete'), 1500);
+      } else if (res.errors) {
+        setErrors(res.errors);
+        toast('Por favor corrija os erros do formulário.', { icon: '⚠️' });
       } else {
-        alert('Erro inesperado. Tente novamente.');
+        toast.error('Erro inesperado. Tente novamente.');
       }
     } catch (error) {
       console.error('Erro ao criar gabinete:', error);
-      alert('Erro ao criar gabinete');
+      toast.error('Erro ao criar gabinete');
     } finally {
       setLoading(false);
     }
@@ -56,6 +62,7 @@ export default function GabineteCriar() {
 
   return (
     <div className="p-6 max-w-lg mx-auto">
+      <Toaster position="top-right" />
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Novo Gabinete</h1>
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
         <div>
@@ -71,13 +78,19 @@ export default function GabineteCriar() {
 
         <div>
           <label className="block text-slate-600 mb-1">Responsável</label>
-          <input
-            type="text"
+          <select
             value={responsavel}
             onChange={(e) => setResponsavel(e.target.value)}
             className="w-full border rounded p-2 focus:outline-none focus:ring focus:border-cyan-400"
-          />
-          {errors.responsavel && <p className="text-red-600 text-sm">{errors.responsavel[0]}</p>}
+          >
+            <option value="">Selecione o responsável</option>
+            {usuarios.map((u) => (
+              <option key={u.id_usuario} value={u.id_usuario}>
+                {u.nome} ({u.email})
+              </option>
+            ))}
+          </select>
+          {errors.id_responsavel && <p className="text-red-600 text-sm">{errors.id_responsavel[0]}</p>}
         </div>
 
         <div>
@@ -89,12 +102,12 @@ export default function GabineteCriar() {
           >
             <option value="">Selecione o município</option>
             {municipios.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={m.id_municipio} value={m.id_municipio}>
                 {m.nome}
               </option>
             ))}
           </select>
-          {errors.municipio_id && <p className="text-red-600 text-sm">{errors.municipio_id[0]}</p>}
+          {errors.id_municipio && <p className="text-red-600 text-sm">{errors.id_municipio[0]}</p>}
         </div>
 
         <button
@@ -108,4 +121,3 @@ export default function GabineteCriar() {
     </div>
   );
 }
-

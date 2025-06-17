@@ -46,9 +46,12 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
         return $this->hasMany(Relatorio::class, 'id_relatorio', 'id_relatorio');
     }
 
-    public function gabinete()
-    {
+   public function gabinete(){
         return $this->belongsTo(Gabinete::class, 'id_gabinete', 'id_gabinete');
+    }
+
+    public function gabineteResponsavel(){
+        return $this->hasOne(Gabinete::class, 'id_responsavel', 'id_usuario');
     }
 
 }

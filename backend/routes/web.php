@@ -106,6 +106,7 @@ Route::get('/provincias_test', fn() => view('testes.provincia'));
 
 Route::get('/municipios_test', fn() => view('testes.minicipio'));
 
+Route::get('/g_test', fn() => view('testes.gabinete'));
 
 
 

@@ -14,14 +14,20 @@ class Gabinete extends Model
 
     protected $fillable = [
         'nome',
-        'responsavel',
+        //'responsavel',
         'contacto',
         'id_municipio',
+        'id_responsavel',
     ];
 
     public function municipio()
     {
         return $this->belongsTo(Municipio::class, 'id_municipio', 'id_municipio');
+    }
+
+    public function responsavel()
+    {
+        return $this->belongsTo(Usuario::class, 'id_responsavel', 'id_usuario');
     }
 
     public function usuarios()

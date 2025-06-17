@@ -12,45 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('usuario', function (Blueprint $table) {
-            // ID
-            $table->id('id_usuario');
+    $table->id('id_usuario');
+    $table->string('nome');
+    $table->string('email')->unique();
+    $table->string('password');
+    $table->enum('role', [
+        'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+        'administrativo', 'agente_sanitario', 'farmaceutico',
+        'analista_dados', 'coordenador_regional'
+    ]);
+    $table->json('permissoes');
+    $table->unsignedBigInteger('id_hospital')->nullable();
+    $table->unsignedBigInteger('id_gabinete')->nullable(); // FK depois
+    $table->timestamp('email_verified_at')->nullable();
+    $table->rememberToken()->nullable();
+    $table->timestamps();
 
-            // Campos do usuário
-            $table->string('nome');
-            $table->string('email')->unique();
-            $table->string('password');
+    $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->onDelete('cascade');
+});
 
-            // Role (ex: gestor, médico, etc)
-            $table->enum('role', [
-                'gestor',
-                'medico',
-                'tecnico',
-                'enfermeiro',
-                'epidemiologista',
-                'administrativo',
-                'agente_sanitario',
-                'farmaceutico',
-                'analista_dados',
-                'coordenador_regional',
-            ]);
-
-            // Permissões (json)
-            $table->json('permissoes');
-
-            // Relacionamento com hospital
-            $table->unsignedBigInteger('id_hospital')->nullable();
-            $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->OnDelete('cascade');
-            // Relacionamento com gabinete
-            $table->unsignedBigInteger('id_gabinete')->nullable();
-            $table->foreign('id_gabinete')->references('id_gabinete')->on('gabinete')->OnDelete('cascade');
-
-            // Campos para autenticação e verificação de email
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken()->nullable(); // Isso adiciona o campo 'remember_token'
-
-            // Timestamps padrão do Laravel (created_at, updated_at)
-            $table->timestamps();
-        });
     }
 
 

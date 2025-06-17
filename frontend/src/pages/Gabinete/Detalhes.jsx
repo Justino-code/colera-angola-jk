@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import { toast, Toaster } from 'react-hot-toast';
 
 export default function GabineteDetalhes() {
   const { id } = useParams();
@@ -11,16 +12,17 @@ export default function GabineteDetalhes() {
   useEffect(() => {
     const fetchGabinete = async () => {
       try {
-        const { data } = await api.get(`/gabinetes/${id}`);
-        if (data.success) {
-          setGabinete(data.data); // assume resposta { success, data }
+        const res = await api.get(`/gabinetes/${id}`);
+
+        if (res.success) {
+          setGabinete(res.data); // resposta padrão { success, data }
         } else {
-          alert(data.message || 'Gabinete não encontrado');
+          toast.error(res.message || 'Gabinete não encontrado');
           navigate('/gabinete');
         }
       } catch (error) {
         console.error('Erro ao buscar gabinete:', error);
-        alert('Erro ao buscar gabinete');
+        toast.error('Erro ao buscar gabinete');
         navigate('/gabinete');
       } finally {
         setLoading(false);
@@ -47,6 +49,7 @@ export default function GabineteDetalhes() {
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+      <Toaster position="top-right" />
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Detalhes do Gabinete</h1>
       <div className="space-y-2">
         <div>
@@ -55,7 +58,9 @@ export default function GabineteDetalhes() {
         </div>
         <div>
           <span className="font-semibold text-slate-600">Responsável:</span>
-          <p className="text-slate-700">{gabinete.responsavel}</p>
+          <p className="text-slate-700">
+            {gabinete.responsavel?.nome || 'N/A'}
+          </p>
         </div>
         {gabinete.municipio && (
           <div>
@@ -76,7 +81,7 @@ export default function GabineteDetalhes() {
       </div>
       <div className="mt-4 flex space-x-2">
         <button
-          onClick={() => navigate(`/gabinete/editar/${gabinete.id || gabinete.id_gabinete}`)}
+          onClick={() => navigate(`/gabinete/${gabinete.id_gabinete}/editar`)}
           className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
         >
           Editar
@@ -91,4 +96,3 @@ export default function GabineteDetalhes() {
     </div>
   );
 }
-

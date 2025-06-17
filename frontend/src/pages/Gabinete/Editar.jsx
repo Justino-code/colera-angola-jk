@@ -1,54 +1,63 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 export default function GabineteEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
-  const [responsavel, setResponsavel] = useState('');
+  const [id_responsavel, setResponsavel] = useState('');
+  const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const fetchGabinete = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await api.get(`/gabinetes/${id}`);
-        if (data.success) {
-          const g = data.data;
+        const [gabRes, usersRes] = await Promise.all([
+          api.get(`/gabinetes/${id}`),
+          api.get('/usuario') // ajuste conforme seu endpoint
+        ]);
+
+        if (gabRes.success) {
+          const g = gabRes.data;
           setNome(g.nome || '');
-          setResponsavel(g.responsavel || '');
+          setResponsavel(g.id_responsavel?.id_usuario || '');
         } else {
-          alert(data.message || 'Gabinete não encontrado');
+          toast.error(gabRes.message || 'Gabinete não encontrado');
           navigate('/gabinete');
         }
+
+        setUsuarios(usersRes.success ? usersRes.data : []);
       } catch (error) {
-        console.error('Erro ao carregar gabinete:', error);
-        alert('Erro ao carregar gabinete');
+        console.error('Erro ao carregar dados:', error);
+        toast.error('Erro ao carregar dados');
         navigate('/gabinete');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGabinete();
+    fetchData();
   }, [id, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { nome, responsavel };
-      const { data } = await api.put(`/gabinetes/${id}`, payload);
-      if (data.success) {
-        alert('Gabinete atualizado com sucesso!');
+      const payload = { nome, id_responsavel };
+      const res = await api.put(`/gabinetes/${id}`, payload);
+      if (res.success) {
+        toast.success('Gabinete atualizado com sucesso!');
+        console.log(res);
         navigate('/gabinete');
       } else {
-        alert(data.message || 'Erro ao atualizar gabinete');
+        toast.error(res.message || 'Erro ao atualizar gabinete');
       }
     } catch (error) {
       console.error('Erro ao atualizar gabinete:', error);
-      alert('Erro ao atualizar gabinete');
+      toast.error('Erro ao atualizar gabinete');
     } finally {
       setSaving(false);
     }
@@ -81,16 +90,23 @@ export default function GabineteEditar() {
             className="w-full border rounded p-2 focus:outline-none focus:ring focus:border-cyan-400"
           />
         </div>
+
         <div>
           <label className="block text-slate-600 mb-1">Responsável</label>
-          <input
-            type="text"
-            value={responsavel}
+          <select
+            value={id_responsavel}
             onChange={(e) => setResponsavel(e.target.value)}
-            required
             className="w-full border rounded p-2 focus:outline-none focus:ring focus:border-cyan-400"
-          />
+          >
+            <option value="">Selecione um usuário</option>
+            {usuarios.map((u) => (
+              <option key={u.id_usuario} value={u.id_usuario}>
+                {u.nome} ({u.email})
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className="flex space-x-2">
           <button
             type="submit"
@@ -111,4 +127,3 @@ export default function GabineteEditar() {
     </div>
   );
 }
-
