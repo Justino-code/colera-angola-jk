@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('viatura', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_viatura');
             $table->string('identificacao')->unique();
             $table->enum('tipo', ['ambulancia', 'outros'])->default('ambulancia');
             $table->enum('status', ['disponivel', 'em_viagem', 'ocupada'])->default('disponivel');

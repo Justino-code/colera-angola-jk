@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { toast } from 'react-hot-toast';
-import Skeleton from '../../components/common/Skeleton';
+import toast from 'react-hot-toast';
 
 export default function ViaturaListar() {
   const [viaturas, setViaturas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchViaturas = async () => {
       try {
-        const res = await api.get('/viatura');
+        const res = await api.get('/viaturas');
+        console.log(res);
         if (res.success) {
           setViaturas(res.data);
         } else {
-          toast.error(res.message || 'Falha ao carregar viaturas');
+          toast.error(res.error || 'Erro ao carregar viaturas');
         }
       } catch (error) {
-        console.error('Erro na requisição:', error);
-        toast.error('Erro na comunicação com o servidor');
+        toast.error('Erro ao conectar ao servidor');
       } finally {
         setLoading(false);
       }
@@ -27,41 +27,78 @@ export default function ViaturaListar() {
     fetchViaturas();
   }, []);
 
-  if (loading) return <Skeleton />;
+  const removerViatura = async (id) => {
+    if (!window.confirm('Deseja realmente remover esta viatura?')) return;
+    try {
+      const res = await api.delete(`/viaturas/${id}`);
+      if (res.success) {
+        toast.success(res.message || 'Viatura removida com sucesso');
+        setViaturas(viaturas.filter(v => v.id_viatura || v.id !== id));
+      } else {
+        toast.error(res.error || 'Erro ao remover viatura');
+      }
+    } catch {
+      toast.error('Erro ao remover viatura');
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6 text-center text-slate-500">Carregando viaturas...</div>;
+  }
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-slate-700">Viaturas</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex justify-between mb-4">
+        <h1 className="text-2xl font-bold">Viaturas</h1>
         <Link
           to="/viatura/criar"
-          className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
+          className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700"
         >
           Nova Viatura
         </Link>
       </div>
 
       {viaturas.length === 0 ? (
-        <p className="text-slate-500">Nenhuma viatura cadastrada.</p>
+        <div className="text-slate-500">Nenhuma viatura cadastrada.</div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {viaturas.map(v => (
-            <div key={v.id} className="border rounded p-4 shadow-sm bg-white">
-              <h2 className="font-semibold text-lg mb-1">{v.identificacao}</h2>
-              <p className="text-sm text-slate-600">Tipo: {v.tipo}</p>
-              <p className="text-sm text-slate-600">Status: {v.status}</p>
-              <p className="text-sm text-slate-600">Hospital ID: {v.id_hospital}</p>
-              <Link
-                to={`/viatura/${v.id}`}
-                className="text-cyan-600 text-sm mt-2 inline-block hover:underline"
-              >
-                Ver detalhes
-              </Link>
-            </div>
-          ))}
-        </div>
+        <table className="w-full border-collapse border">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border p-2 text-left">Identificação</th>
+              <th className="border p-2 text-left">Tipo</th>
+              <th className="border p-2 text-left">Status</th>
+              <th className="border p-2 text-left">Hospital</th>
+              <th className="border p-2">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {viaturas.map(v => (
+              <tr key={v.id_viatura}>
+                <td className="border p-2">{v.identificacao}</td>
+                <td className="border p-2">{v.tipo}</td>
+                <td className="border p-2">{v.status}</td>
+                <td className="border p-2">{v.hospital?.nome || 'N/A'}</td>
+                <td className="border p-2 text-center">
+                  <div className="flex gap-2 justify-center">
+                    <Link to={`/viatura/${v.id_viatura || v.id}`} className="text-cyan-600 hover:underline">
+                      Detalhes
+                    </Link>
+                    <Link to={`/viatura/${v.id_viatura || v.id}/editar`} className="text-yellow-600 hover:underline">
+                      Editar
+                    </Link>
+                    <button
+                      onClick={() => removerViatura(v.id_viatura || v.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
 }
-
