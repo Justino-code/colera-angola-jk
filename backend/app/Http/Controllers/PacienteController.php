@@ -44,7 +44,7 @@ class PacienteController extends Controller
                 'telefone' => 'required|string|max:20',
                 'idade' => 'required|integer',
                 'sexo' => 'required|in:M,F',
-                'sintomas' => 'required',
+                'sintomas' => 'required|array',
                 'localizacao' => 'required|array',
                 'localizacao.latitude' => 'required|numeric',
                 'localizacao.longitude' => 'required|numeric',
