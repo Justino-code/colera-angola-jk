@@ -85,7 +85,7 @@ Route::post('viaturas_test/{id}', [ViaturaController::class, 'update']);
 Route::post('viaturas_test/{id}/delete', [ViaturaController::class, 'destroy']);
 
 
-
+    Route::get('/pacientes/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
 
 
 

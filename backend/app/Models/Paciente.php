@@ -21,6 +21,6 @@ class Paciente extends Model {
     ];
 
     public function hospital(): BelongsTo {
-        return $this->belongsTo(Hospital::class);
+        return $this->belongsTo(Hospital::class, 'id_hospital', 'id_hospital');
     }
 }

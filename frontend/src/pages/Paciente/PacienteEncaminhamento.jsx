@@ -1,96 +1,121 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import api from "../../services/api";
+import toast from "react-hot-toast";
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Corrigir ícones padrão do Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: new URL("leaflet/dist/images/marker-icon-2x.png", import.meta.url).href,
+  iconUrl: new URL("leaflet/dist/images/marker-icon.png", import.meta.url).href,
+  shadowUrl: new URL("leaflet/dist/images/marker-shadow.png", import.meta.url).href,
+});
 
 export default function PacienteEncaminhamento() {
   const { id } = useParams();
   const [paciente, setPaciente] = useState(null);
   const [rota, setRota] = useState(null);
-  const [erro, setErro] = useState(null);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const resPaciente = await fetch(`${import.meta.env.VITE_API_URL}/paciente/${id}`);
-        const dataPaciente = await resPaciente.json();
+    carregarEncaminhamento();
+  }, []);
 
-        if (!dataPaciente.success) throw new Error(dataPaciente.error || "Erro ao buscar paciente");
-        setPaciente(dataPaciente.data);
+  const carregarEncaminhamento = async () => {
+    try {
+      const res = await api.get(`/pacientes/${id}/encaminhamento`);
+      console.log(res);
 
-        const resRota = await fetch(`${import.meta.env.VITE_API_URL}/paciente/${id}/encaminhamento`);
-        const dataRota = await resRota.json();
-
-        if (!dataRota.success) throw new Error(dataRota.error || "Erro ao buscar encaminhamento");
-        setRota(dataRota.data);
-      } catch (err) {
-        setErro(err.message);
+      if (res.success) {
+        setPaciente(res.data.paciente);
+        setRota(res.data.rota);
+      } else {
+        toast.error(res.message || "Erro ao carregar encaminhamento");
       }
+    } catch (error) {
+      toast.error("Falha ao comunicar com o servidor");
     }
-
-    fetchData();
-  }, [id]);
-
-  if (erro) {
-    return <div className="text-red-600 text-center mt-4">Erro: {erro}</div>;
-  }
-
-  if (!paciente || !rota) {
-    return <div className="text-center mt-4">Carregando...</div>;
-  }
-
-  const pacientePos = [paciente.latitude, paciente.longitude];
-  const hospitalPos = [paciente.hospital.latitude, paciente.hospital.longitude];
-  const caminho = rota.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Encaminhamento do Paciente</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-1">
-          <div className="bg-white shadow rounded p-4">
-            <h2 className="text-xl font-semibold mb-2">Paciente</h2>
-            <p><strong>Nome:</strong> {paciente.nome}</p>
-            <p><strong>Idade:</strong> {paciente.idade}</p>
-            <p><strong>Sexo:</strong> {paciente.sexo}</p>
-            <p><strong>Triagem:</strong> {paciente.resultado_triagem}</p>
-            <p><strong>Hospital:</strong> {paciente.hospital.nome}</p>
-            <p><strong>Distância:</strong> {(rota.distancia_metros / 1000).toFixed(2)} km</p>
-            <p><strong>Duração:</strong> {(rota.duracao_segundos / 60).toFixed(1)} min</p>
-          </div>
-
-          <div className="bg-white shadow rounded p-4 mt-4">
-            <h2 className="text-xl font-semibold mb-2">Instruções</h2>
-            <ul className="list-disc pl-4">
-              {rota.instrucoes.map((inst, idx) => (
-                <li key={idx}>{inst}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="col-span-1 md:col-span-2">
-          <MapContainer
-            center={pacientePos}
-            zoom={13}
-            scrollWheelZoom={true}
-            className="w-full h-96 rounded shadow"
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            />
-            <Marker position={pacientePos}>
-              <Popup>Paciente: {paciente.nome}</Popup>
-            </Marker>
-            <Marker position={hospitalPos}>
-              <Popup>Hospital: {paciente.hospital.nome}</Popup>
-            </Marker>
-            <Polyline positions={caminho} color="blue" />
-          </MapContainer>
-        </div>
+    <div className="p-6 max-w-5xl mx-auto bg-white rounded shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Encaminhamento do Paciente</h1>
+        <Link
+          to="/paciente"
+          className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-700"
+        >
+          Voltar
+        </Link>
       </div>
+
+      {!paciente ? (
+        <p className="text-gray-500">Carregando dados...</p>
+      ) : (
+        <div className="space-y-4">
+          <div className="border p-4 rounded bg-slate-50">
+            <h2 className="text-lg font-semibold">Paciente</h2>
+            <p><strong>Nome:</strong> {paciente.nome}</p>
+            <p><strong>BI:</strong> {paciente.numero_bi}</p>
+            <p><strong>Hospital:</strong> {paciente.hospital?.nome || "Não informado"}</p>
+            <p><strong>Risco:</strong> {paciente.resultado_triagem}</p>
+          </div>
+
+          {rota ? (
+            <div className="border p-4 rounded bg-slate-50">
+              <h2 className="text-lg font-semibold">Rota</h2>
+              <p><strong>Distância:</strong> {(rota.distancia_metros / 1000).toFixed(2)} km</p>
+              <p><strong>Duração:</strong> {(rota.duracao_segundos / 60).toFixed(1)} min</p>
+
+              <div className="mt-2">
+                <h3 className="font-medium">Instruções:</h3>
+                <ol className="list-decimal list-inside text-sm text-gray-700">
+                  {rota.instrucoes.map((instrucao, index) => (
+                    <li key={index}>{instrucao.texto}</li>
+                  ))}
+                </ol>
+              </div>
+
+              <div className="mt-4">
+                <h3 className="font-medium mb-2">Mapa</h3>
+                <MapContainer
+                  center={[
+                    rota.geometry[0][1],
+                    rota.geometry[0][0]
+                  ]}
+                  zoom={13}
+                  scrollWheelZoom={true}
+                  className="w-full h-96 rounded"
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Polyline
+                    positions={rota.geometry.map(coord => [coord[1], coord[0]])}
+                    color="blue"
+                  />
+                  <Marker position={[
+                    rota.geometry[0][1],
+                    rota.geometry[0][0]
+                  ]}>
+                    <Popup>Localização do Paciente</Popup>
+                  </Marker>
+                  <Marker position={[
+                    rota.geometry[rota.geometry.length - 1][1],
+                    rota.geometry[rota.geometry.length - 1][0]
+                  ]}>
+                    <Popup>Hospital de destino</Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500">Sem rota disponível para este paciente.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

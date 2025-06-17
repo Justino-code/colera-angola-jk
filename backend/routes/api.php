@@ -49,7 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'overview']);
 
-     Route::get('/encaminhamento/{id}', [PacienteController::class, 'encaminhamento']);
+    //Route::get('/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
+    Route::get('/pacientes/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
 
 
     // Rotas customizadas
