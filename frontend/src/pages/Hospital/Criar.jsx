@@ -133,13 +133,13 @@ export default function HospitalCriar() {
         id_municipio: parseInt(idMunicipio, 10)
       };
 
-      const { data } = await api.post('/hospitais', payload);
+      const res = await api.post('/hospitais', payload);
 
-      if (data.success) {
+      if (res.success) {
         toast.success('Hospital criado com sucesso!');
         navigate('/hospital');
       } else {
-        toast.error(data.message || 'Erro ao criar hospital');
+        toast.error(res.message || 'Erro ao criar hospital');
       }
     } catch (err) {
       console.error(err);

@@ -7,8 +7,7 @@ export default function HospitalEditar() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
-  const [local, setLocal] = useState('');
-  const [capacidade, setCapacidade] = useState('');
+  const [capacidadeLeitos, setCapacidadeLeitos] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -16,13 +15,12 @@ export default function HospitalEditar() {
     const fetchHospital = async () => {
       try {
         const res = await api.get(`/hospitais/${id}`);
-        if (res.data?.success) {
-          const hosp = res.data.data;
+        if (res.success) {
+          const hosp = res.data;
           setNome(hosp.nome);
-          setLocal(hosp.local || '');
-          setCapacidade(hosp.capacidade?.toString() || '0');
+          setCapacidadeLeitos(hosp.capacidade_leitos.toString());
         } else {
-          toast.error(res.data?.message || 'Erro ao carregar hospital');
+          toast.error(res.message || 'Erro ao carregar hospital');
           navigate('/hospital');
         }
       } catch (error) {
@@ -43,14 +41,13 @@ export default function HospitalEditar() {
     try {
       const res = await api.put(`/hospitais/${id}`, {
         nome,
-        local,
-        capacidade: parseInt(capacidade, 10)
+        capacidade_leitos: parseInt(capacidadeLeitos, 10)
       });
-      if (res.data?.success) {
+      if (res.success) {
         toast.success('Hospital atualizado com sucesso!');
         navigate('/hospital');
       } else {
-        toast.error(res.data?.message || 'Erro ao atualizar hospital');
+        toast.error(res.message || 'Erro ao atualizar hospital');
       }
     } catch (error) {
       console.error('Erro ao atualizar hospital:', error);
@@ -69,11 +66,11 @@ export default function HospitalEditar() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow space-y-4">
-      <h1 className="text-2xl font-bold text-slate-700">Editar Hospital</h1>
-      <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+      <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Hospital</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-slate-600">Nome</label>
+          <label className="block text-slate-600 mb-1">Nome</label>
           <input
             type="text"
             value={nome}
@@ -84,22 +81,11 @@ export default function HospitalEditar() {
         </div>
 
         <div>
-          <label className="block text-slate-600">Local</label>
-          <input
-            type="text"
-            value={local}
-            onChange={(e) => setLocal(e.target.value)}
-            required
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-cyan-400"
-          />
-        </div>
-
-        <div>
-          <label className="block text-slate-600">Capacidade de Leitos</label>
+          <label className="block text-slate-600 mb-1">Capacidade (Leitos)</label>
           <input
             type="number"
-            value={capacidade}
-            onChange={(e) => setCapacidade(e.target.value)}
+            value={capacidadeLeitos}
+            onChange={(e) => setCapacidadeLeitos(e.target.value)}
             required
             min="0"
             className="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-cyan-400"

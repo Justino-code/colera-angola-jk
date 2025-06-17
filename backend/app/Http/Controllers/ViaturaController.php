@@ -6,16 +6,25 @@ use App\Models\Viatura;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ViaturaController extends Controller
 {
     public function index(): JsonResponse
     {
-        $viaturas = Viatura::with('hospital')->get();
-        return response()->json([
-            'success' => true,
-            'data' => $viaturas
-        ]);
+        try {
+            $viaturas = Viatura::with('hospital')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $viaturas
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao listar viaturas: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request): JsonResponse
@@ -61,11 +70,16 @@ class ViaturaController extends Controller
                 'success' => true,
                 'data' => $viatura
             ]);
-        } catch (\Exception $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'error' => 'Viatura não encontrada'
             ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao carregar viatura: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -97,6 +111,11 @@ class ViaturaController extends Controller
                 'data' => $viatura
             ]);
 
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Viatura não encontrada'
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -115,6 +134,11 @@ class ViaturaController extends Controller
                 'success' => true,
                 'message' => 'Viatura removida com sucesso.'
             ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Viatura não encontrada'
+            ], 404);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -123,4 +147,3 @@ class ViaturaController extends Controller
         }
     }
 }
-

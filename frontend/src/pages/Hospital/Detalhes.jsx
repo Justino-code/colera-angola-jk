@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 
 export default function HospitalDetalhes() {
   const { id } = useParams();
@@ -53,34 +55,52 @@ export default function HospitalDetalhes() {
     );
   }
 
+  const position = [
+    parseFloat(hospital.latitude) || -11.2027, // Default Angola center if latitude missing
+    parseFloat(hospital.longitude) || 17.8739
+  ];
+
+  const markerIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+  });
+
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded shadow space-y-4">
       <h1 className="text-2xl font-bold text-slate-700">Detalhes do Hospital</h1>
       <div className="space-y-2">
-        <div>
-          <span className="font-semibold text-slate-600">Nome:</span> {hospital.nome}
-        </div>
-        <div>
-          <span className="font-semibold text-slate-600">Local:</span> {hospital.endereco}
-        </div>
-        <div>
-          <span className="font-semibold text-slate-600">Capacidade:</span> {hospital.capacidade_leitos} pacientes
-        </div>
-        <div>
-          <span className="font-semibold text-slate-600">Criado em:</span>{' '}
-          {hospital.created_at ? new Date(hospital.created_at).toLocaleString() : 'N/A'}
-        </div>
+        <div><span className="font-semibold text-slate-600">Nome:</span> {hospital.nome}</div>
+        <div><span className="font-semibold text-slate-600">Local:</span> {hospital.endereco}</div>
+        <div><span className="font-semibold text-slate-600">Capacidade:</span> {hospital.capacidade_leitos} pacientes</div>
+        <div><span className="font-semibold text-slate-600">Registrado em:</span> {hospital.created_at ? new Date(hospital.created_at).toLocaleString() : 'N/A'}</div>
         {hospital.updated_at && (
-          <div>
-            <span className="font-semibold text-slate-600">Atualizado em:</span>{' '}
-            {new Date(hospital.updated_at).toLocaleString()}
-          </div>
+          <div><span className="font-semibold text-slate-600">Atualizado em:</span> {new Date(hospital.updated_at).toLocaleString()}</div>
         )}
       </div>
 
+      {hospital.latitude && hospital.longitude && (
+        <div className="h-64 rounded overflow-hidden">
+          <MapContainer
+            center={position}
+            zoom={13}
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap contributors"
+            />
+            <Marker position={position} icon={markerIcon}>
+              <Popup>{hospital.nome}</Popup>
+            </Marker>
+          </MapContainer>
+        </div>
+      )}
+
       <div className="flex space-x-2">
         <button
-          onClick={() => navigate(`/hospital/editar/${hospital.id_hospital}`)}
+          onClick={() => navigate(`/hospital/${hospital.id_hospital}/editar`)}
           className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
         >
           Editar
