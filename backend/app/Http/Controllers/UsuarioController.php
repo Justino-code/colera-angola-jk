@@ -17,8 +17,45 @@ class UsuarioController extends Controller
     // Listar todos os usuários
     public function index(): JsonResponse
     {
-        $usuarios = Usuario::all();
-        return response()->json($usuarios);
+        try {
+            $usuarios = Usuario::all();
+
+            if ($usuarios->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['Nenhum usuário encontrado.']
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $usuarios
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['Erro inesperado: ' . $e->getMessage()]
+            ], 500);
+        }
+    }
+
+
+    // Exibir um usuário específico
+    public function show(int $id): JsonResponse
+    {
+        $usuario = Usuario::find($id);
+
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['Usuário não encontrado.']
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $usuario
+        ]);
     }
 
     // Criar um novo usuário
@@ -37,11 +74,14 @@ class UsuarioController extends Controller
                 'permissoes' => 'required|array',
                 'permissoes.*' => 'string',
                 'id_hospital' => 'nullable|exists:hospital,id_hospital',
-                 'id_gabinete' => 'nullable|exists:gabinete,id_gabinete',
+                'id_gabinete' => 'nullable|exists:gabinete,id_gabinete',
             ]);
 
             if ($validator->fails()) {
-                return response()->json(['success' => false, 'errors' => $validator->errors(), 'request' => $request->all()], 422);
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
             }
 
             $validated = $validator->validated();
@@ -52,26 +92,40 @@ class UsuarioController extends Controller
                 'password' => Hash::make($validated['password']),
                 'role' => $validated['role'],
                 'permissoes' => $validated['permissoes'],
-                'id_hospital' => $validated['id_hospital'],
+                'id_hospital' => $validated['id_hospital'] ?? null,
+                'id_gabinete' => $validated['id_gabinete'] ?? null,
             ]);
 
             $token = $usuario->createToken('api-user-token', ['post:read', 'post:create']);
 
             return response()->json([
-                'usuario' => $usuario,
-                'token' => $token->plainTextToken
+                'success' => true,
+                'message' => 'Usuário criado com sucesso.',
+                'data' => [
+                    'usuario' => $usuario,
+                    'token' => $token->plainTextToken
+                ]
             ], 201);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Erro inesperado: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'errors' => ['Erro inesperado: ' . $e->getMessage()]
+            ], 500);
         }
     }
 
-    // Atualizar permissões de um usuário
+    // Atualizar permissões
     public function updatePermissions(Request $request, int $id): JsonResponse
     {
-        $usuario = Usuario::findOrFail($id);
-        //$this->authorize('update', $usuario);
+        $usuario = Usuario::find($id);
+
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['Usuário não encontrado.']
+            ], 404);
+        }
 
         $validator = Validator::make($request->all(), [
             'permissoes' => 'required|array',
@@ -79,81 +133,95 @@ class UsuarioController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $usuario->update([
             'permissoes' => $validator->validated()['permissoes'],
         ]);
 
-        return response()->json($usuario);
+        return response()->json([
+            'success' => true,
+            'message' => 'Permissões atualizadas com sucesso.',
+            'data' => $usuario
+        ]);
     }
 
     // Atualizar dados do usuário
     public function update(Request $request, int $id): JsonResponse
-{
-    $usuario = Usuario::findOrFail($id);
-
-    $validator = Validator::make($request->all(), [
-        'nome' => 'nullable|string|max:255',
-        'email' => [
-            'nullable', 'email', 'max:255',
-            Rule::unique('usuario', 'email')->ignore($usuario->id_usuario, 'id_usuario')
-        ],
-        'password' => 'nullable|string|min:6',
-        'role' => [
-            'nullable',
-            Rule::in([
-                'admin', 'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
-                'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
-                'coordenador_regional',
-            ])
-        ],
-        'id_hospital' => 'nullable|exists:hospital,id_hospital',
-         'id_gabinete' => 'nullable|exists:gabinete,id_gabinete',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors' => $validator->errors()
-        ], 422);
-    }
-
-    // Remove campos nulos ou vazios
-    $data = array_filter($validator->validated(), function ($value) {
-        return !is_null($value);
-    });
-
-    if (isset($data['password'])) {
-        $data['password'] = Hash::make($data['password']);
-    }
-
-    $usuario->update($data);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Usuário atualizado com sucesso.',
-        'data' => $usuario
-    ]);
-}
-
-
-    // Exibir um usuário específico
-    public function show(int $id): JsonResponse
     {
-        $usuario = Usuario::findOrFail($id);
-        return response()->json($usuario);
+        $usuario = Usuario::find($id);
+
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['Usuário não encontrado.']
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nome' => 'nullable|string|max:255',
+            'email' => [
+                'nullable', 'email', 'max:255',
+                Rule::unique('usuario', 'email')->ignore($usuario->id_usuario, 'id_usuario')
+            ],
+            'password' => 'nullable|string|min:6',
+            'role' => [
+                'nullable',
+                Rule::in([
+                    'admin', 'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+                    'administrativo', 'agente_sanitario', 'farmaceutico', 'analista_dados',
+                    'coordenador_regional',
+                ])
+            ],
+            'id_hospital' => 'nullable|exists:hospital,id_hospital',
+            'id_gabinete' => 'nullable|exists:gabinete,id_gabinete',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = array_filter($validator->validated(), function ($value) {
+            return !is_null($value);
+        });
+
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $usuario->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuário atualizado com sucesso.',
+            'data' => $usuario
+        ]);
     }
 
     // Excluir um usuário
     public function destroy(int $id): JsonResponse
     {
-        $usuario = Usuario::findOrFail($id);
-        //$this->authorize('delete', $usuario);
+        $usuario = Usuario::find($id);
+
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['Usuário não encontrado.']
+            ], 404);
+        }
 
         $usuario->delete();
-        return response()->json(null, 204);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuário excluído com sucesso.'
+        ]);
     }
 }
-

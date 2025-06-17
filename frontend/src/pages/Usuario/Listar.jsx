@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import Skeleton from '../../components/common/Skeleton';
 import { toast } from 'react-hot-toast';
@@ -7,13 +7,14 @@ import { toast } from 'react-hot-toast';
 export default function UsuarioListar() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const res = await api.get('/usuario');
-        if (res.data.success) {
-          setUsuarios(res.data.data);
+        if (res.success) {
+          setUsuarios(res.data);
         } else {
           toast.error('Erro ao carregar usuários');
         }
@@ -27,6 +28,22 @@ export default function UsuarioListar() {
 
     fetchUsuarios();
   }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem certeza que deseja remover este usuário?')) return;
+    try {
+      const res = await api.delete(`/usuario/${id}`);
+      if (res.success) {
+        setUsuarios(usuarios.filter(u => u.id_usuario !== id));
+        toast.success('Usuário removido com sucesso!');
+      } else {
+        toast.error('Erro ao remover usuário');
+      }
+    } catch (err) {
+      toast.error('Erro ao remover usuário');
+      console.error(err);
+    }
+  };
 
   if (loading) return <Skeleton />;
 
@@ -67,6 +84,18 @@ export default function UsuarioListar() {
                   >
                     Editar
                   </Link>
+                  <button
+                    onClick={() => navigate(`/usuarios/${u.id_usuario}`)}
+                    className="text-green-600 hover:underline"
+                  >
+                    Detalhes
+                  </button>
+                  <button
+                    onClick={() => handleDelete(u.id_usuario)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Remover
+                  </button>
                 </td>
               </tr>
             ))}
