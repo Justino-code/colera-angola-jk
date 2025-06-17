@@ -13,11 +13,14 @@ export default function ProvinciaCriar() {
     setSalvando(true);
     try {
       const res = await api.post('/provincias', { nome });
-      if (res.data.success) {
-        toast.success(res.data.message || 'Província criada com sucesso!');
+      if (res.success) {
+        toast.success(res.message || 'Província criada com sucesso!');
         navigate('/provincia');
-      } else {
-        toast.error(res.data.message || 'Erro ao criar província');
+      } else if(res.error){
+        console.log(res.error);
+      } 
+      else {
+        toast.error(res.message || 'Erro ao criar província');
       }
     } catch (error) {
       console.error('Erro na requisição:', error);

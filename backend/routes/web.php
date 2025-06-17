@@ -119,6 +119,7 @@ Route::post('/usuario_test/create', function (\Illuminate\Http\Request $request)
 
 
 Route::get('/pacientes_test', fn() => view('testes.teste_pacientes'));
+Route::get('/provincias_test', fn() => view('testes.provincia'));
 
 Route::post('/paciente_test/create', function (Request $request) {
     // Processa sintomas como array

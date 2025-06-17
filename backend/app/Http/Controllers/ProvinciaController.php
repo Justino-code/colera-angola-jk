@@ -6,6 +6,7 @@ use App\Models\Provincia;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use App\Utils\GerarCodigoIso;
 
 class ProvinciaController extends Controller
 {
@@ -32,7 +33,7 @@ class ProvinciaController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
-                'codigo_iso' => 'required|string|max:5|unique:provincia,codigo_iso'
+                //'codigo_iso' => 'required|string|max:5|unique:provincia,codigo_iso'
             ]);
 
             if ($validator->fails()) {
@@ -42,7 +43,14 @@ class ProvinciaController extends Controller
                 ], 422);
             }
 
-            $provincia = Provincia::create($validator->validated());
+            $validated = $validator->validated();
+
+            $codigo = GerarCodigoIso::gerar($validated['nome']);
+
+            $provincia = Provincia::create([
+                'nome' => $validated['nome'],
+                'codigo_iso' => $codigo,
+            ]);
 
             return response()->json([
                 'success' => true,
