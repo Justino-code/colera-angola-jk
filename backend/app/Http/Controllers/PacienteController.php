@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Paciente;
 use App\Services\TriageService;
+use App\Services\OpenRouteService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\JsonResponse;
 
 class PacienteController extends Controller
 {
@@ -58,32 +59,21 @@ class PacienteController extends Controller
             }
 
             $validated = $validator->validated();
-            $sintomas = is_array($validated['sintomas']) ? $validated['sintomas'] : explode(',', $validated['sintomas']);
+            $sintomas = $validated['sintomas'];
 
-            // Avaliar risco e encontrar hospital mais próximo
             $riskLevel = $this->triageService->avaliarRisco($sintomas);
             $hospital = $this->triageService->encontrarHospitalMaisProximo(
                 $validated['localizacao']['latitude'],
                 $validated['localizacao']['longitude']
             );
 
-            // Gerar rota até o hospital
-            $openRoute = null;
-            if ($hospital) {
-                $openRoute = new \App\Services\OpenRouteService([
-                    [$validated['localizacao']['longitude'], $validated['localizacao']['latitude']],
-                    [$hospital->longitude, $hospital->latitude]
-                ]);
-            }
-
-            // Criar paciente
             $paciente = Paciente::create([
                 'nome' => $validated['nome'],
                 'numero_bi' => $validated['numero_bi'],
                 'telefone' => $validated['telefone'],
                 'idade' => $validated['idade'],
                 'sexo' => $validated['sexo'],
-                'sintomas' => $validated['sintomas'],
+                'sintomas' => $sintomas,
                 'resultado_triagem' => $riskLevel,
                 'latitude' => $validated['localizacao']['latitude'],
                 'longitude' => $validated['localizacao']['longitude'],
@@ -92,53 +82,20 @@ class PacienteController extends Controller
                 'qr_code' => null,
             ]);
 
-            // Gerar QR Code
             $qrCode = $this->triageService->gerarQrCodeDoPaciente($paciente->toArray());
             $qrCodePath = "paciente/qrcodes/paciente_{$paciente->id_paciente}.png";
             Storage::put($qrCodePath, $qrCode);
             $paciente->update(['qr_code' => $qrCodePath]);
 
-            // Montar resposta
             return response()->json([
                 'success' => true,
-                'message' => 'Paciente criado e encaminhamento gerado com sucesso.',
-                'data' => [
-                    'paciente' => $paciente->load('hospital'),
-                    'rota' => $openRoute && $openRoute->sucesso() ? [
-                        'distancia_metros' => $openRoute->obterDistanciaTotal(),
-                        'duracao_segundos' => $openRoute->obterDuracaoTotal(),
-                        'geometry' => $openRoute->getGeometry(),
-                        'instrucoes' => $openRoute->obterInstrucoes()
-                    ] : null
-                ]
+                'message' => 'Paciente criado com sucesso.',
+                'data' => $paciente->load('hospital')
             ], 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'error' => 'Falha ao processar paciente: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function show(int $id): JsonResponse
-    {
-        try {
-            $paciente = Paciente::with('hospital')->findOrFail($id);
-
-            return response()->json([
-                'success' => true,
-                'data' => $paciente
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Paciente não encontrado.'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Erro ao buscar paciente: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -169,8 +126,7 @@ class PacienteController extends Controller
                 'message' => 'Paciente atualizado com sucesso.',
                 'data' => $paciente->load('hospital')
             ]);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
                 'error' => 'Paciente não encontrado.'
@@ -179,6 +135,28 @@ class PacienteController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Erro ao atualizar paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        try {
+            $paciente = Paciente::with('hospital')->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $paciente
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Paciente não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao buscar paciente: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -193,7 +171,7 @@ class PacienteController extends Controller
                 'success' => true,
                 'message' => 'Paciente excluído com sucesso.'
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
                 'error' => 'Paciente não encontrado.'
@@ -206,12 +184,49 @@ class PacienteController extends Controller
         }
     }
 
+    public function encaminhamento(int $id): JsonResponse
+    {
+        try {
+            $paciente = Paciente::with('hospital')->findOrFail($id);
+
+            if (!$paciente->hospital) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Paciente não possui hospital associado.'
+                ], 400);
+            }
+
+            $openRoute = new OpenRouteService([
+                [$paciente->longitude, $paciente->latitude],
+                [$paciente->hospital->longitude, $paciente->hospital->latitude]
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => $openRoute->sucesso() ? [
+                    'distancia_metros' => $openRoute->obterDistanciaTotal(),
+                    'duracao_segundos' => $openRoute->obterDuracaoTotal(),
+                    'geometry' => $openRoute->getGeometry(),
+                    'instrucoes' => $openRoute->obterInstrucoes()
+                ] : null
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Paciente não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao gerar encaminhamento: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function pacientesPorHospital(int $idHospital): JsonResponse
     {
         try {
-            $pacientes = Paciente::where('id_hospital', $idHospital)
-                ->with('hospital')
-                ->get();
+            $pacientes = Paciente::where('id_hospital', $idHospital)->with('hospital')->get();
 
             return response()->json([
                 'success' => true,

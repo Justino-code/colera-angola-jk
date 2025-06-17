@@ -13,6 +13,7 @@ const PacienteListar = lazy(() => import("../pages/Paciente/Listar"));
 const PacienteCriar = lazy(() => import("../pages/Paciente/Criar"));
 const PacienteEditar = lazy(() => import("../pages/Paciente/Editar"));
 const PacienteDetalhes = lazy(() => import("../pages/Paciente/Detalhes"));
+const PacienteEncaminhamento = lazy(() => import("../pages/Paciente/PacienteEncaminhamento"));
 
 // Hospital
 const HospitalListar = lazy(() => import("../pages/Hospital/Listar"));
@@ -77,6 +78,7 @@ export default function AppRoutes() {
           <Route path="/paciente/criar" element={<PacienteCriar />} />
           <Route path="/paciente/:id/editar" element={<PacienteEditar />} />
           <Route path="/paciente/:id" element={<PacienteDetalhes />} />
+          <Route path="/paciente/:id/encaminhamento" element={<PacienteEncaminhamento />} />
 
           {/* Hospital */}
           <Route path="/hospital" element={<HospitalListar />} />

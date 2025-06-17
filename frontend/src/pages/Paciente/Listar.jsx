@@ -16,10 +16,9 @@ export default function PacienteListar() {
     console.log(res);
     if (res.success == true && res.data.length != 0) {
       setPacientes(res.data);
-    } else if(res.data.length == 0){
+    } else if (res.data.length == 0) {
       toast.error("Nenhum paciente cadastrado");
-    }
-    else {
+    } else {
       toast.error(res.message || "Erro ao carregar pacientes");
     }
   };
@@ -35,11 +34,15 @@ export default function PacienteListar() {
       toast.error(res.message || "Erro ao excluir paciente");
     }
   };
+
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Pacientes</h1>
-        <Link to="/paciente/criar" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <Link
+          to="/paciente/criar"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
           Novo
         </Link>
       </div>
@@ -52,7 +55,7 @@ export default function PacienteListar() {
           </tr>
         </thead>
         <tbody>
-          {pacientes.map(p => (
+          {pacientes.map((p) => (
             <tr key={p.id_paciente} className="hover:bg-slate-50">
               <td className="border p-2">{p.nome}</td>
               <td className="border p-2">{p.numero_bi}</td>
@@ -69,6 +72,12 @@ export default function PacienteListar() {
                 >
                   Excluir
                 </button>
+                <Link
+                  to={`/paciente/${p.id_paciente}/encaminhamento`}
+                  className="bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
+                >
+                  Ver Encaminhamento
+                </Link>
               </td>
             </tr>
           ))}
@@ -77,4 +86,3 @@ export default function PacienteListar() {
     </div>
   );
 }
-

@@ -74,9 +74,9 @@ export default function PacienteCriar() {
       console.log(res);
       if (res.success) {
         toast.success(res.message || "Paciente criado com sucesso!");
-        //navigate('/paciente');
+        navigate('/paciente');
       } else if(res.success == false && res.errors){
-        //toast(res.message);
+        toast(res.message);
         console.log(res.errors);
       }
       else {
