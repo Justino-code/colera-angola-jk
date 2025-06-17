@@ -17,11 +17,11 @@ class Hospital extends Model {
     ];
 
     public function municipio(): BelongsTo {
-        return $this->belongsTo(Municipio::class);
+        return $this->belongsTo(Municipio::class, 'id_municipio', 'id_municipio');
     }
 
     public function pacientes(): HasMany {
-        return $this->hasMany(Paciente::class);
+        return $this->hasMany(Paciente::class, 'id_paciente', 'id_paciente');
     }
 
     public function ambulancias(): HasMany {
@@ -30,7 +30,7 @@ class Hospital extends Model {
 
     public function viaturas()
     {
-        return $this->hasMany(Viatura::class);
+        return $this->hasMany(Viatura::class, 'id_viatura', 'id_viatura');
     }
 
 }

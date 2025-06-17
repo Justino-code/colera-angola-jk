@@ -35,15 +35,16 @@ export default function ProvinciaEditar() {
     setSalvando(true);
     try {
       const res = await api.put(`/provincias/${id}`, { nome, codigo_iso: codigoIso });
-      if (res.data.success) {
-        toast.success(res.data.message || 'Província atualizada com sucesso!');
+      if (res.success) {
+        toast.success(res.message || 'Província atualizada com sucesso!');
         navigate('/provincia');
       } else {
-        toast.error(res.data.message || 'Erro ao atualizar província');
+        toast.error(res.message || 'Erro ao atualizar província x');
+        console.log(res);
       }
     } catch (error) {
       console.error('Erro na requisição:', error);
-      toast.error('Erro ao atualizar província');
+      toast.error('Erro ao atualizar província x');
     } finally {
       setSalvando(false);
     }

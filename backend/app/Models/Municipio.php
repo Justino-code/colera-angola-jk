@@ -14,10 +14,10 @@ class Municipio extends Model {
     protected $fillable = ['nome', 'id_provincia'];
 
     public function provincia(): BelongsTo {
-        return $this->belongsTo(Provincia::class);
+        return $this->belongsTo(Provincia::class, 'id_provincia', 'id_provincia');
     }
 
     public function hospitais(): HasMany {
-        return $this->hasMany(Hospital::class);
+        return $this->hasMany(Hospital::class, 'id_hospital', 'id_hospital');
     }
 }

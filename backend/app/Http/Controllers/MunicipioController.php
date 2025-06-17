@@ -12,7 +12,16 @@ class MunicipioController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $municipios = Municipio::with('provincia')->get();
+            //$municipios = Municipio::with('provincia')->get();
+            $municipios = Municipio::with('provincia')->get()->map(function ($m) {
+                return [
+                    'id_municipio' => $m->id_municipio,
+                    'nome' => $m->nome,
+                    'nome_provincia' => $m->provincia->nome ?? null,
+                    'id_provincia' => $m->id_provincia,
+                ];
+            });
+
 
             return response()->json([
                 'success' => true,

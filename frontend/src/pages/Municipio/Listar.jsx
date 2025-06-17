@@ -13,6 +13,7 @@ export default function MunicipioListar() {
       try {
         const { data } = await api.get('/municipios');
         setMunicipios(data);
+        console.log(data);
       } catch (error) {
         console.error('Erro ao carregar municípios:', error);
         toast.error('Erro ao carregar municípios');
@@ -30,7 +31,7 @@ export default function MunicipioListar() {
     }
     try {
       await api.delete(`/municipios/${id}`);
-      setMunicipios(municipios.filter((m) => m.id !== id));
+      setMunicipios(municipios.filter((m) => m.id_municipio !== id));
       toast.success('Município excluído com sucesso!');
     } catch (error) {
       console.error('Erro ao excluir município:', error);
@@ -76,22 +77,22 @@ export default function MunicipioListar() {
             {municipios.map((m) => (
               <tr key={m.id} className="hover:bg-slate-50">
                 <td className="border p-2">{m.nome}</td>
-                <td className="border p-2">{m.provincia_nome}</td>
+                <td className="border p-2">{m.nome_provincia}</td>
                 <td className="border p-2 text-center space-x-2">
                   <button
-                    onClick={() => navigate(`/municipio/detalhes/${m.id}`)}
+                    onClick={() => navigate(`/municipio/${m.id_municipio}`)}
                     className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition"
                   >
                     Detalhes
                   </button>
                   <button
-                    onClick={() => navigate(`/municipio/editar/${m.id}`)}
+                    onClick={() => navigate(`/municipio/${m.id_municipio}/editar`)}
                     className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition"
                   >
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDelete(m.id)}
+                    onClick={() => handleDelete(m.id_municipio)}
                     className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
                   >
                     Excluir

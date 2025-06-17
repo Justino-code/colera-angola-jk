@@ -63,7 +63,7 @@ export default function MunicipioDetalhes() {
       </div>
       <div className="mt-4 flex space-x-2">
         <button
-          onClick={() => navigate(`/municipio/editar/${municipio.id}`)}
+          onClick={() => navigate(`/municipio/${municipio.id_municipio}/editar`)}
           className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
         >
           Editar

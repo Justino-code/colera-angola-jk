@@ -21,11 +21,11 @@ class Gabinete extends Model
 
     public function municipio()
     {
-        return $this->belongsTo(Municipio::class);
+        return $this->belongsTo(Municipio::class, 'id_municipio', 'id_municipio');
     }
 
     public function usuarios()
     {
-        return $this->hasMany(Usuario::class);
+        return $this->hasMany(Usuario::class, 'id_usuario', 'id_usuario');
     }
 }

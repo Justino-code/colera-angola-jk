@@ -87,7 +87,7 @@ export default function MunicipioEditar() {
           >
             <option value="">Selecione</option>
             {provincias.map((prov) => (
-              <option key={prov.id} value={prov.id}>
+              <option key={prov.id_provincia} value={prov.id_provincia}>
                 {prov.nome}
               </option>
             ))}

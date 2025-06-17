@@ -23,6 +23,6 @@ class Viatura extends Model
 
     public function hospital()
     {
-        return $this->belongsTo(Hospital::class);
+        return $this->belongsTo(Hospital::class, 'id_hospital', 'id_hospital');
     }
 }

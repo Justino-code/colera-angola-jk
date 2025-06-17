@@ -14,6 +14,6 @@ class Provincia extends Model {
     protected $fillable = ['nome', 'codigo_iso'];
 
     public function municipios(): HasMany {
-        return $this->hasMany(Municipio::class);
+        return $this->hasMany(Municipio::class, 'id_municipio', 'id_municipio');
     }
 }

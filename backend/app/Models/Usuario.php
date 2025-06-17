@@ -39,16 +39,16 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
     ];
 
     public function hospital(): BelongsTo {
-        return $this->belongsTo(Hospital::class);
+        return $this->belongsTo(Hospital::class, 'id_hospital', 'id_hospital');
     }
 
     public function relatorios() {
-        return $this->hasMany(Relatorio::class);
+        return $this->hasMany(Relatorio::class, 'id_relatorio', 'id_relatorio');
     }
 
     public function gabinete()
     {
-        return $this->belongsTo(Gabinete::class);
+        return $this->belongsTo(Gabinete::class, 'id_gabinete', 'id_gabinete');
     }
 
 }

@@ -20,6 +20,6 @@ class Relatorio extends Model {
 
     // Relacionamento com o usuário que gerou o relatório
     public function usuario(): BelongsTo {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
     }
 }
