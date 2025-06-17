@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import toast from "react-hot-toast";
+
 
 export default function HospitalListar() {
   const [hospitais, setHospitais] = useState([]);
@@ -9,15 +11,20 @@ export default function HospitalListar() {
   useEffect(() => {
     const fetchHospitais = async () => {
       try {
-        const { data } = await api.get('/hospitais');
-        if (data.success) {
-          setHospitais(data.data);
-        } else {
-          alert(data.message || 'Erro ao carregar hospitais');
+        const res = await api.get('/hospitais');
+        console.log(res);
+
+        if (res.success && res.data.length > 0) {
+          setHospitais(res.data);
+        } else if(res.success && res.data.length == 0){
+          toast.error('Nenhum hospital cadastrado');
+        } 
+        else {
+          toast.error(res.error || 'Erro ao carregar hospitais');
         }
       } catch (error) {
         console.error('Erro ao carregar hospitais:', error);
-        alert('Erro ao carregar hospitais');
+        toast.error('Erro ao carregar hospitais');
       } finally {
         setLoading(false);
       }
