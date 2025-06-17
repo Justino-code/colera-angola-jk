@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 export default function MunicipioCriar() {
@@ -13,11 +13,11 @@ export default function MunicipioCriar() {
   useEffect(() => {
     const fetchProvincias = async () => {
       try {
-        const { data } = await api.get('/provincias');
-        if (data.success) {
-          setProvincias(data.data);
+        const res = await api.get('/provincias');
+        if (res.success) {
+          setProvincias(res.data);
         } else {
-          toast.error(data.message || 'Erro ao carregar províncias');
+          toast.error(res.message || 'Erro ao carregar províncias');
         }
       } catch (error) {
         console.error('Erro ao carregar províncias:', error);
@@ -32,16 +32,16 @@ export default function MunicipioCriar() {
     e.preventDefault();
     setSalvando(true);
     try {
-      const { data } = await api.post('/municipios', {
+      const res = await api.post('/municipios', {
         nome,
-        provincia_id: provinciaId,
+        id_provincia: provinciaId,
       });
 
-      if (data.success) {
+      if (res.success) {
         toast.success('Município criado com sucesso!');
         navigate('/municipio');
       } else {
-        toast.error(data.message || 'Erro ao criar município');
+        toast.error(res.message || 'Erro ao criar município');
       }
     } catch (error) {
       console.error('Erro ao criar município:', error);
@@ -76,7 +76,7 @@ export default function MunicipioCriar() {
           >
             <option value="">Selecione</option>
             {provincias.map((prov) => (
-              <option key={prov.id} value={prov.id}>
+              <option key={prov.id_provincia} value={prov.id_provincia}>
                 {prov.nome}
               </option>
             ))}

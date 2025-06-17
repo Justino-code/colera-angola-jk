@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 export default function MunicipioEditar() {
@@ -22,7 +22,7 @@ export default function MunicipioEditar() {
 
         setProvincias(provRes.data);
         setNome(munRes.data.nome);
-        setProvinciaId(munRes.data.provincia_id);
+        setProvinciaId(munRes.data.id_provincia);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         toast.error('Erro ao carregar dados');

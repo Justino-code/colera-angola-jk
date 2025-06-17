@@ -1,0 +1,12 @@
+sudo apt install php php-cli php-mysql php-curl php-json php-xml php-mbstring php-zip php-bcmath php-ldap php-soap php-intl php-gd php-imagick -y
+
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+
+ssh-keygen -t rsa -b 4096 -C "jkotingo25@gmail.com"
+
+eval "$(ssh-agent -s)"
+
+ssh-add ~/.ssh/id_rsa
+
+cat ~/.ssh/id_rsa.pub
+

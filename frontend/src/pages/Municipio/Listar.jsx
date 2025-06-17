@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import api from '../../services/api';
 
 export default function MunicipioListar() {
@@ -13,7 +13,6 @@ export default function MunicipioListar() {
       try {
         const { data } = await api.get('/municipios');
         setMunicipios(data);
-        console.log(data);
       } catch (error) {
         console.error('Erro ao carregar municípios:', error);
         toast.error('Erro ao carregar municípios');
@@ -75,7 +74,7 @@ export default function MunicipioListar() {
           </thead>
           <tbody>
             {municipios.map((m) => (
-              <tr key={m.id} className="hover:bg-slate-50">
+              <tr key={m.id_municipio} className="hover:bg-slate-50">
                 <td className="border p-2">{m.nome}</td>
                 <td className="border p-2">{m.nome_provincia}</td>
                 <td className="border p-2 text-center space-x-2">
