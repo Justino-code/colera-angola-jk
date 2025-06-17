@@ -14,11 +14,11 @@ export default function ProvinciaEditar() {
   useEffect(() => {
     api.get(`/provincias/${id}`)
       .then(res => {
-        if (res.data.success) {
-          setNome(res.data.data.nome);
-          setCodigoIso(res.data.data.codigo_iso);
+        if (res.success) {
+          setNome(res.data.nome);
+          setCodigoIso(res.data.codigo_iso);
         } else {
-          toast.error(res.data.message || 'Erro ao carregar província');
+          toast.error(res.message || 'Erro ao carregar província');
           navigate('/provincia');
         }
       })

@@ -9,10 +9,11 @@ export default function ProvinciaListar() {
   useEffect(() => {
     api.get('/provincias')
       .then(res => {
-        if (res.data.success) {
-          setProvincias(res.data.data);
+        console.log(res);
+        if (res.success) {
+          setProvincias(res.data);
         } else {
-          toast.error(res.data.message || 'Erro ao carregar províncias');
+          toast.error(res.message || 'Erro ao carregar províncias');
         }
       })
       .catch(err => {
@@ -25,11 +26,11 @@ export default function ProvinciaListar() {
     if (!window.confirm('Tem certeza que deseja apagar esta província?')) return;
     try {
       const res = await api.delete(`/provincias/${id}`);
-      if (res.data.success) {
-        toast.success(res.data.message || 'Província eliminada');
-        setProvincias(prev => prev.filter(p => p.id !== id));
+      if (res.success) {
+        toast.success(res.message || 'Província eliminada');
+        setProvincias(prev => prev.filter(p => p.id_provincia !== id));
       } else {
-        toast.error(res.data.message || 'Erro ao eliminar província');
+        toast.error(res.message || 'Erro ao eliminar província');
       }
     } catch (err) {
       console.error('Erro na requisição:', err);
@@ -56,13 +57,13 @@ export default function ProvinciaListar() {
           </thead>
           <tbody>
             {provincias.map(p => (
-              <tr key={p.id} className="border-t">
+              <tr key={p.id_provincia} className="border-t">
                 <td className="p-2">{p.nome}</td>
                 <td className="p-2">{p.codigo_iso}</td>
                 <td className="p-2 space-x-2">
-                  <Link to={`/provincia/${p.id}`} className="text-cyan-600 hover:underline">Ver</Link>
-                  <Link to={`/provincia/editar/${p.id}`} className="text-yellow-600 hover:underline">Editar</Link>
-                  <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">Apagar</button>
+                  <Link to={`/provincia/${p.id_provincia}`} className="text-cyan-600 hover:underline">Ver</Link>
+                  <Link to={`/provincia/${p.id_provincia}/editar`} className="text-yellow-600 hover:underline">Editar</Link>
+                  <button onClick={() => handleDelete(p.id_provincia)} className="text-red-600 hover:underline">Apagar</button>
                 </td>
               </tr>
             ))}

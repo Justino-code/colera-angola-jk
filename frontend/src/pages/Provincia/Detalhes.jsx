@@ -12,10 +12,10 @@ export default function ProvinciaDetalhes() {
   useEffect(() => {
     api.get(`/provincias/${id}`)
       .then(res => {
-        if (res.data.success) {
-          setProvincia(res.data.data);
+        if (res.success) {
+          setProvincia(res.data);
         } else {
-          toast.error(res.data.message || 'Erro ao carregar província');
+          toast.error(res.message || 'Erro ao carregar província');
           navigate('/provincia');
         }
       })
@@ -40,7 +40,7 @@ export default function ProvinciaDetalhes() {
         <p><strong className="text-slate-600">Atualizado em:</strong> {new Date(provincia.updated_at).toLocaleString()}</p>
       )}
       <div className="mt-4 flex space-x-2">
-        <button onClick={() => navigate(`/provincia/editar/${provincia.id}`)} className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">
+        <button onClick={() => navigate(`/provincia/${provincia.id_provincia}/editar`)} className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">
           Editar
         </button>
         <button onClick={() => navigate('/provincia')} className="bg-slate-300 text-slate-700 px-4 py-2 rounded hover:bg-slate-400 transition">
