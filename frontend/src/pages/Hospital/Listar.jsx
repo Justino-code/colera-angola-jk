@@ -59,8 +59,8 @@ export default function HospitalListar() {
         <div className="space-y-2">
           {hospitais.map((hosp) => (
             <Link
-              to={`/hospital/${hosp.id}`}
-              key={hosp.id}
+              to={`/hospital/${hosp.id_hospital}`}
+              key={hosp.id_hospital}
               className="block border rounded p-3 hover:bg-slate-50 transition"
             >
               <div className="font-semibold text-slate-700">{hosp.nome}</div>
