@@ -1,9 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 function FlyToLocation({ position }) {
   const map = useMap();
@@ -21,6 +21,7 @@ export default function HospitalCriar() {
   const [idMunicipio, setIdMunicipio] = useState('');
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  const [municipios, setMunicipios] = useState([]);
   const [saving, setSaving] = useState(false);
 
   const navigate = useNavigate();
@@ -35,15 +36,50 @@ export default function HospitalCriar() {
     'Outros'
   ];
 
-  const handleMapClick = (e) => {
-    setLatitude(e.latlng.lat);
-    setLongitude(e.latlng.lng);
-    toast.info('Localização selecionada no mapa');
+  useEffect(() => {
+    async function carregarMunicipios() {
+      try {
+        const { data } = await api.get('/municipios');
+        setMunicipios(data); 
+      } catch (err) {
+        console.error(err);
+        toast.error('Erro ao carregar municípios');
+      }
+    }
+
+    carregarMunicipios();
+  }, []);
+
+  const handleMapClick = async (e) => {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+    setLatitude(lat);
+    setLongitude(lng);
+
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'meu-app-teste'
+        }
+      });
+      const data = await res.json();
+
+      if (data && data.display_name) {
+        setNome(data.display_name);
+        toast.success(`Local detectado: ${data.display_name}`);
+      } else {
+        toast.info('Localização marcada no mapa (nome não identificado)');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao identificar o nome do local');
+    }
   };
 
   const buscarCoordenadas = async () => {
     if (!nome || !endereco) {
-      toast.warn('Preencha o nome e o endereço para buscar localização');
+      toast.error('Preencha o nome e o endereço para buscar localização');
       return;
     }
 
@@ -169,15 +205,20 @@ export default function HospitalCriar() {
         </div>
 
         <div>
-          <label className="block text-slate-600">ID Município</label>
-          <input
-            type="number"
+          <label className="block text-slate-600">Município</label>
+          <select
             value={idMunicipio}
             onChange={(e) => setIdMunicipio(e.target.value)}
             required
-            min="1"
             className="w-full border rounded px-3 py-2"
-          />
+          >
+            <option value="">Selecione o município</option>
+            {municipios.map((m) => (
+              <option key={m.id_municipio} value={m.id_municipio}>
+                {m.nome}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button

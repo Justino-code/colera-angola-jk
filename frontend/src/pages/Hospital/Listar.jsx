@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import toast from "react-hot-toast";
-
+import toast from 'react-hot-toast';
 
 export default function HospitalListar() {
   const [hospitais, setHospitais] = useState([]);
@@ -14,13 +13,15 @@ export default function HospitalListar() {
         const res = await api.get('/hospitais');
         console.log(res);
 
-        if (res.success && res.data.length > 0) {
-          setHospitais(res.data);
-        } else if(res.success && res.data.length == 0){
-          toast.error('Nenhum hospital cadastrado');
-        } 
-        else {
-          toast.error(res.error || 'Erro ao carregar hospitais');
+        if (res.success) {
+          const lista = res.data || [];
+          if (lista.length > 0) {
+            setHospitais(lista);
+          } else {
+            toast('Nenhum hospital cadastrado', { icon: 'ℹ️' });
+          }
+        } else {
+          toast.error(res.message || 'Erro ao carregar hospitais');
         }
       } catch (error) {
         console.error('Erro ao carregar hospitais:', error);
@@ -35,7 +36,7 @@ export default function HospitalListar() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 text-center">
         <p className="animate-pulse text-slate-500">Carregando hospitais...</p>
       </div>
     );
@@ -54,17 +55,22 @@ export default function HospitalListar() {
       </div>
 
       {hospitais.length === 0 ? (
-        <p className="text-slate-500">Nenhum hospital cadastrado.</p>
+        <div className="text-slate-500">Nenhum hospital cadastrado.</div>
       ) : (
         <div className="space-y-2">
           {hospitais.map((hosp) => (
             <Link
-              to={`/hospital/${hosp.id_hospital}`}
               key={hosp.id_hospital}
-              className="block border rounded p-3 hover:bg-slate-50 transition"
+              to={`/hospital/${hosp.id_hospital}`}
+              className="block border rounded-lg p-4 hover:bg-slate-50 transition"
             >
-              <div className="font-semibold text-slate-700">{hosp.nome}</div>
-              <div className="text-slate-500 text-sm">{hosp.local} - Capacidade: {hosp.capacidade}</div>
+              <div className="font-semibold text-slate-700 text-lg">{hosp.nome}</div>
+              <div className="text-slate-500 text-sm">
+                {hosp.endereco || 'Endereço não informado'} — Capacidade: {hosp.capacidade_leitos || 0}
+              </div>
+              {hosp.municipio?.nome && (
+                <div className="text-slate-400 text-xs">Município: {hosp.municipio.nome}</div>
+              )}
             </Link>
           ))}
         </div>
@@ -72,4 +78,3 @@ export default function HospitalListar() {
     </div>
   );
 }
-

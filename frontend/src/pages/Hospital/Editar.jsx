@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function HospitalEditar() {
   const { id } = useParams();
@@ -14,18 +15,19 @@ export default function HospitalEditar() {
   useEffect(() => {
     const fetchHospital = async () => {
       try {
-        const { data } = await api.get(`/hospitais/${id}`);
-        if (data.success) {
-          setNome(data.data.nome);
-          setLocal(data.data.local);
-          setCapacidade(data.data.capacidade.toString());
+        const res = await api.get(`/hospitais/${id}`);
+        if (res.data?.success) {
+          const hosp = res.data.data;
+          setNome(hosp.nome);
+          setLocal(hosp.local || '');
+          setCapacidade(hosp.capacidade?.toString() || '0');
         } else {
-          alert(data.message || 'Erro ao carregar hospital');
+          toast.error(res.data?.message || 'Erro ao carregar hospital');
           navigate('/hospital');
         }
       } catch (error) {
         console.error('Erro ao carregar hospital:', error);
-        alert('Erro ao carregar hospital');
+        toast.error('Erro ao carregar hospital');
         navigate('/hospital');
       } finally {
         setLoading(false);
@@ -39,20 +41,20 @@ export default function HospitalEditar() {
     e.preventDefault();
     setSaving(true);
     try {
-      const { data } = await api.put(`/hospitais/${id}`, {
+      const res = await api.put(`/hospitais/${id}`, {
         nome,
         local,
-        capacidade: parseInt(capacidade, 10),
+        capacidade: parseInt(capacidade, 10)
       });
-      if (data.success) {
-        alert('Hospital atualizado com sucesso!');
+      if (res.data?.success) {
+        toast.success('Hospital atualizado com sucesso!');
         navigate('/hospital');
       } else {
-        alert(data.message || 'Erro ao atualizar hospital');
+        toast.error(res.data?.message || 'Erro ao atualizar hospital');
       }
     } catch (error) {
       console.error('Erro ao atualizar hospital:', error);
-      alert('Erro ao atualizar hospital');
+      toast.error('Erro ao atualizar hospital');
     } finally {
       setSaving(false);
     }
@@ -60,18 +62,18 @@ export default function HospitalEditar() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 text-center">
         <p className="animate-pulse text-slate-500">Carregando hospital...</p>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Hospital</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow space-y-4">
+      <h1 className="text-2xl font-bold text-slate-700">Editar Hospital</h1>
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-slate-600 mb-1">Nome</label>
+          <label className="block text-slate-600">Nome</label>
           <input
             type="text"
             value={nome}
@@ -82,7 +84,7 @@ export default function HospitalEditar() {
         </div>
 
         <div>
-          <label className="block text-slate-600 mb-1">Local</label>
+          <label className="block text-slate-600">Local</label>
           <input
             type="text"
             value={local}
@@ -93,7 +95,7 @@ export default function HospitalEditar() {
         </div>
 
         <div>
-          <label className="block text-slate-600 mb-1">Capacidade</label>
+          <label className="block text-slate-600">Capacidade de Leitos</label>
           <input
             type="number"
             value={capacidade}
@@ -124,4 +126,3 @@ export default function HospitalEditar() {
     </div>
   );
 }
-
