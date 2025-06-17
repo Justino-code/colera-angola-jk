@@ -37,7 +37,6 @@ class PacienteController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        //dd($request->all());
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
@@ -46,9 +45,9 @@ class PacienteController extends Controller
                 'idade' => 'required|integer',
                 'sexo' => 'required|in:M,F',
                 'sintomas' => 'required',
-                'localizacao' => 'nullable|array',
-                /*'latitude' => 'nullable|numeric',
-                'longitude' => 'nullable|numeric'*/
+                'localizacao' => 'required|array',
+                'localizacao.latitude' => 'required|numeric',
+                'localizacao.longitude' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
@@ -59,17 +58,25 @@ class PacienteController extends Controller
             }
 
             $validated = $validator->validated();
+            $sintomas = is_array($validated['sintomas']) ? $validated['sintomas'] : explode(',', $validated['sintomas']);
 
-            $sintomas = is_array($validated['sintomas']) ? $validated['sintomas']: explode(',',$validated['sintomas']);
-
+            // Avaliar risco e encontrar hospital mais próximo
             $riskLevel = $this->triageService->avaliarRisco($sintomas);
             $hospital = $this->triageService->encontrarHospitalMaisProximo(
-                $validated['localizacao']['latitude'] ?? null,
-                $validated['localizacao']['longitude'] ?? null
+                $validated['localizacao']['latitude'],
+                $validated['localizacao']['longitude']
             );
 
-            //dd($riskLevel);
+            // Gerar rota até o hospital
+            $openRoute = null;
+            if ($hospital) {
+                $openRoute = new \App\Services\OpenRouteService([
+                    [$validated['localizacao']['longitude'], $validated['localizacao']['latitude']],
+                    [$hospital->longitude, $hospital->latitude]
+                ]);
+            }
 
+            // Criar paciente
             $paciente = Paciente::create([
                 'nome' => $validated['nome'],
                 'numero_bi' => $validated['numero_bi'],
@@ -79,22 +86,31 @@ class PacienteController extends Controller
                 'sintomas' => $validated['sintomas'],
                 'resultado_triagem' => $riskLevel,
                 'latitude' => $validated['localizacao']['latitude'],
-                'longitude' => $validated['localizacao']['longitude'] ,
+                'longitude' => $validated['localizacao']['longitude'],
                 'nome_hospital' => $hospital->nome ?? null,
                 'id_hospital' => $hospital?->id_hospital ?? null,
                 'qr_code' => null,
             ]);
 
+            // Gerar QR Code
             $qrCode = $this->triageService->gerarQrCodeDoPaciente($paciente->toArray());
             $qrCodePath = "paciente/qrcodes/paciente_{$paciente->id_paciente}.png";
             Storage::put($qrCodePath, $qrCode);
-
             $paciente->update(['qr_code' => $qrCodePath]);
 
+            // Montar resposta
             return response()->json([
                 'success' => true,
-                'message' => 'Paciente criado com sucesso.',
-                'data' => $paciente->load('hospital')
+                'message' => 'Paciente criado e encaminhamento gerado com sucesso.',
+                'data' => [
+                    'paciente' => $paciente->load('hospital'),
+                    'rota' => $openRoute && $openRoute->sucesso() ? [
+                        'distancia_metros' => $openRoute->obterDistanciaTotal(),
+                        'duracao_segundos' => $openRoute->obterDuracaoTotal(),
+                        'geometry' => $openRoute->getGeometry(),
+                        'instrucoes' => $openRoute->obterInstrucoes()
+                    ] : null
+                ]
             ], 201);
 
         } catch (\Exception $e) {
@@ -212,4 +228,3 @@ class PacienteController extends Controller
         }
     }
 }
-

@@ -128,16 +128,31 @@ export default function PacienteCriar() {
         </div>
 
         <div>
-          <label className="block mb-1">Sintomas</label>
-          <div className="flex flex-col space-y-1">
-            {["Diarreia", "febre", "Vómito", "Desidratação"].map(s => (
-              <label key={s}>
-                <input type="checkbox" value={s} {...register("sintomas")} className="mr-1" /> {s}
-              </label>
-            ))}
-          </div>
-          {errors.sintomas && <p className="text-red-500 text-sm">{errors.sintomas.message}</p>}
-        </div>
+  <label className="block mb-1">Sintomas</label>
+  <div className="flex flex-col space-y-1">
+    {[
+      { key: 'diarreia_aquosa', label: 'Diarreia aquosa profusa (em água de arroz)' },
+      { key: 'vomito', label: 'Vômito' },
+      { key: 'desidratacao', label: 'Sinais de desidratação' },
+      { key: 'cãibras_musculares', label: 'Cãibras musculares' },
+      { key: 'sede_excessiva', label: 'Sede excessiva' },
+      { key: 'olhos_fundos', label: 'Olhos fundos' },
+      { key: 'pele_retraida', label: 'Pele com perda de elasticidade' },
+      { key: 'fraqueza', label: 'Fraqueza extrema' },
+      { key: 'batimento_acelerado', label: 'Batimento cardíaco acelerado' },
+      { key: 'pressao_baixa', label: 'Pressão arterial baixa' },
+      { key: 'urinacao_reduzida', label: 'Diminuição da urina' },
+      { key: 'letargia', label: 'Letargia / sonolência' },
+      { key: 'febre', label: 'Febre' },
+    ].map(({ key, label }) => (
+      <label key={key}>
+        <input type="checkbox" value={key} {...register("sintomas")} className="mr-1" /> {label}
+      </label>
+    ))}
+  </div>
+  {errors.sintomas && <p className="text-red-500 text-sm">{errors.sintomas.message}</p>}
+</div>
+
 
         <div className="grid grid-cols-2 gap-2">
           <div>

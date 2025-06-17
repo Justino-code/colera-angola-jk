@@ -23,8 +23,8 @@ export default function ViaturaEditar() {
     const fetchData = async () => {
       try {
         const [viaturaRes, hospitaisRes] = await Promise.all([
-          api.get(`/viatura/${id}`),
-          api.get('/hospital')
+          api.get(`/viaturas/${id}`),
+          api.get('/hospitais')
         ]);
 
         if (!viaturaRes.success) {
@@ -90,7 +90,7 @@ export default function ViaturaEditar() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await api.put(`/viatura/${id}`, form);
+      const res = await api.put(`/viaturas/${id}`, form);
       if (res.success) {
         toast.success(res.message || 'Viatura atualizada com sucesso');
         navigate('/viatura');
