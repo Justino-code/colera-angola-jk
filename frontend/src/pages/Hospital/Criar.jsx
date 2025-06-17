@@ -1,16 +1,15 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { toast } from 'react-toastify';
 
-function LocationSelector({ setLatitude, setLongitude }) {
-  useMapEvents({
-    click(e) {
-      setLatitude(e.latlng.lat);
-      setLongitude(e.latlng.lng);
-    },
-  });
+function FlyToLocation({ position }) {
+  const map = useMap();
+  if (position) {
+    map.flyTo(position, 16);
+  }
   return null;
 }
 
@@ -19,45 +18,73 @@ export default function HospitalCriar() {
   const [tipo, setTipo] = useState('');
   const [endereco, setEndereco] = useState('');
   const [capacidade, setCapacidade] = useState('');
+  const [idMunicipio, setIdMunicipio] = useState('');
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+
+  const navigate = useNavigate();
   const mapRef = useRef();
+
+  const tipos = [
+    'Geral',
+    'Municipal',
+    'Centro de Saúde',
+    'Posto Médico',
+    'Clínica',
+    'Outros'
+  ];
+
+  const handleMapClick = (e) => {
+    setLatitude(e.latlng.lat);
+    setLongitude(e.latlng.lng);
+    toast.info('Localização selecionada no mapa');
+  };
 
   const buscarCoordenadas = async () => {
     if (!nome || !endereco) {
-      alert('Informe o nome e o endereço do hospital');
+      toast.warn('Preencha o nome e o endereço para buscar localização');
       return;
     }
 
     try {
       const query = encodeURIComponent(`${nome} ${endereco}`);
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
-      const results = await response.json();
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}`;
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'meu-app-teste'
+        }
+      });
 
-      if (results.length > 0) {
-        const lat = parseFloat(results[0].lat);
-        const lon = parseFloat(results[0].lon);
+      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+
+      const data = await response.json();
+
+      if (data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
         setLatitude(lat);
         setLongitude(lon);
-
-        // Faz o zoom e centraliza no ponto encontrado
-        if (mapRef.current) {
-          mapRef.current.setView([lat, lon], 16); // zoom mais próximo
-        }
+        toast.success('Localização encontrada');
       } else {
-        alert('Localização não encontrada');
+        toast.error('Localização não encontrada');
       }
-    } catch (error) {
-      console.error('Erro ao buscar coordenadas:', error);
-      alert('Erro ao buscar localização');
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao buscar localização');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    if (!latitude || !longitude) {
+      toast.warn('Selecione ou busque a localização no mapa');
+      setSaving(false);
+      return;
+    }
 
     try {
       const payload = {
@@ -67,20 +94,20 @@ export default function HospitalCriar() {
         capacidade_leitos: parseInt(capacidade, 10),
         latitude,
         longitude,
-        id_municipio: 1,
+        id_municipio: parseInt(idMunicipio, 10)
       };
 
       const { data } = await api.post('/hospitais', payload);
 
       if (data.success) {
-        alert('Hospital criado com sucesso!');
+        toast.success('Hospital criado com sucesso!');
         navigate('/hospital');
       } else {
-        alert(data.message || 'Erro ao criar hospital');
+        toast.error(data.message || 'Erro ao criar hospital');
       }
-    } catch (error) {
-      console.error('Erro ao criar hospital:', error);
-      alert('Erro ao criar hospital');
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao criar hospital');
     } finally {
       setSaving(false);
     }
@@ -89,9 +116,9 @@ export default function HospitalCriar() {
   return (
     <div className="max-w-lg mx-auto bg-white p-6 rounded shadow space-y-4">
       <h1 className="text-2xl font-bold text-slate-700">Novo Hospital</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-slate-600 mb-1">Nome</label>
+          <label className="block text-slate-600">Nome</label>
           <input
             type="text"
             value={nome}
@@ -102,18 +129,24 @@ export default function HospitalCriar() {
         </div>
 
         <div>
-          <label className="block text-slate-600 mb-1">Tipo</label>
-          <input
-            type="text"
+          <label className="block text-slate-600">Tipo</label>
+          <select
             value={tipo}
             onChange={(e) => setTipo(e.target.value)}
             required
             className="w-full border rounded px-3 py-2"
-          />
+          >
+            <option value="">Selecione o tipo</option>
+            {tipos.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
-          <label className="block text-slate-600 mb-1">Endereço</label>
+          <label className="block text-slate-600">Endereço</label>
           <input
             type="text"
             value={endereco}
@@ -124,7 +157,7 @@ export default function HospitalCriar() {
         </div>
 
         <div>
-          <label className="block text-slate-600 mb-1">Capacidade (leitos)</label>
+          <label className="block text-slate-600">Capacidade de Leitos</label>
           <input
             type="number"
             value={capacidade}
@@ -136,35 +169,42 @@ export default function HospitalCriar() {
         </div>
 
         <div>
-          <button
-            type="button"
-            onClick={buscarCoordenadas}
-            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-          >
-            Buscar Localização pelo Nome e Endereço
-          </button>
+          <label className="block text-slate-600">ID Município</label>
+          <input
+            type="number"
+            value={idMunicipio}
+            onChange={(e) => setIdMunicipio(e.target.value)}
+            required
+            min="1"
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
 
-        <div className="h-64">
-          <MapContainer
-            center={[-11.2027, 17.8739]}
-            zoom={6}
-            style={{ height: '100%', width: '100%' }}
-            whenCreated={(mapInstance) => { mapRef.current = mapInstance; }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <LocationSelector setLatitude={setLatitude} setLongitude={setLongitude} />
-            {latitude && longitude && <Marker position={[latitude, longitude]} />}
-          </MapContainer>
-        </div>
+        <button
+          type="button"
+          onClick={buscarCoordenadas}
+          className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600"
+        >
+          Buscar Localização
+        </button>
 
-        <div>
-          <p className="text-sm text-slate-500">
-            Latitude: {latitude ?? 'N/A'}, Longitude: {longitude ?? 'N/A'}
-          </p>
-        </div>
+        <MapContainer
+          center={[-11.2027, 17.8739]}
+          zoom={6}
+          style={{ height: '300px', width: '100%' }}
+          whenCreated={(mapInstance) => {
+            mapRef.current = mapInstance;
+          }}
+          onclick={handleMapClick}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {latitude && longitude && (
+            <>
+              <Marker position={[latitude, longitude]} />
+              <FlyToLocation position={[latitude, longitude]} />
+            </>
+          )}
+        </MapContainer>
 
         <div className="flex space-x-2">
           <button
