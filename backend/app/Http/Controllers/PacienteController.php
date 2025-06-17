@@ -47,8 +47,8 @@ class PacienteController extends Controller
                 'sexo' => 'required|in:M,F',
                 'sintomas' => 'required',
                 'localizacao' => 'nullable|array',
-                /*'latitude' => 'nullable|numeric',
-                'longitude' => 'nullable|numeric'*/
+                'latitude' => 'nullable|numeric',
+                'longitude' => 'nullable|numeric'
             ]);
 
             if ($validator->fails()) {
@@ -64,8 +64,8 @@ class PacienteController extends Controller
 
             $riskLevel = $this->triageService->avaliarRisco($sintomas);
             $hospital = $this->triageService->encontrarHospitalMaisProximo(
-                $validated['localizacao']['latitude'] ?? null,
-                $validated['localizacao']['longitude'] ?? null
+                $validated['latitude'] ?? null,
+                $validated['longitude'] ?? null
             );
 
             //dd($riskLevel);
@@ -78,6 +78,8 @@ class PacienteController extends Controller
                 'sexo' => $validated['sexo'],
                 'sintomas' => $validated['sintomas'],
                 'resultado_triagem' => $riskLevel,
+                'latitude' => $validated['latitude'],
+                'longitude' => $validated['longitude'],
                 'nome_hospital' => $hospital->nome ?? null,
                 'id_hospital' => $hospital?->id_hospital ?? null,
                 'qr_code' => null,

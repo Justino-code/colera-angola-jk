@@ -12,15 +12,20 @@ export default function MapaCasos() {
   useEffect(() => {
     toast.loading("Carregando casos...");
     api.get("/pacientes")
-      .then(data => {
-        setPacientes(data);
-        toast.dismiss();  // Remove o loading
-        toast.success("Casos carregados com sucesso!");
-      })
-      .catch(err => {
-        toast.dismiss();
-        toast.error("Erro ao carregar casos: " + err.message);
-      });
+  .then(res => {
+    if (res.success) {
+      setPacientes(res.data || []);
+      toast.success("Casos carregados com sucesso!");
+    } else {
+      setPacientes([]);
+      toast.error("Falha ao carregar casos.");
+    }
+    toast.dismiss();
+  })
+  .catch(err => {
+    toast.dismiss();
+    toast.error("Erro ao carregar casos: " + err.message);
+  });
 
     const savedFiltro = localStorage.getItem("filtroSintoma");
     if (savedFiltro !== null) setFiltro(savedFiltro);

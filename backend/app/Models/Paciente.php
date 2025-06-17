@@ -11,7 +11,7 @@ class Paciente extends Model {
 
     protected $fillable = [
         'nome', 'numero_bi', 'telefone', 'idade', 'sexo',
-        'sintomas', 'resultado_triagem', 'qr_code', 'nome_hospital', 'id_hospital'
+        'sintomas', 'resultado_triagem', 'qr_code', 'latitude', 'longitude', 'nome_hospital', 'id_hospital'
     ];
 
     protected $casts = [
