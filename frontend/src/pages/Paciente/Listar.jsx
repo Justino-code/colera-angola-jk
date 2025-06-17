@@ -28,11 +28,11 @@ export default function PacienteListar() {
     if (!window.confirm("Tem certeza que deseja excluir?")) return;
 
     const res = await api.delete(`/pacientes/${id}`);
-    if (res.data.success) {
-      toast.success(res.data.message || "Paciente excluído!");
+    if (res.success) {
+      toast.success(res.message || "Paciente excluído!");
       carregarPacientes();
     } else {
-      toast.error(res.data.message || "Erro ao excluir paciente");
+      toast.error(res.message || "Erro ao excluir paciente");
     }
   };
   return (
@@ -65,7 +65,7 @@ export default function PacienteListar() {
                 </button>
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  onClick={() => handleDelete(p.id_paciente)}
+                  onClick={() => excluirPaciente(p.id_paciente)}
                 >
                   Excluir
                 </button>
