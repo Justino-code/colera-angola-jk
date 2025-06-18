@@ -4,6 +4,7 @@ import api from "../../services/api";
 import toast from "react-hot-toast";
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import polyline from "@mapbox/polyline"; // Importa o decodificador de polyline
 
 // Corrigir ícones padrão do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -17,6 +18,7 @@ export default function PacienteEncaminhamento() {
   const { id } = useParams();
   const [paciente, setPaciente] = useState(null);
   const [rota, setRota] = useState(null);
+  const [path, setPath] = useState([]);
 
   useEffect(() => {
     carregarEncaminhamento();
@@ -30,6 +32,11 @@ export default function PacienteEncaminhamento() {
       if (res.success) {
         setPaciente(res.paciente);
         setRota(res.data);
+
+        // Decodificar a polyline
+        const decoded = polyline.decode(res.data.geometry);
+        // polyline retorna [lat, lng], mas Leaflet espera [lat, lng] também, então está correto
+        setPath(decoded);
       } else {
         toast.error(res.message || "Erro ao carregar encaminhamento");
       }
@@ -62,7 +69,7 @@ export default function PacienteEncaminhamento() {
             <p><strong>Risco:</strong> {paciente.resultado_triagem}</p>
           </div>
 
-          {rota ? (
+          {rota && path.length > 0 ? (
             <div className="border p-4 rounded bg-slate-50">
               <h2 className="text-lg font-semibold">Rota</h2>
               <p><strong>Distância:</strong> {(rota.distancia_metros / 1000).toFixed(2)} km</p>
@@ -80,10 +87,7 @@ export default function PacienteEncaminhamento() {
               <div className="mt-4">
                 <h3 className="font-medium mb-2">Mapa</h3>
                 <MapContainer
-                  center={[
-                    rota.geometry[0][1],
-                    rota.geometry[0][0]
-                  ]}
+                  center={path[0]}
                   zoom={13}
                   scrollWheelZoom={true}
                   className="w-full h-96 rounded"
@@ -92,20 +96,11 @@ export default function PacienteEncaminhamento() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                   />
-                  <Polyline
-                    positions={rota.geometry.map(coord => [coord[1], coord[0]])}
-                    color="blue"
-                  />
-                  <Marker position={[
-                    rota.geometry[0][1],
-                    rota.geometry[0][0]
-                  ]}>
+                  <Polyline positions={path} color="blue" />
+                  <Marker position={path[0]}>
                     <Popup>Localização do Paciente</Popup>
                   </Marker>
-                  <Marker position={[
-                    rota.geometry[rota.geometry.length - 1][1],
-                    rota.geometry[rota.geometry.length - 1][0]
-                  ]}>
+                  <Marker position={path[path.length - 1]}>
                     <Popup>Hospital de destino</Popup>
                   </Marker>
                 </MapContainer>
