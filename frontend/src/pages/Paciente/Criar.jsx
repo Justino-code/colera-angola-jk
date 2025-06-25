@@ -71,20 +71,20 @@ export default function PacienteCriar() {
   const onSubmit = async (data) => {
     try {
       const res = await api.post('/pacientes', data);
-      console.log(res);
+
       if (res.success) {
         toast.success(res.message || "Paciente criado com sucesso!");
         navigate('/paciente');
-      } else if(res.success == false && res.errors){
-        toast(res.message);
-        console.log(res.errors);
       }
       else {
-        toast.error(res.message || "Erro ao criar paciente");
+        const errorData = await res.json();
+        //toast.error(res.message || "Erro ao criar paciente");
+        throw new Error(errorData.error || "Erro ao criar paciente");
+        
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Erro ao criar paciente x");
+      console.error("Erro ao criar paciente:", err);
+      toast.error("Erro ao criar paciente: \n" + (err || "Erro desconhecido"));
     }
   };
 

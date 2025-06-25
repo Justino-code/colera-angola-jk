@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class PacienteController extends Controller
 {
@@ -38,6 +39,7 @@ class PacienteController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        DB::beginTransaction();  // Inicia a transação
         try {
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
@@ -54,7 +56,9 @@ class PacienteController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'errors' => $validator->errors()
+                    'message' => 'Dados inválidos.',
+                    'errors' => $validator->errors(),
+                    'error' => $validator->errors()->first()
                 ], 422);
             }
 
@@ -86,6 +90,8 @@ class PacienteController extends Controller
             $qrCodePath = "paciente/qrcodes/paciente_{$paciente->id_paciente}.png";
             Storage::put($qrCodePath, $qrCode);
             $paciente->update(['qr_code' => $qrCodePath]);
+            // Se tudo ocorrer bem, faz o commit
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -93,6 +99,9 @@ class PacienteController extends Controller
                 'data' => $paciente->load('hospital')
             ], 201);
         } catch (\Exception $e) {
+            DB::rollBack(); // Reverte a transação em caso de erro
+            // Log::error('Erro ao processar paciente: ' . $e->getMessage());
+            // Retorna uma resposta JSON com o erro
             return response()->json([
                 'success' => false,
                 'error' => 'Falha ao processar paciente: ' . $e->getMessage()
@@ -115,7 +124,9 @@ class PacienteController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'errors' => $validator->errors()
+                    'message' => 'Validação falhou.',
+                    'errors' => $validator->errors(),
+                    'error' =>  $validator->errors()->first()
                 ], 422);
             }
 
