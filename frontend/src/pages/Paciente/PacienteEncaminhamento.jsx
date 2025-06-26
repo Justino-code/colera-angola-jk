@@ -27,7 +27,7 @@ export default function PacienteEncaminhamento() {
   const carregarEncaminhamento = async () => {
     try {
       const res = await api.get(`/pacientes/${id}/encaminhamento`);
-      console.log(res.data);
+      console.log(res);
 
       if (res.success) {
         setPaciente(res.paciente);

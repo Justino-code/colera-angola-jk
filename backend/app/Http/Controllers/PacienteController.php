@@ -215,12 +215,12 @@ class PacienteController extends Controller
             return response()->json([
                 'success' => true,
                 'paciente' => $paciente,
-                'data' => $openRoute->sucesso() ? [
+                'geo' => $openRoute->sucesso() ? [
                     'distancia_metros' => $openRoute->obterDistanciaTotal(),
                     'duracao_segundos' => $openRoute->obterDuracaoTotal(),
                     'geometry' => $openRoute->getGeometry(),
                     'instrucoes' => $openRoute->obterInstrucoes(),
-                ] : null
+                ] : null,
             ]);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([

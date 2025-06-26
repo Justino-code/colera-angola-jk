@@ -28,6 +28,11 @@ class OpenRouteService
         $this->dadosRota = $this->fazerRequisicao($coordinates);
     }
 
+    public function getApiKey()
+    {
+        return $this->apiKey;
+    }
+
     /**
      * Faz a requisição à API do OpenRouteService.
      *
@@ -50,7 +55,7 @@ class OpenRouteService
             return json_decode($response->getBody(), true);
         } catch (\Exception $e) {
             Log::error("Erro na API do OpenRouteService: " . $e->getMessage());
-            return false;
+            return false; // Retorna false em caso de erro
         }
     }
 

@@ -1,3 +1,4 @@
+
 import toast from "react-hot-toast";
 
 const API_URL =
@@ -50,10 +51,11 @@ async function request(endpoint, options = {}) {
 
                 setTimeout(() => {
                     // Redirecionar para a página de login
-                    navigate("/login", {
+                    /*navigate("/login", {
                         replace: true,
-                    });
-                }, 2000);
+                    });*/
+                    window.location.href = "/login";
+                }, 1000);
 
                 // Exibe uma mensagem informando que a sessão expirou
                 //alert("Sua sessão expirou. Por favor, faça login novamente.");
