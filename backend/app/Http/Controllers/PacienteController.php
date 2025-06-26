@@ -215,7 +215,7 @@ class PacienteController extends Controller
             return response()->json([
                 'success' => true,
                 'paciente' => $paciente,
-                'geo' => $openRoute->sucesso() ? [
+                'open_route' => $openRoute->sucesso() ? [
                     'distancia_metros' => $openRoute->obterDistanciaTotal(),
                     'duracao_segundos' => $openRoute->obterDuracaoTotal(),
                     'geometry' => $openRoute->getGeometry(),

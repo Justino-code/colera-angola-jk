@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import polyline from "@mapbox/polyline"; // Importa o decodificador de polyline
+import InstrucoesRota from '../../components/InstrucoesRota';
 
 // Corrigir ícones padrão do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -31,10 +32,10 @@ export default function PacienteEncaminhamento() {
 
       if (res.success) {
         setPaciente(res.paciente);
-        setRota(res.data);
+        setRota(res.open_route);
 
         // Decodificar a polyline
-        const decoded = polyline.decode(res.data.geometry);
+        const decoded = polyline.decode(res.open_route.geometry);
         // polyline retorna [lat, lng], mas Leaflet espera [lat, lng] também, então está correto
         setPath(decoded);
       } else {
@@ -75,14 +76,8 @@ export default function PacienteEncaminhamento() {
               <p><strong>Distância:</strong> {(rota.distancia_metros / 1000).toFixed(2)} km</p>
               <p><strong>Duração:</strong> {(rota.duracao_segundos / 60).toFixed(1)} min</p>
 
-              <div className="mt-2">
-                <h3 className="font-medium">Instruções:</h3>
-                <ol className="list-decimal list-inside text-sm text-gray-700">
-                  {rota.instrucoes.map((instrucao, index) => (
-                    <li key={index}>{instrucao.texto}</li>
-                  ))}
-                </ol>
-              </div>
+ {/* Instruções formatadas */}
+    <InstrucoesRota instrucoes={rota.instrucoes} />
 
               <div className="mt-4">
                 <h3 className="font-medium mb-2">Mapa</h3>
