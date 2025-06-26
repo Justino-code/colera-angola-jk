@@ -20,12 +20,14 @@ export default function PacienteEncaminhamento() {
   const [paciente, setPaciente] = useState(null);
   const [rota, setRota] = useState(null);
   const [path, setPath] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Estado de loading
 
   useEffect(() => {
     carregarEncaminhamento();
   }, []);
 
   const carregarEncaminhamento = async () => {
+    setIsLoading(true);
     try {
       const res = await api.get(`/pacientes/${id}/encaminhamento`);
       console.log(res);
@@ -34,15 +36,15 @@ export default function PacienteEncaminhamento() {
         setPaciente(res.paciente);
         setRota(res.open_route);
 
-        // Decodificar a polyline
         const decoded = polyline.decode(res.open_route.geometry);
-        // polyline retorna [lat, lng], mas Leaflet espera [lat, lng] também, então está correto
         setPath(decoded);
       } else {
         toast.error(res.message || "Erro ao carregar encaminhamento");
       }
     } catch (error) {
       toast.error("Falha ao comunicar com o servidor");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,8 +60,34 @@ export default function PacienteEncaminhamento() {
         </Link>
       </div>
 
-      {!paciente ? (
-        <p className="text-gray-500">Carregando dados...</p>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-10">
+          <svg
+            className="animate-spin h-8 w-8 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            ></path>
+          </svg>
+          <span className="ml-2 text-blue-700 font-medium">
+            Carregando encaminhamento...
+          </span>
+        </div>
+      ) : !paciente ? (
+        <p className="text-gray-500">Paciente não encontrado.</p>
       ) : (
         <div className="space-y-4">
           <div className="border p-4 rounded bg-slate-50">
@@ -76,8 +104,8 @@ export default function PacienteEncaminhamento() {
               <p><strong>Distância:</strong> {(rota.distancia_metros / 1000).toFixed(2)} km</p>
               <p><strong>Duração:</strong> {(rota.duracao_segundos / 60).toFixed(1)} min</p>
 
- {/* Instruções formatadas */}
-    <InstrucoesRota instrucoes={rota.instrucoes} />
+              {/* Instruções com animação inteligente */}
+              <InstrucoesRota instrucoes={rota.instrucoes} />
 
               <div className="mt-4">
                 <h3 className="font-medium mb-2">Mapa</h3>
