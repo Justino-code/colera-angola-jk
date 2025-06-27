@@ -1,31 +1,25 @@
-
 import toast from "react-hot-toast";
 
 const API_URL =
     import.meta.env.VITE_API_URL?.replace(/\/$/, "") ||
     "http://0.0.0.0:8000/api";
 
+// 🧠 Flags para evitar múltiplos toasts/redirecionamentos
+let sessionExpiredShown = false;
+let unauthorizedShown = false;
+let serverErrorShown = false;
+
 async function request(endpoint, options = {}) {
     const token = localStorage.getItem("access_token");
 
     const headers = {
         "Content-Type": "application/json",
+        Accept: "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
 
-    // Remove / inicial duplicado no endpoint
     const cleanEndpoint = endpoint.replace(/^\//, "");
-
-    console.log("➡ URL chamada:", `${API_URL}/${cleanEndpoint}`);
-    console.log(
-        "➡ Método:",
-        options.method,
-        "Headers:",
-        headers,
-        "Body:",
-        options.body
-    );
 
     try {
         const response = await fetch(`${API_URL}/${cleanEndpoint}`, {
@@ -33,47 +27,55 @@ async function request(endpoint, options = {}) {
             headers,
         });
 
-        console.log(response);
-        console.log(response.statusText);
-        console.log(response);
-        
-        
+        const text = await response.text();
 
-        // Verifica se a resposta não é OK (ex: 401 Unauthorized)
+        // Converte o corpo para JSON (se for possível)
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch {
+            data = text;
+        }
+
         if (!response.ok) {
-            if (response.status === 401) {
-                // Limpar token expirado do localStorage
+            // Tratamento por tipo de status
+            if (response.status === 401 && !sessionExpiredShown) {
+                sessionExpiredShown = true;
                 localStorage.removeItem("access_token");
-
                 toast.error(
                     "Sua sessão expirou. Por favor, faça login novamente."
                 );
-
                 setTimeout(() => {
-                    // Redirecionar para a página de login
-                    /*navigate("/login", {
-                        replace: true,
-                    });*/
                     window.location.href = "/login";
                 }, 1000);
-
-                // Exibe uma mensagem informando que a sessão expirou
-                //alert("Sua sessão expirou. Por favor, faça login novamente.");
             }
 
-            // Lança um erro genérico para outras falhas
-            const r = await response.text();
-            console.log('Resposta em txt:   '+r);
-            
-            const error = await response.json();
-            throw new Error(`${error.error || response.statusText}`);
+            if (response.status === 403 && !unauthorizedShown) {
+                unauthorizedShown = true;
+                toast.error("Acesso não autorizado.");
+            }
+
+            if (response.status === 404) {
+                toast.error("Recurso não encontrado.");
+            }
+
+            if (response.status === 500 && !serverErrorShown) {
+                serverErrorShown = true;
+                toast.error("Erro interno do servidor.");
+                const errorDetails = data?.error || "Erro desconhecido.";
+                console.error("Erro interno do servidor:", data);
+            }
+
+            // Lança erro com a mensagem retornada ou status
+            const errorMessage =
+                data?.error || response.statusText || "Erro desconhecido.";
+            throw new Error(errorMessage);
         }
 
-        // Caso a resposta seja bem-sucedida, retorna o corpo da resposta
-        return response.json();
+        return data;
     } catch (error) {
         console.error("Erro:", error.message);
-        throw error; // Repassa o erro para quem chamou a função
+        throw error; // Repassa o erro para o componente que chamou
     }
 }
 

@@ -10,17 +10,17 @@ class UsuarioSeeder extends Seeder
 {
     public function run(): void
     {
-        Usuario::updateOrCreate(
-        ['email' => 'admin@example.com'], // evita duplicidade
-        [
+        // Remove o usuário se já existir
+        Usuario::where('email', 'admin@me.com')->delete();
+
+        // Cria novamente o usuário admin
+        Usuario::create([
             'nome' => 'Administrador',
             'email' => 'admin@me.com',
             'password' => Hash::make('admin123'),
-            'role' => 'gestor',
-            'permissoes' => ['gerenciar_usuarios', 
-            'ver_dashboard'],
+            'role' => 'admin',
+            'permissoes' => ['*'],
             'email_verified_at' => now()
-            ]
-        );
+        ]);
     }
 }

@@ -18,15 +18,15 @@ class ProvinciaPolicy
     }
 
     public function create(Usuario $user) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     public function update(Usuario $user, Provincia $provincia) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     public function delete(Usuario $user, Provincia $provincia) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     /**

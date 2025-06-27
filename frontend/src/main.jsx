@@ -6,7 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import './index.css';  // TailwindCSS e estilos globais
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <BrowserRouter>
       <AppRoutes />
       <Toaster
@@ -45,5 +45,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 />
 
     </BrowserRouter>
-  </React.StrictMode>
+  //</React.StrictMode>
 );

@@ -17,7 +17,7 @@ return new class extends Migration
     $table->string('email')->unique();
     $table->string('password');
     $table->enum('role', [
-        'gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+        'admin','gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
         'administrativo', 'agente_sanitario', 'farmaceutico',
         'analista_dados', 'coordenador_regional'
     ]);

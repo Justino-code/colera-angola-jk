@@ -12,32 +12,35 @@ class UsuarioPolicy
     // Gestores gerenciam usuários; outros só veem seu próprio perfil
     public function viewAny(Usuario $user)
     {
-        return $user->role === 'gestor' || $user->role === 'administrador' || $user->role === 'admin';
+        return $user->isGestor() || $user->isAdmin();
     }
 
-    public function view(Usuario $user, Usuario $targetUser)
+    public function view(Usuario $user): bool
     {
-        return ($user->role === 'gestor' || ($user->role === 'administrador' || $user->role === 'admin')) || $user->id_usuario === $targetUser->id_usuario;
+        // Gestores e administradores veem todos os usuários; outros veem apenas seu próprio perfil
+        $targetUser = auth()->user();
+        return ($user->isGestor() || $user->isAdmin()) || $user->id_usuario === $targetUser->id_usuario;
     }
 
     public function create(Usuario $user)
     {
-        return $user->role === 'gestor' || ($user->role === 'administrador' || $user->role === 'admin');
+        return $user->isGestor() || $user->isAdmin();
     }
 
-    public function update(Usuario $user, Usuario $targetUser)
+    public function update(Usuario $user)
     {
-        return ($user->role === 'gestor' || ($user->role === 'administrador' || $user->role === 'admin')) || $user->id_usuario === $targetUser->id_usuario;
+         $targetUser = auth()->user();
+        return ($user->isGestor() || $user->isAdmin()) || $user->id_usuario === $targetUser->id_usuario;
     }
 
-    public function delete(Usuario $user, Usuario $targetUser)
+    public function delete(Usuario $user)
     {
-        return $user->role === 'gestor' || ($user->role === 'administrador' || $user->role === 'admin');
+        return $user->isGestor() || $user->isAdmin();
     }
 
     // Permissão específica para atualizar roles
     public function updateRole(Usuario $user)
     {
-        return $user->role === 'gestor' || ($user->role === 'administrador' || $user->role === 'admin');
+        return $user->isGestor() || $user->isAdmin();
     }
 }

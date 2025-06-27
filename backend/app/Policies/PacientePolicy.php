@@ -10,16 +10,16 @@ class PacientePolicy
 {
     // Autorizações
     public function viewAny(Usuario $user) {
-        return in_array($user->role, ['gestor', 'medico']);
+        return $user->isGestor() || $user->isMedico();
     }
 
     public function view(Usuario $user, Paciente $paciente) {
-        return $user->role === 'gestor' ||
-        ($user->role === 'medico' && $user->id_hospital === $paciente->id_hospital);
+        return $user->isGestor() ||
+            ($user->isMedico() && $user->id_hospital === $paciente->id_hospital);
     }
 
     public function create(Usuario $user) {
-        return in_array($user->role, ['gestor', 'medico']);
+        return $user->isGestor() || $user->isMedico();
     }
 
     public function update(Usuario $user, Paciente $paciente) {
@@ -27,7 +27,7 @@ class PacientePolicy
     }
 
     public function delete(Usuario $user, Paciente $paciente) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
     /**
      * Determine whether the user can restore the model.

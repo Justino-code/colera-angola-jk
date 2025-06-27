@@ -18,15 +18,15 @@ class MunicipioPolicy
     }
 
     public function create(Usuario $user) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     public function update(Usuario $user, Municipio $municipio) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     public function delete(Usuario $user, Municipio $municipio) {
-        return $user->role === 'gestor';
+        return $user->isGestor();
     }
 
     /**

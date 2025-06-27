@@ -18,12 +18,12 @@ export default function UsuarioDetalhes() {
           setUsuario(res.data);
         } else {
           toast.error('Usuário não encontrado');
-          navigate('/usuarios');
+          //navigate('/usuario');
         }
       } catch (err) {
         toast.error('Erro ao carregar usuário');
         console.error(err);
-        navigate('/usuarios');
+        //navigate('/usuario');
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,7 @@ export default function UsuarioDetalhes() {
         <p className="text-center text-slate-500">Usuário não encontrado.</p>
         <div className="text-center mt-4">
           <Link
-            to="/usuarios"
+            to="/usuario"
             className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition"
           >
             Voltar
