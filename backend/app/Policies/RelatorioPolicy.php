@@ -9,24 +9,24 @@ use Illuminate\Auth\Access\Response;
 class RelatorioPolicy
 {
     /// Gestores veem tudo; outros só seus próprios relatórios
-    public function viewAny(User $user) {
+    public function viewAny(Usuario $user) {
         return true;
     }
 
-    public function view(User $user, Relatorio $relatorio) {
+    public function view(Usuario $user, Relatorio $relatorio) {
         return $user->role === 'gestor' || $relatorio->usuario_id === $user->id;
     }
 
-    public function create(User $user) {
+    public function create(Usuario $user) {
         return in_array($user->role, ['gestor', 'medico']);
     }
 
-    public function delete(User $user, Relatorio $relatorio) {
+    public function delete(Usuario $user, Relatorio $relatorio) {
         return $user->role === 'gestor' || $relatorio->usuario_id === $user->id;
     }
 
     // Geração de PDF
-    public function generatePDF(User $user) {
+    public function generatePDF(Usuario $user) {
         return $this->create($user);
     }
 

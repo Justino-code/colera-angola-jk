@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class PacienteController extends Controller
 {
@@ -23,12 +24,18 @@ class PacienteController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Paciente::class);
             $pacientes = Paciente::with('hospital')->get();
 
             return response()->json([
                 'success' => true,
                 'data' => $pacientes
             ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -39,8 +46,12 @@ class PacienteController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        // Inicia uma transação para garantir a atomicidade
+        // Isso é importante para garantir que todas as operações sejam concluídas com sucesso ou revertidas
+        // caso ocorra algum erro, evitando inconsistências no banco de dados.
         DB::beginTransaction();  // Inicia a transação
         try {
+            $this->authorize('create', Paciente::class);
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'numero_bi' => 'required|string|unique:paciente,numero_bi',
@@ -98,6 +109,12 @@ class PacienteController extends Controller
                 'message' => 'Paciente criado com sucesso.',
                 'data' => $paciente->load('hospital')
             ], 201);
+        } catch (AuthorizationException $e) {
+            DB::rollBack(); // Reverte a transação em caso de erro
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Exception $e) {
             DB::rollBack(); // Reverte a transação em caso de erro
             // Log::error('Erro ao processar paciente: ' . $e->getMessage());
@@ -109,56 +126,21 @@ class PacienteController extends Controller
         }
     }
 
-    public function update(Request $request, int $id): JsonResponse
-    {
-        try {
-            $paciente = Paciente::findOrFail($id);
-
-            $validator = Validator::make($request->all(), [
-                'nome' => 'sometimes|required|string|max:255',
-                'numero_bi' => 'sometimes|required|string|unique:paciente,numero_bi,' . $paciente->id_paciente . ',id_paciente',
-                'telefone' => 'sometimes|required|string|max:20',
-                'id_hospital' => 'sometimes|required|exists:hospital,id_hospital'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validação falhou.',
-                    'errors' => $validator->errors(),
-                    'error' =>  $validator->errors()->first()
-                ], 422);
-            }
-
-            $paciente->update($validator->validated());
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Paciente atualizado com sucesso.',
-                'data' => $paciente->load('hospital')
-            ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Paciente não encontrado.'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Erro ao atualizar paciente: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function show(int $id): JsonResponse
     {
         try {
             $paciente = Paciente::with('hospital')->findOrFail($id);
+            $this->authorize('view', $paciente);
 
             return response()->json([
                 'success' => true,
                 'data' => $paciente
             ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
@@ -172,16 +154,69 @@ class PacienteController extends Controller
         }
     }
 
+    public function update(Request $request, int $id): JsonResponse
+    {
+        try {
+            $paciente = Paciente::findOrFail($id);
+            $this->authorize('update', $paciente);
+
+            $validator = Validator::make($request->all(), [
+                'nome' => 'sometimes|required|string|max:255',
+                'numero_bi' => 'sometimes|required|string|unique:paciente,numero_bi,' . $paciente->id_paciente . ',id_paciente',
+                'telefone' => 'sometimes|required|string|max:20',
+                'id_hospital' => 'sometimes|required|exists:hospital,id_hospital'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validação falhou.',
+                    'errors' => $validator->errors(),
+                    'error' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $paciente->update($validator->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Paciente atualizado com sucesso.',
+                'data' => $paciente->load('hospital')
+            ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Paciente não encontrado.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Erro ao atualizar paciente: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function destroy(int $id): JsonResponse
     {
         try {
             $paciente = Paciente::findOrFail($id);
+            $this->authorize('delete', $paciente);
             $paciente->delete();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Paciente excluído com sucesso.'
             ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
@@ -198,7 +233,24 @@ class PacienteController extends Controller
     public function encaminhamento(int $id): JsonResponse
     {
         try {
-            $paciente = Paciente::with('hospital')->findOrFail($id);
+            $paciente = Paciente::findOrFail($id);
+            $this->authorize('encaminhar', $paciente);
+
+            $hospital = $this->triageService->encontrarHospitalMaisProximo(
+                $paciente->latitude,
+                $paciente->longitude,
+            );
+
+            $paciente->hospital = $hospital;
+
+            if ($paciente->resultado_triagem === 'baixo_risco') {
+                return response()->json([
+                    'success' => false,
+                    'paciente' => $paciente,
+                    'message' => 'Paciente com risco baixo não necessita de encaminhamento.',
+                    'encaminhamento' => false
+                ], 200);
+            }
 
             if (!$paciente->hospital) {
                 return response()->json([
@@ -209,12 +261,13 @@ class PacienteController extends Controller
 
             $openRoute = new OpenRouteService([
                 [$paciente->longitude, $paciente->latitude],
-                [$paciente->hospital->longitude, $paciente->hospital->latitude]
+                [$hospital->longitude, $hospital->latitude]
             ]);
 
             return response()->json([
                 'success' => true,
                 'paciente' => $paciente,
+                'hospital' => $hospital,
                 'open_route' => $openRoute->sucesso() ? [
                     'distancia_metros' => $openRoute->obterDistanciaTotal(),
                     'duracao_segundos' => $openRoute->obterDuracaoTotal(),
@@ -222,6 +275,11 @@ class PacienteController extends Controller
                     'instrucoes' => $openRoute->obterInstrucoes(),
                 ] : null,
             ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json([
                 'success' => false,
@@ -238,6 +296,7 @@ class PacienteController extends Controller
     public function pacientesPorHospital(int $idHospital): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Paciente::class);
             $pacientes = Paciente::where('id_hospital', $idHospital)->with('hospital')->get();
 
             return response()->json([
@@ -247,6 +306,11 @@ class PacienteController extends Controller
                     : "Pacientes encontrados para o hospital ID {$idHospital}.",
                 'data' => $pacientes
             ]);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Acesso não autorizado.'
+            ], 403);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

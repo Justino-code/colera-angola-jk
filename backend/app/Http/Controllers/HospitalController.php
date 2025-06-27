@@ -12,6 +12,8 @@ class HospitalController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Hospital::class);
+            
             $hospitais = Hospital::with('municipio')->get();
 
             return response()->json([
@@ -29,6 +31,8 @@ class HospitalController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Hospital::class);
+            
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'tipo' => 'required|in:Geral,Municipal,Centro de Saúde,Posto Médico,Clínica,Outros',
@@ -65,6 +69,8 @@ class HospitalController extends Controller
     public function show(int $id): JsonResponse
     {
         try {
+            $this->authorize('view', Hospital::class);
+            
             $hospital = Hospital::with('municipio')->findOrFail($id);
 
             return response()->json([
@@ -87,6 +93,8 @@ class HospitalController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         try {
+            $this->authorize('update', Hospital::class);
+            
             $hospital = Hospital::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
@@ -130,6 +138,8 @@ class HospitalController extends Controller
     public function destroy(int $id): JsonResponse
     {
         try {
+            $this->authorize('delete', Hospital::class);
+            
             $hospital = Hospital::findOrFail($id);
             $hospital->delete();
 

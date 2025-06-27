@@ -14,6 +14,7 @@ class AmbulanciaController extends Controller
      */
     public function index(): JsonResponse
     {
+        $this->authorize('viewAny', Ambulancia::class);
         $ambulancias = Ambulancia::where('tipo', 'ambulancia')->get();
 
         return response()->json([
@@ -29,6 +30,8 @@ class AmbulanciaController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Ambulancia::class);
+            
             $validated = $request->validate([
                 'placa' => 'required|string|unique:viatura,placa',
                 'status' => 'required|in:disponivel,em_viagem,ocupada',
@@ -61,6 +64,7 @@ class AmbulanciaController extends Controller
      */
     public function show(int $idHospital): JsonResponse
     {
+        $this->authorize('view', Ambulancia::class);
         $ambulancias = Ambulancia::where('tipo', 'ambulancia')
             ->where('id_hospital', $idHospital)
             ->get();
@@ -77,7 +81,10 @@ class AmbulanciaController extends Controller
      */
     public function updateLocation(Request $request, int $id): JsonResponse
     {
+        // Verifica se a ambulância existe e é do tipo 'ambulancia'
         try {
+            $this->authorize('update', Ambulancia::class);
+            
             $ambulancia = Ambulancia::where('tipo', 'ambulancia')->findOrFail($id);
 
             $validated = $request->validate([
@@ -113,6 +120,7 @@ class AmbulanciaController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
+        $this->authorize('delete', Ambulancia::class);
         $ambulancia = Ambulancia::where('tipo', 'ambulancia')->find($id);
 
         if (!$ambulancia) {

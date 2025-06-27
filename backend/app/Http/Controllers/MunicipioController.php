@@ -12,6 +12,8 @@ class MunicipioController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Municipio::class);
+            
             //$municipios = Municipio::with('provincia')->get();
             $municipios = Municipio::with('provincia')->get()->map(function ($m) {
                 return [
@@ -21,7 +23,6 @@ class MunicipioController extends Controller
                     'id_provincia' => $m->id_provincia,
                 ];
             });
-
 
             return response()->json([
                 'success' => true,
@@ -38,6 +39,8 @@ class MunicipioController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Municipio::class);
+            
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'id_provincia' => 'required|exists:provincia,id_provincia'
@@ -69,6 +72,8 @@ class MunicipioController extends Controller
     public function show(int $id): JsonResponse
     {
         try {
+            $this->authorize('view', Municipio::class);
+            
             $municipio = Municipio::with('provincia')->findOrFail($id);
 
             return response()->json([
@@ -91,6 +96,8 @@ class MunicipioController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         try {
+            $this->authorize('update', Municipio::class);
+            
             $municipio = Municipio::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
@@ -129,6 +136,8 @@ class MunicipioController extends Controller
     public function destroy(int $id): JsonResponse
     {
         try {
+            $this->authorize('delete', Municipio::class);
+            
             $municipio = Municipio::findOrFail($id);
             $municipio->delete();
 
@@ -149,4 +158,3 @@ class MunicipioController extends Controller
         }
     }
 }
-

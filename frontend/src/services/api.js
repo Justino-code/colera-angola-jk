@@ -62,6 +62,9 @@ async function request(endpoint, options = {}) {
             }
 
             // Lança um erro genérico para outras falhas
+            const r = await response.text();
+            console.log('Resposta em txt:   '+r);
+            
             const error = await response.json();
             throw new Error(`${error.error || response.statusText}`);
         }

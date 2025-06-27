@@ -14,6 +14,8 @@ class RelatorioController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Relatorio::class);
+            
             $relatorios = auth()->user()->relatorios;
 
             return response()->json([
@@ -32,6 +34,8 @@ class RelatorioController extends Controller
     public function generatePDF(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Relatorio::class);
+            
             $validator = Validator::make($request->all(), [
                 'tipo' => 'required|in:casos_por_regiao,evolucao_temporal,distribuicao_demografica,outro',
                 'dados' => 'required|json'

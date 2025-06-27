@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ProvinciaController;
@@ -25,6 +27,7 @@ use App\Http\Controllers\DashboardController;
 /*Teste*/
 Route::get('/ping', fn() => response()->json(['pong' => true]));
 //Route::get('/dashboard_test', [DashboardController::class, 'overview']);
+Route::get('/pacientes/{id}/encaminhamento_test', [PacienteController::class, 'encaminhamento']);
 /*Fim teste*/
 
 // Rotas públicas
@@ -63,4 +66,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->name('verification.verify');
 
     Route::get('/perfil', fn () => auth()->user())->middleware('verified');
+
+    // Rota para acessar arquivos privados (retorna sempre um JSON)
+    Route::get('/files/{filename}', function ($filename) {
+        $path = storage_path('app/private/' . $filename);
+
+        if (!file_exists($path)) {
+            return response()->json(['success' => false, 'message' => 'Arquivo não encontrado.'], 404);
+        }
+
+        $mime = mime_content_type($path);
+        $base64 = base64_encode(file_get_contents($path));
+
+        return response()->json([
+            'success' => true,
+            'filename' => $filename,
+            'mime' => $mime,
+            'data' => $base64,
+            'url' => null // opcional, caso queira gerar uma URL temporária
+        ]);
+    })->where('filename', '.*');
+
+    // Dados do usuário autenticado
+    Route::get('/me', function (Request $request) {
+        return response()->json([
+            'success' => true,
+            'user' => $request->user()
+        ]);
+    });
 });

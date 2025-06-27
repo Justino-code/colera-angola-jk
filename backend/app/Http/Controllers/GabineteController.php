@@ -12,6 +12,8 @@ class GabineteController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Gabinete::class);
+            
             $gabinetes = Gabinete::with(['municipio', 'responsavel'])->get();
 
             return response()->json([
@@ -29,6 +31,8 @@ class GabineteController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Gabinete::class);
+            
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'id_municipio' => 'required|exists:municipio,id_municipio',
@@ -66,6 +70,8 @@ class GabineteController extends Controller
     public function show($id): JsonResponse
     {
         try {
+            $this->authorize('view', Gabinete::class);
+            
             $gabinete = Gabinete::with(['municipio', 'responsavel'])->findOrFail($id);
 
             return response()->json([
@@ -88,6 +94,8 @@ class GabineteController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         try {
+            $this->authorize('update', Gabinete::class);
+            
             $gabinete = Gabinete::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
@@ -130,6 +138,8 @@ class GabineteController extends Controller
     public function destroy($id): JsonResponse
     {
         try {
+            $this->authorize('delete', Gabinete::class);
+            
             $gabinete = Gabinete::findOrFail($id);
             $gabinete->delete();
 

@@ -9,23 +9,23 @@ use Illuminate\Auth\Access\Response;
 class MunicipioPolicy
 {
     // Apenas gestores podem criar/editar municípios
-    public function viewAny(User $user) {
+    public function viewAny(Usuario $user) {
         return true;
     }
 
-    public function view(User $user, Municipio $municipio) {
+    public function view(Usuario $user, Municipio $municipio) {
         return true;
     }
 
-    public function create(User $user) {
+    public function create(Usuario $user) {
         return $user->role === 'gestor';
     }
 
-    public function update(User $user, Municipio $municipio) {
+    public function update(Usuario $user, Municipio $municipio) {
         return $user->role === 'gestor';
     }
 
-    public function delete(User $user, Municipio $municipio) {
+    public function delete(Usuario $user, Municipio $municipio) {
         return $user->role === 'gestor';
     }
 

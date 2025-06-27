@@ -8,29 +8,50 @@ use Illuminate\Auth\Access\Response;
 
 class HospitalPolicy
 {
-    // Apenas gestores podem criar/editar/excluir hospitais
-    public function viewAny(User $user) {
-        return true; // Todos podem listar hospitais
-    }
-
-    public function view(User $user, Hospital $hospital) {
+    /**
+     * Todos os usuários podem ver a lista de hospitais.
+     */
+    public function viewAny(Usuario $usuario): bool
+    {
         return true;
     }
 
-    public function create(User $user) {
-        return $user->role === 'gestor';
-    }
-
-    public function update(User $user, Hospital $hospital) {
-        return $user->role === 'gestor';
-    }
-
-    public function delete(User $user, Hospital $hospital) {
-        return $user->role === 'gestor';
+    /**
+     * Todos os usuários podem ver detalhes de um hospital.
+     */
+    public function view(Usuario $usuario, Hospital $hospital): bool
+    {
+        return true;
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Apenas gestores podem criar hospitais.
+     */
+    public function create(Usuario $usuario): bool
+    {
+        return $usuario->isGestor() || $usuario->isAdmin();
+    }
+
+    /**
+     * Apenas gestores podem atualizar hospitais.
+     */
+    public function update(Usuario $usuario, Hospital $hospital): bool
+    {
+        return $usuario->isGestor() || $usuario->isAdmin();
+    }
+
+    /**
+     * Apenas gestores podem deletar hospitais.
+     */
+    public function delete(Usuario $usuario, Hospital $hospital): bool | Response
+    {
+        return $usuario->isGestor() || $usuario->isAdmin()  
+            ? Response::allow()
+            : Response::deny('Você não tem permissão para excluir este hospital.');
+    }
+
+    /**
+     * Restaurar hospital — desativado por padrão.
      */
     public function restore(Usuario $usuario, Hospital $hospital): bool
     {
@@ -38,7 +59,7 @@ class HospitalPolicy
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Excluir permanentemente — desativado por padrão.
      */
     public function forceDelete(Usuario $usuario, Hospital $hospital): bool
     {

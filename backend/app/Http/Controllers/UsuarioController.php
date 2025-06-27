@@ -18,6 +18,7 @@ class UsuarioController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Usuario::class);
             $usuarios = Usuario::all();
 
             if ($usuarios->isEmpty()) {
@@ -43,6 +44,7 @@ class UsuarioController extends Controller
     // Exibir um usuário específico
     public function show(int $id): JsonResponse
     {
+        $this->authorize('view', Usuario::class);
         $usuario = Usuario::find($id);
 
         if (!$usuario) {
@@ -62,6 +64,9 @@ class UsuarioController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Usuario::class);
+            
+            // Validação dos dados de entrada
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 'email' => ['required', 'email', 'max:255', Rule::unique('usuario', 'email')],
@@ -118,6 +123,7 @@ class UsuarioController extends Controller
     // Atualizar permissões
     public function updatePermissions(Request $request, int $id): JsonResponse
     {
+        $this->authorize('update', Usuario::class);
         $usuario = Usuario::find($id);
 
         if (!$usuario) {
@@ -153,6 +159,7 @@ class UsuarioController extends Controller
     // Atualizar dados do usuário
     public function update(Request $request, int $id): JsonResponse
     {
+        $this->authorize('update', Usuario::class);
         $usuario = Usuario::find($id);
 
         if (!$usuario) {
@@ -208,6 +215,7 @@ class UsuarioController extends Controller
     // Excluir um usuário
     public function destroy(int $id): JsonResponse
     {
+        $this->authorize('delete', Usuario::class);
         $usuario = Usuario::find($id);
 
         if (!$usuario) {

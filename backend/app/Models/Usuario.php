@@ -3,6 +3,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasRoles;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 
 
 class Usuario extends Authenticatable implements MustVerifyEmail{
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, HasRoles;
 
     protected $table = 'usuario';
     protected $primaryKey = 'id_usuario';

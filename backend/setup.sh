@@ -22,4 +22,8 @@ php artisan db:seed --class=UsuarioSeeder
 echo "🌱 Executando: php artisan db:seed --class=ProvinciasMunicipiosSeeder"
 php artisan db:seed --class=ProvinciasMunicipiosSeeder
 
+# Criar link simbólico para o storage
+echo "🔗 Executando: php artisan storage:link"
+php artisan storage:link
+
 echo "✅ Setup concluído com sucesso!"

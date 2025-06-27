@@ -14,6 +14,8 @@ class ProvinciaController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Provincia::class);
+            
             $provincias = Provincia::all();
             return response()->json([
                 'success' => true,
@@ -31,6 +33,8 @@ class ProvinciaController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Provincia::class);
+            
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
                 //'codigo_iso' => 'required|string|max:5|unique:provincia,codigo_iso'
@@ -68,6 +72,8 @@ class ProvinciaController extends Controller
     public function show($idProvincia): JsonResponse
     {
         try {
+            $this->authorize('view', Provincia::class);
+            
             $provincia = Provincia::findOrFail($idProvincia);
 
             return response()->json([
@@ -91,6 +97,8 @@ class ProvinciaController extends Controller
     public function update(Request $request, $idProvincia): JsonResponse
     {
         try {
+            $this->authorize('update', Provincia::class);
+            
             $provincia = Provincia::findOrFail($idProvincia);
 
             $validator = Validator::make($request->all(), [
@@ -128,6 +136,8 @@ class ProvinciaController extends Controller
     public function destroy($idProvincia): JsonResponse
     {
         try {
+            $this->authorize('delete', Provincia::class);
+            
             $provincia = Provincia::findOrFail($idProvincia);
             $provincia->delete();
 

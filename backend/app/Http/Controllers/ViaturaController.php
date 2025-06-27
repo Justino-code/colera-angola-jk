@@ -13,6 +13,8 @@ class ViaturaController extends Controller
     public function index(): JsonResponse
     {
         try {
+            $this->authorize('viewAny', Viatura::class);
+
             $viaturas = Viatura::with('hospital')->get();
 
             return response()->json([
@@ -30,6 +32,9 @@ class ViaturaController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            $this->authorize('create', Viatura::class);
+
+            // Validação dos dados de entrada
             $validator = Validator::make($request->all(), [
                 'identificacao' => 'required|string|max:50',
                 'tipo' => 'required|string|max:50',
@@ -64,6 +69,8 @@ class ViaturaController extends Controller
     public function show($id): JsonResponse
     {
         try {
+            $this->authorize('view', Viatura::class);
+
             $viatura = Viatura::with('hospital')->findOrFail($id);
 
             return response()->json([
@@ -86,6 +93,8 @@ class ViaturaController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         try {
+            $this->authorize('update', Viatura::class);
+
             $viatura = Viatura::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
@@ -127,6 +136,7 @@ class ViaturaController extends Controller
     public function destroy($id): JsonResponse
     {
         try {
+            $this->authorize('delete', Viatura::class);
             $viatura = Viatura::findOrFail($id);
             $viatura->delete();
 

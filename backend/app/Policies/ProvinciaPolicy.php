@@ -9,30 +9,30 @@ use Illuminate\Auth\Access\Response;
 class ProvinciaPolicy
 {
     // Apenas gestores podem gerenciar províncias
-    public function viewAny(User $user) {
+    public function viewAny(Usuario $user) {
         return true; // Todos podem listar
     }
 
-    public function view(User $user, Provincia $provincia) {
+    public function view(Usuario $user, Provincia $provincia) {
         return true;
     }
 
-    public function create(User $user) {
+    public function create(Usuario $user) {
         return $user->role === 'gestor';
     }
 
-    public function update(User $user, Provincia $provincia) {
+    public function update(Usuario $user, Provincia $provincia) {
         return $user->role === 'gestor';
     }
 
-    public function delete(User $user, Provincia $provincia) {
+    public function delete(Usuario $user, Provincia $provincia) {
         return $user->role === 'gestor';
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(Usuario $usuario, Provincia $provincia): bool
+    public function restore(Usuario $user, Provincia $provincia): bool
     {
         return false;
     }
@@ -40,7 +40,7 @@ class ProvinciaPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(Usuario $usuario, Provincia $provincia): bool
+    public function forceDelete(Usuario $user, Provincia $provincia): bool
     {
         return false;
     }
