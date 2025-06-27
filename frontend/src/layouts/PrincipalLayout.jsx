@@ -2,7 +2,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
-  LogOut, Menu, X, Home, User, Building2, Car, Landmark, Users, Map, MapPin, Sun, Moon
+  LogOut, Menu, X, Home, User, Building2, Car, Landmark, Users, Map, MapPin, Sun, Moon, FileText
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -110,6 +110,8 @@ export default function PrincipalLayout() {
               <SidebarLink to="/municipio" text="Municípios" icon={<MapPin size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
             </>
           )}
+          {/* Relatórios: todos */}
+          <SidebarLink to="/relatorio" text="Relatórios" icon={<FileText size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           {/* Mapa: todos */}
           <SidebarLink to="/mapacasos" text="Mapa" icon={<MapPin size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
         </nav>

@@ -56,8 +56,7 @@ class RelatorioController extends Controller
             'id_usuario' => auth()->id()
         ]);
 
-        $dadosArray = json_decode($relatorio->dados, true);
-
+        $dadosArray = $relatorio->dados;
         // Montar o HTML do relatório para o PDF
         $html = '
             <html>
