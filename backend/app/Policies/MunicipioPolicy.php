@@ -21,18 +21,18 @@ class MunicipioPolicy
         return $user->isGestor();
     }
 
-    public function update(Usuario $user, Municipio $municipio) {
+    public function update(Usuario $user): bool {
         return $user->isGestor();
     }
 
-    public function delete(Usuario $user, Municipio $municipio) {
+    public function delete(Usuario $user): bool {
         return $user->isGestor();
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(Usuario $usuario, Municipio $municipio): bool
+    public function restore(Usuario $usuario): bool
     {
         return false;
     }
@@ -40,7 +40,7 @@ class MunicipioPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(Usuario $usuario, Municipio $municipio): bool
+    public function forceDelete(Usuario $usuario): bool
     {
         return false;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Hospital;
 use App\Models\Paciente;
 use App\Models\Usuario;
 use Illuminate\Auth\Access\Response;
@@ -9,25 +10,25 @@ use Illuminate\Auth\Access\Response;
 class PacientePolicy
 {
     // Autorizações
-    public function viewAny(Usuario $user) {
-        return $user->isGestor() || $user->isMedico();
+    public function viewAny(Usuario $user): bool {
+        $authUser = auth()->user();
+        return $user->isGestor() || $user->isAdmin() || ($user->isMedico());
     }
 
-    public function view(Usuario $user, Paciente $paciente) {
-        return $user->isGestor() ||
-            ($user->isMedico() && $user->id_hospital === $paciente->id_hospital);
+    public function view(Usuario $user) {
+        return $user->isGestor() ||$user->isMedico() || $user->isAdmin();
     }
 
     public function create(Usuario $user) {
-        return $user->isGestor() || $user->isMedico();
+        return $user->isGestor() || $user->isMedico() || $user->isAdmin();
     }
 
-    public function update(Usuario $user, Paciente $paciente) {
-        return $this->view($user, $paciente);
+    public function update(Usuario $user): bool {
+        return $user->isGestor() || $user->isAdmin() || ($user->isMedico());
     }
 
-    public function delete(Usuario $user, Paciente $paciente) {
-        return $user->isGestor();
+    public function delete(Usuario $user) {
+        return $user->isGestor() || $user->isAdmin() || $user->isMedico();
     }
     /**
      * Determine whether the user can restore the model.

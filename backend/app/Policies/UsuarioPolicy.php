@@ -3,12 +3,9 @@
 namespace App\Policies;
 
 use App\Models\Usuario;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UsuarioPolicy
 {
-    use HandlesAuthorization;
-
     // Gestores gerenciam usuários; outros só veem seu próprio perfil
     public function viewAny(Usuario $user)
     {

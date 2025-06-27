@@ -13,22 +13,21 @@ class RelatorioPolicy
         return true;
     }
 
-    public function view(Relatorio $relatorio) {
-        $user = auth()->user();
-        return $user->isGestor() || $relatorio->usuario_id === $user->id_usuario;
+    public function view(Usuario $user): bool {
+        return true;
     }
 
-    public function create(Usuario $user) {
-        return $user->isGestor() || $user->isMedico();
+    public function create(Usuario $user): bool {
+        return true;
     }
 
-    public function delete(Usuario $user, Relatorio $relatorio) {
-        return $user->isGestor() || $relatorio->usuario_id === $user->id;
+    public function delete(Usuario $user): bool {
+        return $user->isGestor() || $user->isAdmin();
     }
 
     // Geração de PDF
     public function generatePDF(Usuario $user) {
-        return $this->create($user);
+        return true;
     }
 
     /**

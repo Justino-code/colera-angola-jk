@@ -13,20 +13,20 @@ class ProvinciaPolicy
         return true; // Todos podem listar
     }
 
-    public function view(Usuario $user, Provincia $provincia) {
+    public function view(Usuario $user) {
         return true;
     }
 
     public function create(Usuario $user) {
-        return $user->isGestor();
+        return $user->isAdmin();
     }
 
     public function update(Usuario $user, Provincia $provincia) {
-        return $user->isGestor();
+        return $user->isAdmin();
     }
 
     public function delete(Usuario $user, Provincia $provincia) {
-        return $user->isGestor();
+        return $user->isAdmin();
     }
 
     /**

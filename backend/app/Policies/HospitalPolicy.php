@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Hospital;
 use App\Models\Usuario;
 use Illuminate\Auth\Access\Response;
 
@@ -19,7 +18,7 @@ class HospitalPolicy
     /**
      * Todos os usuários podem ver detalhes de um hospital.
      */
-    public function view(Usuario $usuario, Hospital $hospital): bool
+    public function view(Usuario $usuario): bool
     {
         return true;
     }
@@ -35,7 +34,7 @@ class HospitalPolicy
     /**
      * Apenas gestores podem atualizar hospitais.
      */
-    public function update(Usuario $usuario, Hospital $hospital): bool
+    public function update(Usuario $usuario): bool
     {
         return $usuario->isGestor() || $usuario->isAdmin();
     }
@@ -43,7 +42,7 @@ class HospitalPolicy
     /**
      * Apenas gestores podem deletar hospitais.
      */
-    public function delete(Usuario $usuario, Hospital $hospital): bool | Response
+    public function delete(Usuario $usuario): bool | Response
     {
         return $usuario->isGestor() || $usuario->isAdmin()  
             ? Response::allow()
@@ -53,7 +52,7 @@ class HospitalPolicy
     /**
      * Restaurar hospital — desativado por padrão.
      */
-    public function restore(Usuario $usuario, Hospital $hospital): bool
+    public function restore(Usuario $usuario): bool
     {
         return false;
     }
@@ -61,7 +60,7 @@ class HospitalPolicy
     /**
      * Excluir permanentemente — desativado por padrão.
      */
-    public function forceDelete(Usuario $usuario, Hospital $hospital): bool
+    public function forceDelete(Usuario $usuario): bool
     {
         return false;
     }

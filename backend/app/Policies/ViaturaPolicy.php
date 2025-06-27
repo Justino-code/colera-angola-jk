@@ -10,36 +10,34 @@ class ViaturaPolicy
 {
     // Gestores e técnicos do mesmo hospital
     public function viewAny(Usuario $user) {
-        return in_array($user->role, ['gestor', 'tecnico']);
+        return true;
     }
 
-    public function view(Usuario $user, Viatura $Viatura) {
-        return $user->role === 'gestor' ||
-        ($user->role === 'tecnico' && $user->id_hospital === $Viatura->id_hospital);
+    public function view(Usuario $user) {
+        return $user->isGestor() || $user->isAdmin();
     }
 
     public function create(Usuario $user) {
-        return $user->role === 'gestor';
+        return $user->isAdmin() || $user->isGestor();
     }
 
-    public function update(Usuario $user, Viatura $viatura) {
-        return $user->role === 'gestor' ||
-        ($user->role === 'tecnico' && $user->id_hospital === $viatura->id_hospital);
+    public function update(Usuario $user) {
+        return $user->isGestor() || $user->isGestor() || $user->isTecnico();
     }
 
-    public function delete(Usuario $user, Viatura $viatura) {
-        return $user->role === 'gestor';
+    public function delete(Usuario $user) {
+        return $user->isAdmin() || $user->isGestor();
     }
 
     // Atualização de localização
-    public function updateLocation(Usuario $user, Viatura $viatura) {
-        return $this->update($user, $viatura);
+    public function updateLocation(Usuario $user) {
+        return $user->isAdmin() || $user->isGestor() || $user->isTecnico();
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(Usuario $usuario, Viatura $viatura): bool
+    public function restore(Usuario $usuario): bool
     {
         return false;
     }
@@ -47,7 +45,7 @@ class ViaturaPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(Usuario $usuario, Viatura $Viatura): bool
+    public function forceDelete(Usuario $usuario): bool
     {
         return false;
     }

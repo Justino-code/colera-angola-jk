@@ -14,7 +14,7 @@ class GabinetePolicy
         return true;
     }
 
-    public function view(Usuario $usuario, Gabinete $gabinete): bool
+    public function view(Usuario $usuario): bool
     {
         // Admins, gerentes ou responsáveis pelo gabinete podem ver
         return $usuario->isAdmin() || $usuario->isGerente();
@@ -23,13 +23,13 @@ class GabinetePolicy
     public function create(Usuario $usuario): bool
     {
         // Apenas admins e gerentes podem criar gabinetes
-        return $usuario->isAdmin() || $usuario->isGerente();
+        return $usuario->isAdmin();
     }
 
-    public function update(Usuario $usuario, Gabinete $gabinete): bool
+    public function update(Usuario $usuario): bool
     {
         // Apenas admins ou responsáveis podem editar
-        return $usuario->isAdmin() || $gabinete->usuario_id === $usuario->id;
+        return $usuario->isAdmin();
     }
 
     public function delete(Usuario $usuario, Gabinete $gabinete): bool
