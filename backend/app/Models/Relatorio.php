@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Relatorio extends Model {
+    protected $table = 'relatorio'; // Define o nome da tabela
+    protected $primaryKey = 'id_relatorio'; // Define a chave primária
     protected $fillable = [
         'tipo',
         'dados',
@@ -20,6 +22,6 @@ class Relatorio extends Model {
 
     // Relacionamento com o usuário que gerou o relatório
     public function usuario(): BelongsTo {
-        return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
+        return $this->belongsTo(Usuario::class, 'id_usuario', 'id_usuario');
     }
 }

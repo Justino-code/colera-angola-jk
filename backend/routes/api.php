@@ -51,15 +51,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('gabinetes', GabineteController::class);
     Route::apiResource('viaturas', ViaturaController::class);
 
+    // Rotas customizadas
     Route::get('/dashboard', [DashboardController::class, 'overview']);
 
     //Route::get('/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
     Route::get('/pacientes/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
 
 
-    // Rotas customizadas
     Route::post('/ambulancia/{ambulancia}/location', [AmbulanciaController::class, 'updateLocation']);
-    Route::post('/relatorio/generate-pdf', [RelatorioController::class, 'generatePDF']);
+    Route::post('/relatorio/{id}/gerar-pdf', [RelatorioController::class, 'gerarPDF']);
+    Route::post('/relatorio/gerar', [RelatorioController::class, 'store']);
+    Route::delete('/relatorio/{id}', [RelatorioController::class, 'destroy']);
+    Route::get('/relatorio/{id}', [RelatorioController::class, 'show']);
     Route::put('/usuario/{user}/permissions', [UsuarioController::class, 'updatePermissions']);
 
     //Rotas de verificacao de email

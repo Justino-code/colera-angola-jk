@@ -47,7 +47,7 @@ async function request(endpoint, options = {}) {
                 );
                 setTimeout(() => {
                     window.location.href = "/login";
-                }, 1000);
+                }, 2000);
             }
 
             if (response.status === 403 && !unauthorizedShown) {

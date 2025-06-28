@@ -8,8 +8,8 @@ class AuthController extends Controller
 {
     public function login(Request $request, LoginAction $login)
     {
-        $data = $login->handle($request);
-        return response()->json($data);
+        return $login->handle($request);
+        //return response()->json($data);
     }
 
     public function register(Request $request, RegisterAction $register)
