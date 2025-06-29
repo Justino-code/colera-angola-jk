@@ -49,9 +49,9 @@ export default function ViaturaDetalhes() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Detalhes da Viatura</h1>
-      <div className="space-y-2">
+      <div className="space-y-2 flex-1">
         <div><span className="font-semibold">Identificação:</span> {viatura.identificacao}</div>
         <div><span className="font-semibold">Tipo:</span> {viatura.tipo}</div>
         <div><span className="font-semibold">Status:</span> {viatura.status}</div>

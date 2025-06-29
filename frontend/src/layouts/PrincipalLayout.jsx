@@ -66,14 +66,14 @@ export default function PrincipalLayout() {
   const hasAnyRole = (roles) => user && roles.includes(user.role);
 
   return (
-    <div className={`min-h-screen flex transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
+    <div className={`min-h-screen flex ${darkMode ? 'bg-gray-900 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
       {/* Sidebar */}
       <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'} flex flex-col
                       ${darkMode ? 'bg-blue-900' : 'bg-blue-700'} text-white`}>
         <div className="flex items-center justify-between p-4 min-h-[56px]">
           {sidebarOpen && (
             <span className="font-bold text-lg">
-              🩺 Sistema
+              🩺 AngoVIva
             </span>
           )}
           <button onClick={toggleSidebar}>
@@ -84,7 +84,7 @@ export default function PrincipalLayout() {
           {/* Dashboard: todos */}
           <SidebarLink to="/dashboard" text="Dashboard" icon={<Home size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           {/* Pacientes: admin, gestor, medico, enfermeiro, epidemiologista, tecnico */}
-          {hasAnyRole(['admin', 'gestor', 'medico', 'enfermeiro', 'epidemiologista', 'tecnico']) && (
+          {hasAnyRole(['admin', 'gestor', 'medico', 'enfermeiro', 'epidemiologista']) && (
             <SidebarLink to="/paciente" text="Pacientes" icon={<User size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
           {/* Hospitais: admin, gestor, medico, epidemiologista */}
@@ -133,22 +133,22 @@ export default function PrincipalLayout() {
       </div>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         <header className={`shadow p-4 flex justify-between items-center
                            ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-          <h1 className="font-semibold text-xl">Sistema Cólera Angola</h1>
+          <h1 className="font-semibold text-xl">Angola Viva</h1>
           {user && (
             <div className="text-sm">
               Olá, <span className="font-semibold">{user.nome || user.name}</span> <span className="ml-2 px-2 py-1 rounded bg-blue-200 text-blue-900">{user.role}</span>
             </div>
           )}
         </header>
-        <main className="flex-1 p-4">
-          <Outlet />
+        <main className="flex-1 min-h-0 overflow-auto p-4">
+            <Outlet />
         </main>
         <footer className={`text-sm text-center py-2 shadow-inner
                             ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'}`}>
-          &copy; {new Date().getFullYear()} Sistema Cólera Angola. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} Angola Viva. Todos os direitos reservados.
         </footer>
       </div>
     </div>

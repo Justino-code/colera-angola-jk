@@ -20,9 +20,12 @@ export default function MunicipioEditar() {
           api.get(`/municipios/${id}`)
         ]);
 
-        setProvincias(provRes.data);
-        setNome(munRes.data.nome);
-        setProvinciaId(munRes.data.id_provincia);
+        if (provRes.success && munRes.success) {
+          setProvincias(provRes.data);
+          setNome(munRes.data.nome);
+          setProvinciaId(munRes.data.id_provincia);
+        }
+
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
         toast.error('Erro ao carregar dados');
@@ -52,7 +55,7 @@ export default function MunicipioEditar() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
         <div className="animate-pulse w-full max-w-lg space-y-4">
           <div className="h-6 bg-slate-200 rounded" />
           <div className="h-10 bg-slate-200 rounded" />
@@ -64,7 +67,7 @@ export default function MunicipioEditar() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Município</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

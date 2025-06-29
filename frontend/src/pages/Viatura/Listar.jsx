@@ -47,7 +47,7 @@ export default function ViaturaListar() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Viaturas</h1>
         <Link
@@ -61,7 +61,7 @@ export default function ViaturaListar() {
       {viaturas.length === 0 ? (
         <div className="text-slate-500">Nenhuma viatura cadastrada.</div>
       ) : (
-        <table className="w-full border-collapse border">
+        <table className="w-full border-collapse border flex-1">
           <thead className="bg-slate-100">
             <tr>
               <th className="border p-2 text-left">Identificação</th>

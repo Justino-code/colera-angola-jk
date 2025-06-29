@@ -64,7 +64,7 @@ export default function HospitalListar() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Hospitais</h1>
         <Link
@@ -84,17 +84,21 @@ export default function HospitalListar() {
               key={hosp.id_hospital}
               className="border rounded-lg p-4 hover:bg-slate-50 transition"
             >
-              <Link to={`/hospital/${hosp.id_hospital}`}>
-                <div className="font-semibold text-slate-700 text-lg">{hosp.nome}</div>
-                <div className="text-slate-500 text-sm">
-                  {hosp.endereco || 'Endereço não informado'} — Capacidade: {hosp.capacidade_leitos || 0}
-                </div>
-                {hosp.municipio?.nome && (
-                  <div className="text-slate-400 text-xs">Município: {hosp.municipio.nome}</div>
-                )}
-              </Link>
+              <div className="font-semibold text-slate-700 text-lg">{hosp.nome}</div>
+              <div className="text-slate-500 text-sm">
+                {hosp.endereco || 'Endereço não informado'} — Capacidade: {hosp.capacidade_leitos || 0}
+              </div>
+              {hosp.municipio?.nome && (
+                <div className="text-slate-400 text-xs">Município: {hosp.municipio.nome}</div>
+              )}
 
               <div className="mt-2 flex gap-2">
+                <Link
+                  to={`/hospital/${hosp.id_hospital}`}
+                  className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700 transition"
+                >
+                  Ver
+                </Link>
                 <button
                   onClick={() => navigate(`/hospital/${hosp.id_hospital}/editar`)}
                   className="bg-cyan-600 text-white text-sm px-3 py-1 rounded hover:bg-cyan-700 transition"

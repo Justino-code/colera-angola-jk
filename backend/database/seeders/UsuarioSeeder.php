@@ -10,17 +10,24 @@ class UsuarioSeeder extends Seeder
 {
     public function run(): void
     {
-        // Remove o usuário se já existir
-        Usuario::where('email', 'admin@me.com')->delete();
+        $roles = [
+            'admin','gestor', 'medico', 'tecnico', 'enfermeiro', 'epidemiologista',
+            'administrativo', 'agente_sanitario', 'farmaceutico',
+            'analista_dados', 'coordenador_regional'
+        ];
 
-        // Cria novamente o usuário admin
-        Usuario::create([
-            'nome' => 'Administrador',
-            'email' => 'admin@me.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-            'permissoes' => ['*'],
-            'email_verified_at' => now()
-        ]);
+        foreach ($roles as $role) {
+            $email = $role . '@me.com';
+            Usuario::where('email', $email)->delete();
+
+            Usuario::create([
+                'nome' => ucfirst($role),
+                'email' => $email,
+                'password' => Hash::make('admin123'),
+                'role' => $role,
+                'permissoes' => ['*'],
+                'email_verified_at' => now()
+            ]);
+        }
     }
 }

@@ -13,7 +13,7 @@ class MunicipioPolicy
         return true;
     }
 
-    public function view(Usuario $user, Municipio $municipio) {
+    public function view(Usuario $user) {
         return true;
     }
 

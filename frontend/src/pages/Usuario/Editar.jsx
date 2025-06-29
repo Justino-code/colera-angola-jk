@@ -128,8 +128,17 @@ export default function UsuarioEditar() {
   if (loading) return <Skeleton />;
 
   return (
-    <div className="max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold text-slate-700">Editar Usuário</h1>
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="text-2xl font-bold text-slate-700">Editar Usuário</h1>
+        <button
+          type="button"
+          onClick={() => navigate("/usuario")}
+          className="mt-4 sm:mt-0 bg-slate-200 text-slate-700 px-4 py-2 rounded hover:bg-slate-300 transition"
+        >
+          Voltar
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-4 rounded shadow space-y-4">
 

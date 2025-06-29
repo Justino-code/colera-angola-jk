@@ -31,7 +31,7 @@ export default function ProvinciaCriar() {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
+ <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Criar Província</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

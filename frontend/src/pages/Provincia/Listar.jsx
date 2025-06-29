@@ -39,7 +39,7 @@ export default function ProvinciaListar() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+ <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Provincias</h1>
         <Link to="/provincia/criar" className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">Nova</Link>

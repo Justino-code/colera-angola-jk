@@ -53,6 +53,9 @@ async function request(endpoint, options = {}) {
             if (response.status === 403 && !unauthorizedShown) {
                 unauthorizedShown = true;
                 toast.error("Acesso não autorizado.");
+                setTimeout(() => {
+                    window.location.href = "/forbidden";
+                }, 1500);
             }
 
             if (response.status === 404) {

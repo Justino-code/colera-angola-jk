@@ -34,7 +34,7 @@ export default function GabineteDetalhes() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-lg mx-auto">
+      <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-slate-200 rounded w-1/3" />
           <div className="h-4 bg-slate-200 rounded w-1/2" />
@@ -48,7 +48,7 @@ export default function GabineteDetalhes() {
   if (!gabinete) return null;
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+<div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Detalhes do Gabinete</h1>
       <div className="space-y-2">

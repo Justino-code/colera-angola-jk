@@ -89,7 +89,7 @@ export default function PacienteCriar() {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-4 rounded shadow space-y-4">
+ <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold text-slate-700">Novo Paciente</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         

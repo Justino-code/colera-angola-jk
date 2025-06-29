@@ -62,7 +62,7 @@ export default function RelatorioDetalhes() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="h-full w-full flex flex-col bg-white p-4 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Detalhes do Relatório</h1>
 
       {loading ? (
@@ -72,7 +72,7 @@ export default function RelatorioDetalhes() {
           <div className="h-40 bg-slate-200 rounded animate-pulse"></div>
         </div>
       ) : relatorio ? (
-        <div className="bg-white p-4 rounded shadow space-y-3">
+        <div className="flex-1 flex flex-col space-y-3">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <div>
               <p><strong>ID:</strong> {relatorio.id_relatorio}</p>
@@ -95,7 +95,7 @@ export default function RelatorioDetalhes() {
               Voltar
             </button>
           </div>
-          <div>
+          <div className="flex-1 flex flex-col">
             <h2 className="font-semibold mt-2 mb-1">Dados do Relatório</h2>
             {renderDados()}
           </div>

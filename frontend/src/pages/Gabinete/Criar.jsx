@@ -61,7 +61,7 @@ export default function GabineteCriar() {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <Toaster position="top-right" />
       <h1 className="text-2xl font-bold text-slate-700 mb-4">Novo Gabinete</h1>
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">

@@ -84,9 +84,9 @@ export default function ViaturaCriar() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Nova Viatura</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
         <div>
           <label className="block text-sm font-medium">Identificação *</label>
           <input
@@ -164,13 +164,22 @@ export default function ViaturaCriar() {
             ))}
           </select>
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition w-full"
-        >
-          {loading ? 'Salvando...' : 'Criar'}
-        </button>
+        <div className="flex gap-2 mt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
+          >
+            {loading ? 'Salvando...' : 'Criar'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/viatura")}
+            className="bg-slate-300 text-slate-700 py-2 px-4 rounded"
+          >
+            Voltar
+          </button>
+        </div>
       </form>
     </div>
   );

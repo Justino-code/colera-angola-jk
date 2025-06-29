@@ -12,8 +12,13 @@ export default function MunicipioDetalhes() {
   useEffect(() => {
     const fetchMunicipio = async () => {
       try {
-        const { data } = await api.get(`/municipios/${id}`);
-        setMunicipio(data);
+        const res = await api.get(`/municipios/${id}`);
+        if(res.success) {
+        setMunicipio(res.data);
+        } else {
+          toast.error(res.message || 'Erro ao carregar município');
+          navigate('/municipio');
+        }
       } catch (error) {
         console.error('Erro ao carregar município:', error);
         toast.error('Erro ao carregar município');
@@ -28,7 +33,7 @@ export default function MunicipioDetalhes() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
         <div className="animate-pulse w-full max-w-lg space-y-4">
           <div className="h-6 bg-slate-200 rounded" />
           <div className="h-4 bg-slate-200 rounded" />
@@ -39,7 +44,7 @@ export default function MunicipioDetalhes() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Detalhes do Município</h1>
       <div className="space-y-2">
         <div>

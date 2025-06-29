@@ -62,7 +62,7 @@ export default function GabineteListar() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Gabinetes</h1>
         <Link

@@ -55,7 +55,7 @@ export default function ProvinciaEditar() {
   }
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Província</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -78,9 +78,21 @@ export default function ProvinciaEditar() {
             required
           />
         </div>
-        <button disabled={salvando} className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition">
-          {salvando ? 'Salvando...' : 'Salvar Alterações'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            disabled={salvando}
+            className="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 transition"
+          >
+            {salvando ? 'Salvando...' : 'Salvar Alterações'}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/provincia')}
+            className="bg-slate-200 text-slate-700 px-4 py-2 rounded hover:bg-slate-300 transition"
+          >
+            Voltar
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -40,7 +40,7 @@ export default function MunicipioListar() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
         <div className="animate-pulse w-full max-w-lg space-y-4">
           <div className="h-6 bg-slate-200 rounded" />
           <div className="h-6 bg-slate-200 rounded" />
@@ -51,7 +51,7 @@ export default function MunicipioListar() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Municípios</h1>
         <Link
@@ -61,47 +61,49 @@ export default function MunicipioListar() {
           Novo Município
         </Link>
       </div>
-      {municipios.length === 0 ? (
-        <p className="text-slate-600">Nenhum município cadastrado.</p>
-      ) : (
-        <table className="w-full table-auto border">
-          <thead className="bg-slate-100">
-            <tr>
-              <th className="border p-2 text-left">Nome</th>
-              <th className="border p-2 text-left">Província</th>
-              <th className="border p-2 text-center">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {municipios.map((m) => (
-              <tr key={m.id_municipio} className="hover:bg-slate-50">
-                <td className="border p-2">{m.nome}</td>
-                <td className="border p-2">{m.nome_provincia}</td>
-                <td className="border p-2 text-center space-x-2">
-                  <button
-                    onClick={() => navigate(`/municipio/${m.id_municipio}`)}
-                    className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition"
-                  >
-                    Detalhes
-                  </button>
-                  <button
-                    onClick={() => navigate(`/municipio/${m.id_municipio}/editar`)}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(m.id_municipio)}
-                    className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
-                  >
-                    Excluir
-                  </button>
-                </td>
+      <div className="flex-1 overflow-auto">
+        {municipios.length === 0 ? (
+          <p className="text-slate-600">Nenhum município cadastrado.</p>
+        ) : (
+          <table className="w-full table-auto border">
+            <thead className="bg-slate-100">
+              <tr>
+                <th className="border p-2 text-left">Nome</th>
+                <th className="border p-2 text-left">Província</th>
+                <th className="border p-2 text-center">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {municipios.map((m) => (
+                <tr key={m.id_municipio} className="hover:bg-slate-50">
+                  <td className="border p-2">{m.nome}</td>
+                  <td className="border p-2">{m.nome_provincia}</td>
+                  <td className="border p-2 text-center space-x-2">
+                    <button
+                      onClick={() => navigate(`/municipio/${m.id_municipio}`)}
+                      className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition"
+                    >
+                      Detalhes
+                    </button>
+                    <button
+                      onClick={() => navigate(`/municipio/${m.id_municipio}/editar`)}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(m.id_municipio)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+                    >
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

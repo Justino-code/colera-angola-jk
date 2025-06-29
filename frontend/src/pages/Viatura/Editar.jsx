@@ -108,9 +108,9 @@ export default function ViaturaEditar() {
   if (loading) return <Skeleton />;
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Viatura</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
         <div>
           <label className="block mb-1 text-sm font-medium">Identificação</label>
           <input
@@ -202,9 +202,16 @@ export default function ViaturaEditar() {
         <button
           type="submit"
           disabled={saving}
-          className={`w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {saving ? 'Salvando...' : 'Salvar'}
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/viatura')}
+          className="bg-slate-300 text-slate-700 py-2 rounded"
+        >
+          Voltar
         </button>
       </form>
     </div>

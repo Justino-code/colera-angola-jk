@@ -52,7 +52,7 @@ export default function MunicipioCriar() {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+     <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Criar Município</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

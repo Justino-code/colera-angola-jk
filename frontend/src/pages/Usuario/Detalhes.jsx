@@ -36,7 +36,7 @@ export default function UsuarioDetalhes() {
 
   if (!usuario) {
     return (
-      <div className="max-w-2xl mx-auto p-4">
+      <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
         <p className="text-center text-slate-500">Usuário não encontrado.</p>
         <div className="text-center mt-4">
           <Link
@@ -51,7 +51,7 @@ export default function UsuarioDetalhes() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-4">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold text-slate-700">Detalhes do Usuário</h1>
 
       <div className="bg-white rounded shadow p-4 space-y-2">

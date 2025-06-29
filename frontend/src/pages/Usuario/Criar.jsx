@@ -99,12 +99,21 @@ export default function CriarUsuario() {
   if (loading) return <Skeleton />;
 
   return (
-    <div className="max-w-xl mx-auto space-y-4 p-4">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Criar Usuário</h1>
+    <div className="h-full w-full flex flex-col bg-white p-0 sm:p-6 rounded shadow transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 px-6 pt-6">
+        <h1 className="text-2xl font-bold text-gray-800">Criar Usuário</h1>
+        <button
+          type="button"
+          onClick={() => navigate("/usuario")}
+          className="mt-4 sm:mt-0 bg-slate-200 text-slate-700 px-4 py-2 rounded hover:bg-slate-300 transition"
+        >
+          Voltar
+        </button>
+      </div>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="rounded-lg shadow space-y-4 p-4 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+        className="flex-1 flex flex-col max-w-2xl mx-auto w-full rounded-lg shadow space-y-5 p-6 border border-gray-200 bg-white transition-colors"
       >
         {[
           { name: 'nome', label: 'Nome', type: 'text' },
@@ -114,23 +123,23 @@ export default function CriarUsuario() {
           { name: 'permissoes', label: 'Permissões (separadas por vírgula)', type: 'text' }
         ].map((field) => (
           <div key={field.name}>
-            <label className="block font-medium text-gray-700 dark:text-gray-300">{field.label}</label>
+            <label className="block font-medium text-gray-700 mb-1">{field.label}</label>
             <input
               type={field.type}
               {...register(field.name)}
-              className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+              className="w-full p-2 rounded border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
             />
             {errors[field.name] && (
-              <p className="text-red-500 text-sm">{errors[field.name].message}</p>
+              <p className="text-red-500 text-xs mt-1">{errors[field.name].message}</p>
             )}
           </div>
         ))}
 
         <div>
-          <label className="block font-medium text-gray-700 dark:text-gray-300">Cargo</label>
+          <label className="block font-medium text-gray-700 mb-1">Cargo</label>
           <select
             {...register('role')}
-            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full p-2 rounded border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
           >
             <option value="">Selecione um cargo</option>
             <option value="admin">Admin</option>
@@ -146,44 +155,45 @@ export default function CriarUsuario() {
             <option value="coordenador_regional">Coordenador Regional</option>
           </select>
           {errors.role && (
-            <p className="text-red-500 text-sm">{errors.role.message}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
           )}
         </div>
 
-        <div>
-          <label className="block font-medium text-gray-700 dark:text-gray-300">Hospital</label>
-          <select
-            {...register('id_hospital')}
-            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          >
-            <option value="">Selecione um hospital</option>
-            {hospitais.map((h) => (
-              <option key={h.id_hospital} value={h.id_hospital}>
-                {h.nome}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium text-gray-700 dark:text-gray-300">Gabinete</label>
-          <select
-            {...register('id_gabinete')}
-            className="w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          >
-            <option value="">Selecione um gabinete</option>
-            {gabinetes.map((g) => (
-              <option key={g.id_gabinete} value={g.id_gabinete}>
-                {g.nome}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block font-medium text-gray-700 mb-1">Hospital</label>
+            <select
+              {...register('id_hospital')}
+              className="w-full p-2 rounded border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+            >
+              <option value="">Selecione um hospital</option>
+              {hospitais.map((h) => (
+                <option key={h.id_hospital} value={h.id_hospital}>
+                  {h.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block font-medium text-gray-700 mb-1">Gabinete</label>
+            <select
+              {...register('id_gabinete')}
+              className="w-full p-2 rounded border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+            >
+              <option value="">Selecione um gabinete</option>
+              {gabinetes.map((g) => (
+                <option key={g.id_gabinete} value={g.id_gabinete}>
+                  {g.nome}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded transition disabled:opacity-50"
+          className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded font-semibold transition disabled:opacity-50"
         >
           {saving ? 'Criando...' : 'Criar Usuário'}
         </button>

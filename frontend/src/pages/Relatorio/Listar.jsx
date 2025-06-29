@@ -217,7 +217,7 @@ export default function RelatorioListar() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-4 rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-4 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Relatórios</h1>
         <Link

@@ -68,7 +68,7 @@ export default function HospitalDetalhes() {
   });
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow space-y-4">
+    <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold text-slate-700">Detalhes do Hospital</h1>
       <div className="space-y-2">
         <div><span className="font-semibold text-slate-600">Nome:</span> {hospital.nome}</div>

@@ -48,7 +48,7 @@ export default function UsuarioListar() {
   if (loading) return <Skeleton />;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-slate-700">Usuários</h1>
         <Link to="/usuario/criar" className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 transition">

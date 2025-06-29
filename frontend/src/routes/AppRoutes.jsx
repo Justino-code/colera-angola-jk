@@ -13,7 +13,9 @@ const PacienteListar = lazy(() => import("../pages/Paciente/Listar"));
 const PacienteCriar = lazy(() => import("../pages/Paciente/Criar"));
 const PacienteEditar = lazy(() => import("../pages/Paciente/Editar"));
 const PacienteDetalhes = lazy(() => import("../pages/Paciente/Detalhes"));
-const PacienteEncaminhamento = lazy(() => import("../pages/Paciente/PacienteEncaminhamento"));
+const PacienteEncaminhamento = lazy(() =>
+    import("../pages/Paciente/PacienteEncaminhamento")
+);
 
 // Hospital
 const HospitalListar = lazy(() => import("../pages/Hospital/Listar"));
@@ -59,75 +61,138 @@ const MunicipioDetalhes = lazy(() => import("../pages/Municipio/Detalhes"));
 // Mapa
 const MapaCasos = lazy(() => import("../pages/MapaCasos"));
 
+// Página 403 Forbidden
+const Forbidden = lazy(() => import("../pages/Forbidden"));
+
 export default function AppRoutes() {
-  return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* Rotas de autenticação */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-        </Route>
+    return (
+        <Suspense fallback={<PageLoader />}>
+            <Routes>
+                {/* Rotas de autenticação */}
+                <Route element={<AuthLayout />}>
+                    <Route path="/login" element={<Login />} />
+                    {/* Página 403 Forbidden */}
+                    <Route path="/forbidden" element={<Forbidden />} />
+                </Route>
 
-        {/* Rotas protegidas */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<OverviewPage />} />
+                {/* Rotas protegidas */}
+                <Route element={<MainLayout />}>
+                    <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="/dashboard" element={<OverviewPage />} />
 
-          {/* Paciente */}
-          <Route path="/paciente" element={<PacienteListar />} />
-          <Route path="/paciente/criar" element={<PacienteCriar />} />
-          <Route path="/paciente/:id/editar" element={<PacienteEditar />} />
-          <Route path="/paciente/:id" element={<PacienteDetalhes />} />
-          <Route path="/paciente/:id/encaminhamento" element={<PacienteEncaminhamento />} />
+                    {/* Paciente */}
+                    <Route path="/paciente" element={<PacienteListar />} />
+                    <Route path="/paciente/criar" element={<PacienteCriar />} />
+                    <Route
+                        path="/paciente/:id/editar"
+                        element={<PacienteEditar />}
+                    />
+                    <Route
+                        path="/paciente/:id"
+                        element={<PacienteDetalhes />}
+                    />
+                    <Route
+                        path="/paciente/:id/encaminhamento"
+                        element={<PacienteEncaminhamento />}
+                    />
 
-          {/* Hospital */}
-          <Route path="/hospital" element={<HospitalListar />} />
-          <Route path="/hospital/criar" element={<HospitalCriar />} />
-          <Route path="/hospital/:id/editar" element={<HospitalEditar />} />
-          <Route path="/hospital/:id" element={<HospitalDetalhes />} />
+                    {/* Hospital */}
+                    <Route path="/hospital" element={<HospitalListar />} />
+                    <Route path="/hospital/criar" element={<HospitalCriar />} />
+                    <Route
+                        path="/hospital/:id/editar"
+                        element={<HospitalEditar />}
+                    />
+                    <Route
+                        path="/hospital/:id"
+                        element={<HospitalDetalhes />}
+                    />
 
-          {/* Viatura */}
-          <Route path="/viatura" element={<ViaturaListar />} />
-          <Route path="/viatura/criar" element={<ViaturaCriar />} />
-          <Route path="/viatura/:id/editar" element={<ViaturaEditar />} />
-          <Route path="/viatura/:id" element={<ViaturaDetalhes />} />
+                    {/* Viatura */}
+                    <Route path="/viatura" element={<ViaturaListar />} />
+                    <Route path="/viatura/criar" element={<ViaturaCriar />} />
+                    <Route
+                        path="/viatura/:id/editar"
+                        element={<ViaturaEditar />}
+                    />
+                    <Route path="/viatura/:id" element={<ViaturaDetalhes />} />
 
-          {/* Gabinete */}
-          <Route path="/gabinete" element={<GabineteListar />} />
-          <Route path="/gabinete/criar" element={<GabineteCriar />} />
-          <Route path="/gabinete/:id/editar" element={<GabineteEditar />} />
-          <Route path="/gabinete/:id" element={<GabineteDetalhes />} />
+                    {/* Gabinete */}
+                    <Route path="/gabinete" element={<GabineteListar />} />
+                    <Route path="/gabinete/criar" element={<GabineteCriar />} />
+                    <Route
+                        path="/gabinete/:id/editar"
+                        element={<GabineteEditar />}
+                    />
+                    <Route
+                        path="/gabinete/:id"
+                        element={<GabineteDetalhes />}
+                    />
 
-          {/* Usuario */}
-          <Route path="/usuario" element={<ListarUsuarios />} />
-          <Route path="/usuario/criar" element={<CriarUsuario />} />
-          <Route path="/usuario/:id/editar" element={<EditarUsuario />} />
-          <Route path="/usuario/:id" element={<DetalhesUsuario />} />
+                    {/* Usuario */}
+                    <Route path="/usuario" element={<ListarUsuarios />} />
+                    <Route path="/usuario/criar" element={<CriarUsuario />} />
+                    <Route
+                        path="/usuario/:id/editar"
+                        element={<EditarUsuario />}
+                    />
+                    <Route path="/usuario/:id" element={<DetalhesUsuario />} />
 
-          {/* Relatórios */}
-          <Route path="/relatorio/gerar" element={<RelatorioGerar />} />
-          <Route path="/relatorio/detalhes/:id" element={<RelatorioDetalhes />} />
-          <Route path="/relatorio" element={<RelatorioListar />} />
+                    {/* Relatórios */}
+                    <Route
+                        path="/relatorio/gerar"
+                        element={<RelatorioGerar />}
+                    />
+                    <Route
+                        path="/relatorio/detalhes/:id"
+                        element={<RelatorioDetalhes />}
+                    />
+                    <Route path="/relatorio" element={<RelatorioListar />} />
 
-          {/* Provincia */}
-          <Route path="/provincia" element={<ProvinciaListar />} />
-          <Route path="/provincia/criar" element={<ProvinciaCriar />} />
-          <Route path="/provincia/:id/editar" element={<ProvinciaEditar />} />
-          <Route path="/provincia/:id" element={<ProvinciaDetalhes />} />
+                    {/* Provincia */}
+                    <Route path="/provincia" element={<ProvinciaListar />} />
+                    <Route
+                        path="/provincia/criar"
+                        element={<ProvinciaCriar />}
+                    />
+                    <Route
+                        path="/provincia/:id/editar"
+                        element={<ProvinciaEditar />}
+                    />
+                    <Route
+                        path="/provincia/:id"
+                        element={<ProvinciaDetalhes />}
+                    />
 
-          {/* Município */}
-          <Route path="/municipio" element={<MunicipioListar />} />
-          <Route path="/municipio/criar" element={<MunicipioCriar />} />
-          <Route path="/municipio/:id/editar" element={<MunicipioEditar />} />
-          <Route path="/municipio/:id" element={<MunicipioDetalhes />} />
+                    {/* Município */}
+                    <Route path="/municipio" element={<MunicipioListar />} />
+                    <Route
+                        path="/municipio/criar"
+                        element={<MunicipioCriar />}
+                    />
+                    <Route
+                        path="/municipio/:id/editar"
+                        element={<MunicipioEditar />}
+                    />
+                    <Route
+                        path="/municipio/:id"
+                        element={<MunicipioDetalhes />}
+                    />
 
-          {/* MapaCasos */}
-          <Route path="/mapacasos" element={<MapaCasos />} />
-        </Route>
+                    {/* MapaCasos */}
+                    <Route path="/mapacasos" element={<MapaCasos />} />
+                </Route>
 
-        {/* Fallback para rotas não encontradas */}
-        <Route path="*" element={<div className="p-10 text-center text-red-500">Página não encontrada</div>} />
-      </Routes>
-    </Suspense>
-  );
+                {/* Fallback para rotas não encontradas */}
+                <Route
+                    path="*"
+                    element={
+                        <div className="p-10 text-center text-red-500">
+                            Página não encontrada
+                        </div>
+                    }
+                />
+            </Routes>
+        </Suspense>
+    );
 }

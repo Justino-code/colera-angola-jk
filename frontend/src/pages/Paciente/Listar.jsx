@@ -36,53 +36,63 @@ export default function PacienteListar() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col bg-white p-6 rounded shadow">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Pacientes</h1>
         <Link
           to="/paciente/criar"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
         >
           Novo
         </Link>
       </div>
-      <table className="w-full border">
-        <thead className="bg-slate-100">
-          <tr>
-            <th className="border p-2">Nome</th>
-            <th className="border p-2">BI</th>
-            <th className="border p-2">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pacientes.map((p) => (
-            <tr key={p.id_paciente} className="hover:bg-slate-50">
-              <td className="border p-2">{p.nome}</td>
-              <td className="border p-2">{p.numero_bi}</td>
-              <td className="border p-2 space-x-2">
-                <button
-                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
-                  onClick={() => navigate(`/paciente/${p.id_paciente}/editar`)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                  onClick={() => excluirPaciente(p.id_paciente)}
-                >
-                  Excluir
-                </button>
-                <Link
-                  to={`/paciente/${p.id_paciente}/encaminhamento`}
-                  className="bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
-                >
-                  Ver Encaminhamento
-                </Link>
-              </td>
+      <div className="overflow-x-auto flex-1">
+        <table className="w-full border rounded-lg overflow-hidden">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="border p-2 text-left">Nome</th>
+              <th className="border p-2 text-left">BI</th>
+              <th className="border p-2 text-center">Ações</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {pacientes.map((p) => (
+              <tr key={p.id_paciente} className="hover:bg-slate-50 transition">
+                <td className="border p-2">{p.nome}</td>
+                <td className="border p-2">{p.numero_bi}</td>
+                <td className="border p-2">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <Link
+                      to={`/paciente/${p.id_paciente}`}
+                      className="bg-cyan-600 text-white px-2 py-1 rounded hover:bg-cyan-700 transition"
+                    >
+                      Ver
+                    </Link>
+                    <button
+                      className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 transition"
+                      onClick={() => navigate(`/paciente/${p.id_paciente}/editar`)}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition"
+                      onClick={() => excluirPaciente(p.id_paciente)}
+                    >
+                      Excluir
+                    </button>
+                    <Link
+                      to={`/paciente/${p.id_paciente}/encaminhamento`}
+                      className="bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 transition"
+                    >
+                      Ver Encaminhamento
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

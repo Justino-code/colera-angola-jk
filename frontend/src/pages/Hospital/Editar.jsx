@@ -66,7 +66,7 @@ export default function HospitalEditar() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto bg-white rounded shadow">
+    <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
       <h1 className="text-2xl font-bold mb-4 text-slate-700">Editar Hospital</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
