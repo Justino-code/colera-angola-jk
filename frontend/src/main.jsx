@@ -5,6 +5,7 @@ import AppRoutes from './routes/AppRoutes';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext'; // <== IMPORTANTE
 import './index.css'; // TailwindCSS e estilos globais
+import './App.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   //<React.StrictMode>

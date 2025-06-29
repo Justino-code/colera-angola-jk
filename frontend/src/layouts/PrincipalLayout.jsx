@@ -1,8 +1,8 @@
-// src/layouts/PrincipalLayout.jsx
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {
-  LogOut, Menu, X, Home, User, Building2, Car, Landmark, Users, Map, MapPin, Sun, Moon, FileText
+  LogOut, Menu, X, Home, User, Building2, Car, Landmark, Users, 
+  Map, MapPin, FileText, Sun, Moon
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -14,28 +14,20 @@ export default function PrincipalLayout() {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    if (!token) {
-      navigate('/login');
-    }
+    if (!token) navigate('/login');
 
     const savedSidebar = localStorage.getItem('sidebarOpen');
-    if (savedSidebar !== null) {
-      setSidebarOpen(savedSidebar === 'true');
-    }
+    setSidebarOpen(savedSidebar === 'true' || true);
 
     const savedTheme = localStorage.getItem('darkMode');
-    if (savedTheme !== null) {
-      setDarkMode(savedTheme === 'true');
-      document.documentElement.classList.toggle('dark', savedTheme === 'true');
-    }
+    const isDark = savedTheme === 'true';
+    setDarkMode(isDark);
+    document.documentElement.classList.toggle('dark', isDark);
 
-    // Buscar usuário logado
     async function fetchUser() {
       try {
         const res = await api.get('/me');
-        if (res && res.success !== false) {
-          setUser(res.data || res.user);
-        }
+        if (res?.success !== false) setUser(res.data || res.user);
       } catch {
         setUser(null);
       }
@@ -61,93 +53,123 @@ export default function PrincipalLayout() {
     document.documentElement.classList.toggle('dark', newTheme);
   };
 
-  // Função para verificar permissão
   const hasRole = (role) => user && user.role === role;
   const hasAnyRole = (roles) => user && roles.includes(user.role);
 
   return (
-    <div className={`min-h-screen flex ${darkMode ? 'bg-gray-900 text-gray-200' : 'bg-gray-50 text-gray-800'}`}>
-      {/* Sidebar */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-16'} flex flex-col
-                      ${darkMode ? 'bg-blue-900' : 'bg-blue-700'} text-white`}>
-        <div className="flex items-center justify-between p-4 min-h-[56px]">
+    <div className={`flex h-screen w-full overflow-hidden ${
+      darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'
+    }`}>
+      {/* Sidebar ocupando toda a altura */}
+      <aside
+        className={`h-full flex flex-col ${
+          sidebarOpen ? 'w-64' : 'w-16'
+        } ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        } border-r ${
+          darkMode ? 'border-gray-700' : 'border-gray-200'
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 min-h-[60px]">
           {sidebarOpen && (
-            <span className="font-bold text-lg">
-              🩺 AngoVIva
-            </span>
+            <span className="font-bold text-xl tracking-wide">🩺 AngoVIva</span>
           )}
-          <button onClick={toggleSidebar}>
+          <button
+            onClick={toggleSidebar}
+            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            aria-label={sidebarOpen ? 'Fechar menu' : 'Abrir menu'}
+          >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
-        <nav className="flex-1 flex flex-col gap-2 p-2">
-          {/* Dashboard: todos */}
-          <SidebarLink to="/dashboard" text="Dashboard" icon={<Home size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
-          {/* Pacientes: admin, gestor, medico, enfermeiro, epidemiologista, tecnico */}
+
+        <nav className={`flex-1 px-2 space-y-1 overflow-y-auto ${
+          darkMode ? 'scrollbar-dark' : 'scrollbar-light'
+        }`}>
+          <SidebarLink to="/dashboard" text="Dashboard" icon={<Home />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           {hasAnyRole(['admin', 'gestor', 'medico', 'enfermeiro', 'epidemiologista']) && (
-            <SidebarLink to="/paciente" text="Pacientes" icon={<User size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+            <SidebarLink to="/paciente" text="Pacientes" icon={<User />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {/* Hospitais: admin, gestor, medico, epidemiologista */}
           {hasAnyRole(['admin', 'gestor', 'medico', 'epidemiologista']) && (
-            <SidebarLink to="/hospital" text="Hospitais" icon={<Building2 size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+            <SidebarLink to="/hospital" text="Hospitais" icon={<Building2 />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {/* Viaturas: admin, gestor, tecnico */}
           {hasAnyRole(['admin', 'gestor', 'tecnico']) && (
-            <SidebarLink to="/viatura" text="Viaturas" icon={<Car size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+            <SidebarLink to="/viatura" text="Viaturas" icon={<Car />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {/* Gabinetes: admin, gestor */}
           {hasAnyRole(['admin', 'gestor']) && (
-            <SidebarLink to="/gabinete" text="Gabinetes" icon={<Landmark size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+            <SidebarLink to="/gabinete" text="Gabinetes" icon={<Landmark />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {/* Usuários: admin */}
           {hasRole('admin') && (
-            <SidebarLink to="/usuario" text="Usuários" icon={<Users size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+            <SidebarLink to="/usuario" text="Usuários" icon={<Users />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {/* Províncias e Municípios: admin, gestor, epidemiologista */}
           {hasAnyRole(['admin', 'gestor', 'epidemiologista']) && (
             <>
-              <SidebarLink to="/provincia" text="Províncias" icon={<Map size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
-              <SidebarLink to="/municipio" text="Municípios" icon={<MapPin size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+              <SidebarLink to="/provincia" text="Províncias" icon={<Map />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+              <SidebarLink to="/municipio" text="Municípios" icon={<MapPin />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
             </>
           )}
-          {/* Relatórios: todos */}
-          <SidebarLink to="/relatorio" text="Relatórios" icon={<FileText size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
-          {/* Mapa: todos */}
-          <SidebarLink to="/mapacasos" text="Mapa" icon={<MapPin size={20} />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+          <SidebarLink to="/relatorio" text="Relatórios" icon={<FileText />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
+          <SidebarLink to="/mapacasos" text="Mapa" icon={<MapPin />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
         </nav>
-        <div className="flex flex-col gap-2 p-2">
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-2 bg-gray-600 hover:bg-gray-500 p-2 rounded transition"
-          >
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            {sidebarOpen && <span>Tema</span>}
-          </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 p-2 rounded transition"
-          >
-            <LogOut size={18} /> {sidebarOpen && <span>Sair</span>}
-          </button>
-        </div>
-      </div>
+      </aside>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <header className={`shadow p-4 flex justify-between items-center
-                           ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-          <h1 className="font-semibold text-xl">Angola Viva</h1>
-          {user && (
-            <div className="text-sm">
-              Olá, <span className="font-semibold">{user.nome || user.name}</span> <span className="ml-2 px-2 py-1 rounded bg-blue-200 text-blue-900">{user.role}</span>
-            </div>
-          )}
+      {/* Área principal com header e conteúdo */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Header com botões de tema e sair */}
+        <header className={`min-h-[60px] px-6 flex items-center justify-between ${
+          darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+        } border-b ${
+          darkMode ? 'border-gray-700' : 'border-gray-200'
+        }`}>
+          <div className="flex items-center">
+            <h1 className="text-xl font-semibold">Angola Viva</h1>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {user && (
+              <div className="text-sm">
+                <span className="font-medium">{user.nome || user.name}</span>
+                <span className="ml-2 px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs dark:bg-blue-900 dark:text-blue-200">
+                  {user.role}
+                </span>
+              </div>
+            )}
+            
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full ${
+                darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              } transition`}
+              aria-label="Alternar tema"
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className={`p-2 rounded-full ${
+                darkMode ? 'hover:bg-gray-700 text-red-400' : 'hover:bg-gray-100 text-red-600'
+              } transition`}
+              aria-label="Sair"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </header>
-        <main className="flex-1 min-h-0 overflow-auto p-4">
-            <Outlet />
+
+        {/* Conteúdo principal - sem margens laterais */}
+        <main className={`flex-1 overflow-auto ${
+          darkMode ? 'bg-gray-900' : 'bg-gray-50'
+        }`}>
+          <Outlet />
         </main>
-        <footer className={`text-sm text-center py-2 shadow-inner
-                            ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'}`}>
+
+        {/* Footer sem margens laterais */}
+        <footer className={`py-3 px-6 text-sm ${
+          darkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'
+        } border-t ${
+          darkMode ? 'border-gray-700' : 'border-gray-200'
+        }`}>
           &copy; {new Date().getFullYear()} Angola Viva. Todos os direitos reservados.
         </footer>
       </div>
@@ -156,11 +178,20 @@ export default function PrincipalLayout() {
 }
 
 function SidebarLink({ to, text, icon, sidebarOpen, darkMode }) {
+  const isActive = useMatch(to);
+
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2 p-2 rounded transition 
-                  ${darkMode ? 'hover:bg-blue-800' : 'hover:bg-blue-600'}`}
+      className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200
+                  ${isActive
+                    ? 'bg-blue-600 text-white font-medium'
+                    : ''
+                  } ${
+                    darkMode
+                      ? 'hover:bg-gray-700 text-gray-200'
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
     >
       {icon}
       {sidebarOpen && <span>{text}</span>}
