@@ -10,7 +10,7 @@ class Viatura extends Model
     use HasFactory;
 
     protected $table = 'viatura';
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'id_viatura';
 
     protected $fillable = [
         'identificacao',

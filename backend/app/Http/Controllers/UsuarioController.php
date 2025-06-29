@@ -12,7 +12,34 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class UsuarioController extends Controller
 {
-    // Listar todos os usuários
+    /**
+     * @OA\Get(
+     *     path="/usuario",
+     *     summary="Listar todos os usuários",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de usuários",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Nenhum usuário encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -43,7 +70,41 @@ class UsuarioController extends Controller
         }
     }
 
-    // Exibir um usuário específico
+    /**
+     * @OA\Get(
+     *     path="/usuario/{id}",
+     *     summary="Exibir um usuário específico",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do usuário",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do usuário",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuário não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -74,7 +135,49 @@ class UsuarioController extends Controller
         }
     }
 
-    // Criar um novo usuário
+    /**
+     * @OA\Post(
+     *     path="/usuario",
+     *     summary="Criar um novo usuário",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nome","email","password","role","permissoes"},
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="password_confirmation", type="string"),
+     *             @OA\Property(property="role", type="string"),
+     *             @OA\Property(property="permissoes", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="id_hospital", type="integer"),
+     *             @OA\Property(property="id_gabinete", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Usuário criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -139,7 +242,53 @@ class UsuarioController extends Controller
         }
     }
 
-    // Atualizar permissões
+    /**
+     * @OA\Put(
+     *     path="/usuario/{id}/permissoes",
+     *     summary="Atualizar permissões do usuário",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do usuário",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"permissoes"},
+     *             @OA\Property(property="permissoes", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Permissões atualizadas com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuário não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function updatePermissions(Request $request, int $id): JsonResponse
     {
         try {
@@ -187,7 +336,57 @@ class UsuarioController extends Controller
         }
     }
 
-    // Atualizar dados do usuário
+    /**
+     * @OA\Put(
+     *     path="/usuario/{id}",
+     *     summary="Atualizar dados do usuário",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do usuário",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="role", type="string"),
+     *             @OA\Property(property="id_hospital", type="integer"),
+     *             @OA\Property(property="id_gabinete", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Usuário atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuário não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -255,7 +454,41 @@ class UsuarioController extends Controller
         }
     }
 
-    // Excluir um usuário
+    /**
+     * @OA\Delete(
+     *     path="/usuario/{id}",
+     *     summary="Excluir um usuário",
+     *     tags={"Usuários"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do usuário",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Usuário excluído com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuário não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro inesperado"
+     *     )
+     * )
+     */
     public function destroy(int $id): JsonResponse
     {
         try {

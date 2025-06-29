@@ -9,6 +9,26 @@ use Illuminate\Support\Facades\Validator;
 
 class HospitalController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/hospital",
+     *     summary="Listar todos os hospitais",
+     *     tags={"Hospitais"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de hospitais",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar hospitais"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -28,6 +48,44 @@ class HospitalController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/hospital",
+     *     summary="Criar novo hospital",
+     *     tags={"Hospitais"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nome","tipo","endereco","latitude","longitude","capacidade_leitos","id_municipio"},
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="tipo", type="string", enum={"Geral","Municipal","Centro de Saúde","Posto Médico","Clínica","Outros"}),
+     *             @OA\Property(property="endereco", type="string"),
+     *             @OA\Property(property="latitude", type="number"),
+     *             @OA\Property(property="longitude", type="number"),
+     *             @OA\Property(property="capacidade_leitos", type="integer"),
+     *             @OA\Property(property="id_municipio", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Hospital criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao criar hospital"
+     *     )
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -66,6 +124,37 @@ class HospitalController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/hospital/{id}",
+     *     summary="Exibir detalhes de um hospital",
+     *     tags={"Hospitais"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do hospital",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do hospital",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Hospital não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao buscar hospital"
+     *     )
+     * )
+     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -90,6 +179,54 @@ class HospitalController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/hospital/{id}",
+     *     summary="Atualizar hospital",
+     *     tags={"Hospitais"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do hospital",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="tipo", type="string", enum={"Geral","Municipal","Centro de Saúde","Posto Médico","Clínica","Outros"}),
+     *             @OA\Property(property="endereco", type="string"),
+     *             @OA\Property(property="latitude", type="number"),
+     *             @OA\Property(property="longitude", type="number"),
+     *             @OA\Property(property="capacidade_leitos", type="integer"),
+     *             @OA\Property(property="id_municipio", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Hospital atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Hospital não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao atualizar hospital"
+     *     )
+     * )
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -135,6 +272,37 @@ class HospitalController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/hospital/{id}",
+     *     summary="Excluir hospital",
+     *     tags={"Hospitais"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do hospital",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Hospital excluído com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Hospital não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao excluir hospital"
+     *     )
+     * )
+     */
     public function destroy(int $id): JsonResponse
     {
         try {

@@ -10,6 +10,46 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/dashboard/",
+     *     summary="Resumo geral do dashboard",
+     *     tags={"Dashboard"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do dashboard",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="casos_ativos", type="integer"),
+     *                 @OA\Property(property="novos_casos_24h", type="integer"),
+     *                 @OA\Property(property="leitos_ocupados", type="integer"),
+     *                 @OA\Property(
+     *                     property="ambulancias_ativas",
+     *                     type="object",
+     *                     @OA\Property(property="ativas", type="integer"),
+     *                     @OA\Property(property="total", type="integer")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="tendencias",
+     *                     type="object",
+     *                     @OA\Property(property="casos_ativos", type="string"),
+     *                     @OA\Property(property="leitos_ocupados", type="string"),
+     *                     @OA\Property(property="ambulancias_ativas", type="string"),
+     *                     @OA\Property(property="novos_casos_24h", type="string")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao gerar dados do dashboard"
+     *     )
+     * )
+     */
     public function overview(): JsonResponse
     {
         try {

@@ -10,6 +10,26 @@ use App\Services\GeradorRelatorioPDFService;
 
 class RelatorioController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/relatorio",
+     *     summary="Listar relatórios",
+     *     tags={"Relatórios"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de relatórios",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar relatórios"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -32,6 +52,46 @@ class RelatorioController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/relatorio",
+     *     summary="Criar relatório",
+     *     tags={"Relatórios"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"tipo","dados"},
+     *             @OA\Property(property="tipo", type="string", enum={
+     *                 "casos_por_regiao","evolucao_temporal","distribuicao_demografica",
+     *                 "casos_por_sexo","casos_por_idade","casos_por_hospital",
+     *                 "casos_por_municipio","casos_por_resultado_triagem","outro"
+     *             }),
+     *             @OA\Property(property="dados", type="string", description="JSON dos dados do relatório")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Relatório criado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Não é possível salvar relatório sem dados."
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao criar relatório"
+     *     )
+     * )
+     */
     public function store(Request $request, RelatorioService $service): JsonResponse
     {
         try {
@@ -79,6 +139,37 @@ class RelatorioController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/relatorio/{id}",
+     *     summary="Exibir relatório",
+     *     tags={"Relatórios"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do relatório",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do relatório",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Relatório não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao exibir relatório"
+     *     )
+     * )
+     */
     public function show(Relatorio $relatorio): JsonResponse
     {
         $this->authorize('view', $relatorio);
@@ -89,6 +180,37 @@ class RelatorioController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/relatorio/{id}/pdf",
+     *     summary="Gerar PDF do relatório",
+     *     tags={"Relatórios"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do relatório",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="PDF gerado (base64)",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="file", type="string", description="PDF em base64")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Relatório não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao gerar PDF"
+     *     )
+     * )
+     */
     public function gerarPdf($id, GeradorRelatorioPDFService $pdfService): JsonResponse
     {
         try {
@@ -109,6 +231,37 @@ class RelatorioController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/relatorio/{id}",
+     *     summary="Excluir relatório",
+     *     tags={"Relatórios"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do relatório",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Relatório removido com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Relatório não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao remover relatório"
+     *     )
+     * )
+     */
     public function destroy(Relatorio $relatorio): JsonResponse
     {
         try {

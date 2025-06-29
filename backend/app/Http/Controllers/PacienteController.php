@@ -21,6 +21,30 @@ class PacienteController extends Controller
         $this->triageService = new TriageService();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/pacientes",
+     *     summary="Listar todos os pacientes",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de pacientes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar pacientes"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -44,6 +68,51 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/pacientes",
+     *     summary="Criar novo paciente",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nome","numero_bi","telefone","idade","sexo","sintomas","localizacao"},
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="numero_bi", type="string"),
+     *             @OA\Property(property="telefone", type="string"),
+     *             @OA\Property(property="idade", type="integer"),
+     *             @OA\Property(property="sexo", type="string", enum={"M","F"}),
+     *             @OA\Property(property="sintomas", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="localizacao", type="object",
+     *                 @OA\Property(property="latitude", type="number"),
+     *                 @OA\Property(property="longitude", type="number")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Paciente criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Dados inválidos"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao criar paciente"
+     *     )
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         // Inicia uma transação para garantir a atomicidade
@@ -126,6 +195,41 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/pacientes/{id}",
+     *     summary="Exibir detalhes de um paciente",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do paciente",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do paciente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Paciente não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao buscar paciente"
+     *     )
+     * )
+     */
     public function show(int $id): JsonResponse
     {
         try {
@@ -154,6 +258,55 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/pacientes/{id}",
+     *     summary="Atualizar dados do paciente",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do paciente",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="numero_bi", type="string"),
+     *             @OA\Property(property="telefone", type="string"),
+     *             @OA\Property(property="id_hospital", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paciente atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Paciente não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validação falhou"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao atualizar paciente"
+     *     )
+     * )
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         try {
@@ -201,6 +354,41 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/pacientes/{id}",
+     *     summary="Excluir paciente",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do paciente",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Paciente excluído com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Paciente não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao excluir paciente"
+     *     )
+     * )
+     */
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -230,6 +418,45 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/pacientes/{id}/encaminhamento",
+     *     summary="Gerar encaminhamento para o paciente",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do paciente",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Encaminhamento gerado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="paciente", type="object"),
+     *             @OA\Property(property="hospital", type="object"),
+     *             @OA\Property(property="open_route", type="object"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="encaminhamento", type="boolean")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Paciente não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao gerar encaminhamento"
+     *     )
+     * )
+     */
     public function encaminhamento(int $id): JsonResponse
     {
         try {
@@ -293,6 +520,38 @@ class PacienteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/pacientes/hospital/{idHospital}",
+     *     summary="Listar pacientes por hospital",
+     *     tags={"Pacientes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="idHospital",
+     *         in="path",
+     *         required=true,
+     *         description="ID do hospital",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pacientes do hospital",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso não autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar pacientes do hospital"
+     *     )
+     * )
+     */
     public function pacientesPorHospital(int $idHospital): JsonResponse
     {
         try {

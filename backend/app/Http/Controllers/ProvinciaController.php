@@ -10,7 +10,26 @@ use App\Utils\GerarCodigoIso;
 
 class ProvinciaController extends Controller
 {
-    // Listar todas as províncias
+    /**
+     * @OA\Get(
+     *     path="/provincia",
+     *     summary="Listar todas as províncias",
+     *     tags={"Províncias"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de províncias",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar províncias"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -29,7 +48,37 @@ class ProvinciaController extends Controller
         }
     }
 
-    // Criar nova província
+    /**
+     * @OA\Post(
+     *     path="/provincia",
+     *     summary="Criar nova província",
+     *     tags={"Províncias"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nome"},
+     *             @OA\Property(property="nome", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Província criada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao criar província"
+     *     )
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -68,7 +117,37 @@ class ProvinciaController extends Controller
         }
     }
 
-    // Detalhes de uma província
+    /**
+     * @OA\Get(
+     *     path="/provincia/{id}",
+     *     summary="Detalhes de uma província",
+     *     tags={"Províncias"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da província",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados da província",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Província não encontrada"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao buscar província"
+     *     )
+     * )
+     */
     public function show($idProvincia): JsonResponse
     {
         try {
@@ -93,7 +172,48 @@ class ProvinciaController extends Controller
         }
     }
 
-    // Atualizar província
+    /**
+     * @OA\Put(
+     *     path="/provincia/{id}",
+     *     summary="Atualizar província",
+     *     tags={"Províncias"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da província",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="codigo_iso", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Província atualizada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Província não encontrada"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao atualizar província"
+     *     )
+     * )
+     */
     public function update(Request $request, $idProvincia): JsonResponse
     {
         try {
@@ -132,7 +252,37 @@ class ProvinciaController extends Controller
         }
     }
 
-    // Excluir província
+    /**
+     * @OA\Delete(
+     *     path="/provincia/{id}",
+     *     summary="Excluir província",
+     *     tags={"Províncias"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID da província",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Província removida com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Província não encontrada"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao remover província"
+     *     )
+     * )
+     */
     public function destroy($idProvincia): JsonResponse
     {
         try {

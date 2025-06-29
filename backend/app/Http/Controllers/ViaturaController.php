@@ -10,6 +10,26 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ViaturaController extends Controller
 {
+    /**
+ * @OA\Get(
+ *     path="/viaturas",
+ *     summary="Listar todas as viaturas",
+ *     tags={"Viaturas"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Response(
+ *         response=200,
+ *         description="Lista de viaturas",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno"
+ *     )
+ * )
+ */
     public function index(): JsonResponse
     {
         try {
@@ -29,6 +49,42 @@ class ViaturaController extends Controller
         }
     }
 
+    /**
+ * @OA\Post(
+ *     path="/viaturas",
+ *     summary="Criar uma nova viatura",
+ *     tags={"Viaturas"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"identificacao","tipo","status","id_hospital"},
+ *             @OA\Property(property="identificacao", type="string"),
+ *             @OA\Property(property="tipo", type="string"),
+ *             @OA\Property(property="status", type="string", enum={"disponivel","em_viagem","ocupada"}),
+ *             @OA\Property(property="latitude", type="number"),
+ *             @OA\Property(property="longitude", type="number"),
+ *             @OA\Property(property="id_hospital", type="integer")
+ *         )
+ *     ),
+ * @OA\Response(
+ *         response=201,
+ *         description="Viatura criada",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Erro de validação"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno"
+ *     )
+ * )
+ */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -66,6 +122,36 @@ class ViaturaController extends Controller
         }
     }
 
+    /**
+ * @OA\Get(
+ *     path="/viaturas/{id}",
+ *     summary="Exibir uma viatura",
+ *     tags={"Viaturas"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID da viatura",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Dados da viatura",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),*     @OA\Response(
+ *         response=404,
+ *         description="Viatura não encontrada"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno"
+ *     )
+ * )
+ */
     public function show($id): JsonResponse
     {
         try {
@@ -90,6 +176,52 @@ class ViaturaController extends Controller
         }
     }
 
+    /**
+ * @OA\Put(
+ *     path="/viaturas/{id}",
+ *     summary="Atualizar uma viatura",
+ *     tags={"Viaturas"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID da viatura",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             @OA\Property(property="identificacao", type="string"),
+ *             @OA\Property(property="tipo", type="string"),
+ *             @OA\Property(property="status", type="string", enum={"disponivel","em_viagem","ocupada"}),
+ *             @OA\Property(property="latitude", type="number"),
+ *             @OA\Property(property="longitude", type="number"),
+ *             @OA\Property(property="id_hospital", type="integer")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Viatura atualizada",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="data", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Viatura não encontrada"
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Erro de validação"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno"
+ *     )
+ * )
+ */
     public function update(Request $request, $id): JsonResponse
     {
         try {
@@ -133,6 +265,36 @@ class ViaturaController extends Controller
         }
     }
 
+    /**
+ * @OA\Delete(
+ *     path="/viaturas/{id}",
+ *     summary="Remover uma viatura",
+ *     tags={"Viaturas"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID da viatura",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Viatura removida com sucesso.",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="message", type="string")
+ *         )
+ *     ), *     @OA\Response(
+ *         response=404,
+ *         description="Viatura não encontrada"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno"
+ *     )
+ * )
+ */
     public function destroy($id): JsonResponse
     {
         try {

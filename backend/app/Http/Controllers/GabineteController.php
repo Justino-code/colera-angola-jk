@@ -9,6 +9,26 @@ use Illuminate\Support\Facades\Validator;
 
 class GabineteController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/gabinete",
+     *     summary="Listar todos os gabinetes",
+     *     tags={"Gabinetes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de gabinetes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="array", @OA\Items(type="object"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao listar gabinetes"
+     *     )
+     * )
+     */
     public function index(): JsonResponse
     {
         try {
@@ -28,6 +48,41 @@ class GabineteController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/gabinete",
+     *     summary="Criar novo gabinete",
+     *     tags={"Gabinetes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"nome","id_municipio"},
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="id_municipio", type="integer"),
+     *             @OA\Property(property="contacto", type="string"),
+     *             @OA\Property(property="id_responsavel", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Gabinete criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao criar gabinete"
+     *     )
+     * )
+     */
     public function store(Request $request): JsonResponse
     {
         try {
@@ -67,6 +122,37 @@ class GabineteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/gabinete/{id}",
+     *     summary="Exibir detalhes de um gabinete",
+     *     tags={"Gabinetes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do gabinete",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dados do gabinete",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Gabinete não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao buscar gabinete"
+     *     )
+     * )
+     */
     public function show($id): JsonResponse
     {
         try {
@@ -91,6 +177,51 @@ class GabineteController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/gabinete/{id}",
+     *     summary="Atualizar gabinete",
+     *     tags={"Gabinetes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do gabinete",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="nome", type="string"),
+     *             @OA\Property(property="id_municipio", type="integer"),
+     *             @OA\Property(property="contacto", type="string"),
+     *             @OA\Property(property="id_responsavel", type="integer")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gabinete atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Gabinete não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao atualizar gabinete"
+     *     )
+     * )
+     */
     public function update(Request $request, $id): JsonResponse
     {
         try {
@@ -135,6 +266,37 @@ class GabineteController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/gabinete/{id}",
+     *     summary="Excluir gabinete",
+     *     tags={"Gabinetes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do gabinete",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gabinete removido com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean"),
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Gabinete não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erro ao remover gabinete"
+     *     )
+     * )
+     */
     public function destroy($id): JsonResponse
     {
         try {
