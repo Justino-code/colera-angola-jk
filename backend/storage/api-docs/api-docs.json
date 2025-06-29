@@ -252,13 +252,13 @@
                 ]
             }
         },
-        "/gabinete": {
+        "/gabinetes": {
             "get": {
                 "tags": [
                     "Gabinetes"
                 ],
                 "summary": "Listar todos os gabinetes",
-                "operationId": "94dd913e63ce1d3f9cf1f828406d11a2",
+                "operationId": "910267c8cdab8d30542d47bf19249941",
                 "responses": {
                     "200": {
                         "description": "Lista de gabinetes",
@@ -296,7 +296,7 @@
                     "Gabinetes"
                 ],
                 "summary": "Criar novo gabinete",
-                "operationId": "19c8e061a0127f4fd84a34fc55751c8c",
+                "operationId": "8cc56df9df49a049daa665714fe64917",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -361,13 +361,13 @@
                 ]
             }
         },
-        "/gabinete/{id}": {
+        "/gabinetes/{id}": {
             "get": {
                 "tags": [
                     "Gabinetes"
                 ],
                 "summary": "Exibir detalhes de um gabinete",
-                "operationId": "b9e48912120a74e1cd0566cf7190a3db",
+                "operationId": "5cb582e92ac864dff9d3c58835bf5531",
                 "parameters": [
                     {
                         "name": "id",
@@ -416,7 +416,7 @@
                     "Gabinetes"
                 ],
                 "summary": "Atualizar gabinete",
-                "operationId": "c6475887e1ee95c24497f0e8a57b3ee9",
+                "operationId": "5d4bbbc530addd9c9adb3321f801116b",
                 "parameters": [
                     {
                         "name": "id",
@@ -495,7 +495,7 @@
                     "Gabinetes"
                 ],
                 "summary": "Excluir gabinete",
-                "operationId": "83e27576de0ed0628bcd976364d539a5",
+                "operationId": "29ac10df6b5f41efe1bd1ebf6d40bb36",
                 "parameters": [
                     {
                         "name": "id",
@@ -540,13 +540,13 @@
                 ]
             }
         },
-        "/hospital": {
+        "/hospitais": {
             "get": {
                 "tags": [
                     "Hospitais"
                 ],
                 "summary": "Listar todos os hospitais",
-                "operationId": "7f80d691c9c28da59654dce7030cac9d",
+                "operationId": "0c6a1276bae98de61aa0b18dc5a358e8",
                 "responses": {
                     "200": {
                         "description": "Lista de hospitais",
@@ -584,7 +584,7 @@
                     "Hospitais"
                 ],
                 "summary": "Criar novo hospital",
-                "operationId": "73e716b02b38462afb68be9ef19589a2",
+                "operationId": "c4138e86e7eea8da4305e48db4f22a6b",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -671,13 +671,13 @@
                 ]
             }
         },
-        "/hospital/{id}": {
+        "/hospitais/{id}": {
             "get": {
                 "tags": [
                     "Hospitais"
                 ],
                 "summary": "Exibir detalhes de um hospital",
-                "operationId": "ce1cf29b962ce825ee387a4e586300bd",
+                "operationId": "9c2818b1c473cee58e1bd0201095fce5",
                 "parameters": [
                     {
                         "name": "id",
@@ -726,7 +726,7 @@
                     "Hospitais"
                 ],
                 "summary": "Atualizar hospital",
-                "operationId": "ebd3274b3f9782070d45b4d6d12ff5e2",
+                "operationId": "a4a8cbe92525483c083799b6e90b6183",
                 "parameters": [
                     {
                         "name": "id",
@@ -822,7 +822,7 @@
                     "Hospitais"
                 ],
                 "summary": "Excluir hospital",
-                "operationId": "135074005c060330ba63f78e6d59fb07",
+                "operationId": "359abaa15d78a2fd025b3656538a13eb",
                 "parameters": [
                     {
                         "name": "id",
@@ -867,13 +867,13 @@
                 ]
             }
         },
-        "/municipio": {
+        "/municipios": {
             "get": {
                 "tags": [
                     "Municípios"
                 ],
                 "summary": "Listar todos os municípios",
-                "operationId": "adc28966a21c645f4ce8e50eabfd8d1a",
+                "operationId": "34f21d979ca46ca06972137847825c87",
                 "responses": {
                     "200": {
                         "description": "Lista de municípios",
@@ -911,7 +911,7 @@
                     "Municípios"
                 ],
                 "summary": "Criar novo município",
-                "operationId": "91b057fad8e8461b12343a98512f2b9a",
+                "operationId": "73e72c9edffa831925aa071c8bfa86e5",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -970,13 +970,13 @@
                 ]
             }
         },
-        "/municipio/{id}": {
+        "/municipios/{id}": {
             "get": {
                 "tags": [
                     "Municípios"
                 ],
                 "summary": "Exibir detalhes de um município",
-                "operationId": "6dc36a230e96258a4157e6453d6dc0ea",
+                "operationId": "16befa3301bc96180ea232d71f74ca93",
                 "parameters": [
                     {
                         "name": "id",
@@ -1025,7 +1025,7 @@
                     "Municípios"
                 ],
                 "summary": "Atualizar município",
-                "operationId": "df4fc756d73faa0fee7b58547b44093e",
+                "operationId": "b274b809a5f2f4c2ca5120a5de72fa30",
                 "parameters": [
                     {
                         "name": "id",
@@ -1098,7 +1098,7 @@
                     "Municípios"
                 ],
                 "summary": "Excluir município",
-                "operationId": "e03769af96b9def5e3117e0288b6e610",
+                "operationId": "68929de8c60c9a1e33d9641b6758a711",
                 "parameters": [
                     {
                         "name": "id",
@@ -1598,13 +1598,13 @@
                 ]
             }
         },
-        "/provincia": {
+        "/provincias": {
             "get": {
                 "tags": [
                     "Províncias"
                 ],
                 "summary": "Listar todas as províncias",
-                "operationId": "8283d0d6a33ed58cb0377ea247c1d0b6",
+                "operationId": "c8fe810fd9b109c8b281cf079503a9ed",
                 "responses": {
                     "200": {
                         "description": "Lista de províncias",
@@ -1642,7 +1642,7 @@
                     "Províncias"
                 ],
                 "summary": "Criar nova província",
-                "operationId": "afdd876ab065e58616471a70777eca62",
+                "operationId": "ab686f4889d74fde7a9f366844498f67",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -1694,13 +1694,13 @@
                 ]
             }
         },
-        "/provincia/{id}": {
+        "/provincias/{id}": {
             "get": {
                 "tags": [
                     "Províncias"
                 ],
                 "summary": "Detalhes de uma província",
-                "operationId": "dc6a98cf4685fd943ee01c32cad1b82b",
+                "operationId": "5dd2f44b117cd6e3f9eb0bde1e70f264",
                 "parameters": [
                     {
                         "name": "id",
@@ -1749,7 +1749,7 @@
                     "Províncias"
                 ],
                 "summary": "Atualizar província",
-                "operationId": "538ce5c465c3acf0181a7263f7039e38",
+                "operationId": "9645bebde12e695325ea91bf4f29ae29",
                 "parameters": [
                     {
                         "name": "id",
@@ -1819,7 +1819,7 @@
                     "Províncias"
                 ],
                 "summary": "Excluir província",
-                "operationId": "7d113294c74b7d2469e8a3a463030195",
+                "operationId": "57579cfa186dea2ef176e297bf00eb81",
                 "parameters": [
                     {
                         "name": "id",

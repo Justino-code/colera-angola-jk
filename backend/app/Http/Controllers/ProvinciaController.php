@@ -12,7 +12,7 @@ class ProvinciaController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/provincia",
+     *     path="/provincias",
      *     summary="Listar todas as províncias",
      *     tags={"Províncias"},
      *     security={{"bearerAuth":{}}},
@@ -50,7 +50,7 @@ class ProvinciaController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/provincia",
+     *     path="/provincias",
      *     summary="Criar nova província",
      *     tags={"Províncias"},
      *     security={{"bearerAuth":{}}},
@@ -119,7 +119,7 @@ class ProvinciaController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/provincia/{id}",
+     *     path="/provincias/{id}",
      *     summary="Detalhes de uma província",
      *     tags={"Províncias"},
      *     security={{"bearerAuth":{}}},
@@ -174,7 +174,7 @@ class ProvinciaController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/provincia/{id}",
+     *     path="/provincias/{id}",
      *     summary="Atualizar província",
      *     tags={"Províncias"},
      *     security={{"bearerAuth":{}}},
@@ -254,7 +254,7 @@ class ProvinciaController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/provincia/{id}",
+     *     path="/provincias/{id}",
      *     summary="Excluir província",
      *     tags={"Províncias"},
      *     security={{"bearerAuth":{}}},

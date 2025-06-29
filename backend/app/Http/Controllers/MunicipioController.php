@@ -11,7 +11,7 @@ class MunicipioController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/municipio",
+     *     path="/municipios",
      *     summary="Listar todos os municípios",
      *     tags={"Municípios"},
      *     security={{"bearerAuth":{}}},
@@ -58,7 +58,7 @@ class MunicipioController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/municipio",
+     *     path="/municipios",
      *     summary="Criar novo município",
      *     tags={"Municípios"},
      *     security={{"bearerAuth":{}}},
@@ -124,7 +124,7 @@ class MunicipioController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/municipio/{id}",
+     *     path="/municipios/{id}",
      *     summary="Exibir detalhes de um município",
      *     tags={"Municípios"},
      *     security={{"bearerAuth":{}}},
@@ -179,7 +179,7 @@ class MunicipioController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/municipio/{id}",
+     *     path="/municipios/{id}",
      *     summary="Atualizar município",
      *     tags={"Municípios"},
      *     security={{"bearerAuth":{}}},
@@ -262,7 +262,7 @@ class MunicipioController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/municipio/{id}",
+     *     path="/municipios/{id}",
      *     summary="Excluir município",
      *     tags={"Municípios"},
      *     security={{"bearerAuth":{}}},

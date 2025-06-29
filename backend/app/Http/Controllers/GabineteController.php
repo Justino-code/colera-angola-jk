@@ -11,7 +11,7 @@ class GabineteController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/gabinete",
+     *     path="/gabinetes",
      *     summary="Listar todos os gabinetes",
      *     tags={"Gabinetes"},
      *     security={{"bearerAuth":{}}},
@@ -50,7 +50,7 @@ class GabineteController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/gabinete",
+     *     path="/gabinetes",
      *     summary="Criar novo gabinete",
      *     tags={"Gabinetes"},
      *     security={{"bearerAuth":{}}},
@@ -124,7 +124,7 @@ class GabineteController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/gabinete/{id}",
+     *     path="/gabinetes/{id}",
      *     summary="Exibir detalhes de um gabinete",
      *     tags={"Gabinetes"},
      *     security={{"bearerAuth":{}}},
@@ -179,7 +179,7 @@ class GabineteController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/gabinete/{id}",
+     *     path="/gabinetes/{id}",
      *     summary="Atualizar gabinete",
      *     tags={"Gabinetes"},
      *     security={{"bearerAuth":{}}},
@@ -268,7 +268,7 @@ class GabineteController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/gabinete/{id}",
+     *     path="/gabinetes/{id}",
      *     summary="Excluir gabinete",
      *     tags={"Gabinetes"},
      *     security={{"bearerAuth":{}}},

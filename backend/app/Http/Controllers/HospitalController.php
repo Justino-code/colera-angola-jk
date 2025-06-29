@@ -11,7 +11,7 @@ class HospitalController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/hospital",
+     *     path="/hospitais",
      *     summary="Listar todos os hospitais",
      *     tags={"Hospitais"},
      *     security={{"bearerAuth":{}}},
@@ -50,7 +50,7 @@ class HospitalController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/hospital",
+     *     path="/hospitais",
      *     summary="Criar novo hospital",
      *     tags={"Hospitais"},
      *     security={{"bearerAuth":{}}},
@@ -126,7 +126,7 @@ class HospitalController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/hospital/{id}",
+     *     path="/hospitais/{id}",
      *     summary="Exibir detalhes de um hospital",
      *     tags={"Hospitais"},
      *     security={{"bearerAuth":{}}},
@@ -181,7 +181,7 @@ class HospitalController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/hospital/{id}",
+     *     path="/hospitais/{id}",
      *     summary="Atualizar hospital",
      *     tags={"Hospitais"},
      *     security={{"bearerAuth":{}}},
@@ -274,7 +274,7 @@ class HospitalController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/hospital/{id}",
+     *     path="/hospitais/{id}",
      *     summary="Excluir hospital",
      *     tags={"Hospitais"},
      *     security={{"bearerAuth":{}}},
