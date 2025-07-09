@@ -126,17 +126,20 @@ export default function Login() {
           </motion.button>
         </form>
 
+        {/*
         <div className="flex justify-center mt-6 space-x-4">
           <SocialButton icon="Google" color="bg-red-500" />
           <SocialButton icon="GitHub" color="bg-gray-800" />
           <SocialButton icon="Facebook" color="bg-blue-600" />
         </div>
 
+        
         <div className="text-center mt-6">
           <Link to="/register" className="text-sm text-gray-300 hover:text-white transition">
             Não tem conta? <span className="underline">Cadastre-se</span>
           </Link>
         </div>
+        */}
       </motion.div>
     </div>
   );

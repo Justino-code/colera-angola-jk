@@ -11,24 +11,23 @@ class PacientePolicy
 {
     // Autorizações
     public function viewAny(Usuario $user): bool {
-        $authUser = auth()->user();
-        return $user->isGestor() || $user->isAdmin() || ($user->isMedico());
+        return $user->isGestor() || $user->isAdmin() || ($user->isMedico() || $user->isEnfermeiro());
     }
 
     public function view(Usuario $user) {
-        return $user->isGestor() ||$user->isMedico() || $user->isAdmin();
+        return $user->isGestor() ||$user->isMedico() || $user->isAdmin() || $user->isEnfermeiro();
     }
 
     public function create(Usuario $user) {
-        return $user->isGestor() || $user->isMedico() || $user->isAdmin();
+        return $user->isGestor() || $user->isEnfermeiro() || $user->isAdmin();
     }
 
     public function update(Usuario $user): bool {
-        return $user->isGestor() || $user->isAdmin() || ($user->isMedico());
+        return $user->isGestor() || $user->isAdmin() || ($user->isMedico() || $user->isEnfermeiro());
     }
 
     public function delete(Usuario $user) {
-        return $user->isGestor() || $user->isAdmin() || $user->isMedico();
+        return $user->isGestor() || $user->isAdmin() || $user->isMedico() || $user->isEnfermeiro();
     }
     /**
      * Determine whether the user can restore the model.
@@ -51,8 +50,19 @@ class PacientePolicy
     public function encaminhar(Usuario $usuario, Paciente $paciente): bool | Response
     {
         return ($usuario->isGestor() || $usuario->isAdmin()) ||
-               ($usuario->isMedico() && $usuario->id_hospital === $paciente->id_hospital)
+               (($usuario->isMedico() || $usuario->isEnfermeiro()) && $usuario->id_hospital === $paciente->id_hospital)
                ? Response::allow() :
                Response::deny('Você não tem permissão para encaminhar este paciente.');
+    }
+
+    /**
+     * Verifica se o usuário pode acessar o histórico de avaliações de risco do paciente
+     */
+    public function historicoAvaliacaoRisco(Usuario $usuario, Paciente $paciente): bool | Response
+    {
+        return ($usuario->isGestor() || $usuario->isAdmin() || $usuario->isMedico() || $usuario->isEnfermeiro())
+            && $usuario->id_hospital === $paciente->id_hospital
+            ? Response::allow()
+            : Response::deny('Você não tem permissão para acessar o histórico de avaliações de risco deste paciente.');
     }
 }

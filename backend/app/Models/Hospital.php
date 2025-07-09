@@ -33,4 +33,8 @@ class Hospital extends Model {
         return $this->hasMany(Viatura::class, 'id_viatura', 'id_viatura');
     }
 
+    public function usuarios(): HasMany {
+        return $this->hasMany(Usuario::class, 'id_hospital', 'id_hospital');
+    }
+
 }

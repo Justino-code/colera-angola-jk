@@ -10,8 +10,13 @@ export default function HospitalDetalhes() {
   const navigate = useNavigate();
   const [hospital, setHospital] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Carrega usuário do localStorage
+    const usuario = localStorage.getItem('usuario');
+    setUser(usuario ? JSON.parse(usuario) : null);
+
     const fetchHospital = async () => {
       try {
         const res = await api.get(`/hospitais/${id}`);
@@ -56,7 +61,7 @@ export default function HospitalDetalhes() {
   }
 
   const position = [
-    parseFloat(hospital.latitude) || -11.2027, // Default Angola center if latitude missing
+    parseFloat(hospital.latitude) || -11.2027,
     parseFloat(hospital.longitude) || 17.8739
   ];
 
@@ -66,6 +71,8 @@ export default function HospitalDetalhes() {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
   });
+
+  const podeEditar = user && (user.role === 'admin' || user.role === 'gestor');
 
   return (
     <div className="h-full w-full flex flex-col min-h-0 bg-white p-6 rounded shadow">
@@ -99,12 +106,14 @@ export default function HospitalDetalhes() {
       )}
 
       <div className="flex space-x-2">
-        <button
-          onClick={() => navigate(`/hospital/${hospital.id_hospital}/editar`)}
-          className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
-        >
-          Editar
-        </button>
+        {podeEditar && (
+          <button
+            onClick={() => navigate(`/hospital/${hospital.id_hospital}/editar`)}
+            className="bg-cyan-600 text-white py-2 px-4 rounded hover:bg-cyan-700 transition"
+          >
+            Editar
+          </button>
+        )}
         <button
           onClick={() => navigate('/hospital')}
           className="bg-slate-300 text-slate-700 py-2 px-4 rounded hover:bg-slate-400 transition"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
 
@@ -32,16 +33,22 @@ class LoginAction
             ], 403);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        // Cria o token
+        $tokenResult = $user->createToken('auth-token');
+
+        // Define a expiração (ex: 60 minutos a partir de agora)
+        $token = $tokenResult->accessToken;
+        $token->expires_at = Carbon::now()->addMinutes(60);
+        //$token->expires_at = Carbon::now()->addSeconds(60);
+        $token->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Login realizado com sucesso.',
             'data' => [
-                'token' => $token,
+                'token' => $tokenResult->plainTextToken,
                 'usuario' => $user
             ]
         ], 200);
     }
 }
-

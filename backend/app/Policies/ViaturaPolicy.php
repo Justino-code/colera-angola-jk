@@ -14,7 +14,7 @@ class ViaturaPolicy
     }
 
     public function view(Usuario $user) {
-        return $user->isGestor() || $user->isAdmin();
+        return $user->isGestor() || $user->isAdmin() || $user->isTecnico();
     }
 
     public function create(Usuario $user) {

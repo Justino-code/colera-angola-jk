@@ -7,9 +7,14 @@ export default function ViaturaListar() {
   const [viaturas, setViaturas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Carrega usuário do localStorage
+    const usuario = localStorage.getItem('usuario');
+    setUser(usuario ? JSON.parse(usuario) : null);
+
     const fetchViaturas = async () => {
       try {
         const res = await api.get('/viaturas');
@@ -60,6 +65,8 @@ export default function ViaturaListar() {
     ocupada: 'bg-red-100 text-red-800',
   };
 
+  const podeEditar = user && (user.role === 'admin' || user.role === 'gestor');
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -104,15 +111,17 @@ export default function ViaturaListar() {
                   />
                 </svg>
               </div>
-              <Link
-                to="/viatura/criar"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center justify-center whitespace-nowrap"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Nova Viatura
-              </Link>
+              {podeEditar && (
+                <Link
+                  to="/viatura/criar"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition flex items-center justify-center whitespace-nowrap"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  Nova Viatura
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -140,12 +149,14 @@ export default function ViaturaListar() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                   </svg>
                   <p className="mt-2">Nenhuma viatura cadastrada</p>
-                  <Link
-                    to="/viatura/criar"
-                    className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
-                  >
-                    Adicionar primeira viatura
-                  </Link>
+                  {podeEditar && (
+                    <Link
+                      to="/viatura/criar"
+                      className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
+                    >
+                      Adicionar primeira viatura
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
@@ -200,24 +211,28 @@ export default function ViaturaListar() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </Link>
-                        <Link
-                          to={`/viatura/${v.id_viatura || v.id}/editar`}
-                          className="text-yellow-600 hover:text-yellow-900"
-                          title="Editar"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </Link>
-                        <button
-                          onClick={() => removerViatura(v.id_viatura || v.id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Remover"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                        {podeEditar && (
+                          <Link
+                            to={`/viatura/${v.id_viatura || v.id}/editar`}
+                            className="text-yellow-600 hover:text-yellow-900"
+                            title="Editar"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </Link>
+                        )}
+                        {podeEditar && (
+                          <button
+                            onClick={() => removerViatura(v.id_viatura || v.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Remover"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

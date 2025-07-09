@@ -35,7 +35,7 @@ async function request(endpoint, options = {}) {
             data = JSON.parse(text);
         } catch {
             data = text;
-        }
+        }        
 
         if (!response.ok) {
             // Tratamento por tipo de status
@@ -52,9 +52,11 @@ async function request(endpoint, options = {}) {
 
             if (response.status === 403 && !unauthorizedShown) {
                 unauthorizedShown = true;
+                console.log(data);
+                
                 toast.error("Acesso não autorizado.");
                 setTimeout(() => {
-                    window.location.href = "/forbidden";
+                    //window.location.href = "/forbidden";
                 }, 1500);
             }
 
@@ -77,7 +79,7 @@ async function request(endpoint, options = {}) {
 
         return data;
     } catch (error) {
-        console.error("Erro:", error.message);
+        console.error(error);
         throw error; // Repassa o erro para o componente que chamou
     }
 }

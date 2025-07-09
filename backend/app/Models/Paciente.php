@@ -10,8 +10,10 @@ class Paciente extends Model {
     protected $primaryKey = 'id_paciente';
 
     protected $fillable = [
-        'nome', 'numero_bi', 'telefone', 'idade', 'sexo',
-        'sintomas', 'resultado_triagem', 'qr_code', 'latitude', 'longitude', 'nome_hospital', 'id_hospital'
+        'nome', 'numero_bi', 'telefone', 'idade', 
+        'sexo',/*'sintomas', 'resultado_triagem',*/ 
+        'qr_code', 'latitude', 'longitude', 
+        'nome_hospital', 'id_hospital', 'codigo'
     ];
 
     protected $casts = [
@@ -22,5 +24,9 @@ class Paciente extends Model {
 
     public function hospital(): BelongsTo {
         return $this->belongsTo(Hospital::class, 'id_hospital', 'id_hospital');
+    }
+
+    public function avaliacaoRisco() {
+        return $this->hasMany(AvaliacaoRisco::class, 'id_paciente', 'id_paciente');
     }
 }

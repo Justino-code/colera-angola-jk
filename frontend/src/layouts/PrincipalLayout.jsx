@@ -14,6 +14,7 @@ export default function PrincipalLayout() {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
+    const usuario = localStorage.getItem('usuario');
     if (!token) navigate('/login');
 
     const savedSidebar = localStorage.getItem('sidebarOpen');
@@ -24,15 +25,16 @@ export default function PrincipalLayout() {
     setDarkMode(isDark);
     document.documentElement.classList.toggle('dark', isDark);
 
-    async function fetchUser() {
+    // Carrega usuário do localStorage
+    if (usuario) {
       try {
-        const res = await api.get('/me');
-        if (res?.success !== false) setUser(res.data || res.user);
+        setUser(JSON.parse(usuario));
       } catch {
         setUser(null);
       }
+    } else {
+      setUser(null);
     }
-    fetchUser();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -99,7 +101,7 @@ export default function PrincipalLayout() {
           {hasAnyRole(['admin', 'gestor']) && (
             <SidebarLink to="/gabinete" text="Gabinetes" icon={<Landmark />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
-          {hasRole('admin') && (
+          {hasAnyRole(['admin', 'gestor']) && (
             <SidebarLink to="/usuario" text="Usuários" icon={<Users />} sidebarOpen={sidebarOpen} darkMode={darkMode} />
           )}
           {hasAnyRole(['admin', 'gestor', 'epidemiologista']) && (

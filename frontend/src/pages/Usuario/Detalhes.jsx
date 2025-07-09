@@ -43,6 +43,7 @@ export default function UsuarioDetalhes() {
         const res = await api.get(`/usuario/${id}`);
         if (res.success) {
           setUsuario(res.data);
+          console.log(res);
         } else {
           toast.error(res.message || 'Usuário não encontrado');
           navigate('/usuario');
@@ -200,11 +201,11 @@ export default function UsuarioDetalhes() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Hospital:</span>
-                    <span className="font-medium">{usuario.hospital_nome || 'Nenhum'}</span>
+                    <span className="font-medium">{usuario.hospital?.nome || 'Nenhum'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Gabinete:</span>
-                    <span className="font-medium">{usuario.gabinete_nome || 'Nenhum'}</span>
+                    <span className="font-medium">{usuario.gabinete?.nome || 'Nenhum'}</span>
                   </div>
                 </div>
               </div>

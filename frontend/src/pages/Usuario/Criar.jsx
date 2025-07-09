@@ -85,6 +85,8 @@ export default function CriarUsuario() {
       };
 
       const res = await api.post('/usuario', payload);
+      console.log(res);
+      
 
       if (res.success) {
         toast.success('Usuário criado com sucesso!');
@@ -95,7 +97,7 @@ export default function CriarUsuario() {
       }
     } catch (err) {
       console.error('Erro ao criar usuário:', err);
-      toast.error(err.response?.data?.message || 'Erro ao criar usuário');
+      toast.error(err.response?.message || 'Erro ao criar usuário');
     } finally {
       setSaving(false);
     }

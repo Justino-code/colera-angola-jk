@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Access\AuthorizationException;
+use App\Services\GerarCodigo;
 
 class PacienteController extends Controller
 {
@@ -142,10 +143,13 @@ class PacienteController extends Controller
                 ], 422);
             }
 
+            $codigo = GerarCodigo::gerarCodigo(Paciente::class, 'PAC');
+
             $validated = $validator->validated();
             $sintomas = $validated['sintomas'];
 
             $riskLevel = $this->triageService->avaliarRisco($sintomas);
+            $nivelRisco = $riskLevel['nivel_risco'];
             $hospital = $this->triageService->encontrarHospitalMaisProximo(
                 $validated['localizacao']['latitude'],
                 $validated['localizacao']['longitude']
@@ -157,16 +161,19 @@ class PacienteController extends Controller
                 'telefone' => $validated['telefone'],
                 'idade' => $validated['idade'],
                 'sexo' => $validated['sexo'],
-                'sintomas' => $sintomas,
-                'resultado_triagem' => $riskLevel,
+                //'sintomas' => $sintomas, sera removido do modelo Paciente
+                //'resultado_triagem' => $nivelRisco,
                 'latitude' => $validated['localizacao']['latitude'],
                 'longitude' => $validated['localizacao']['longitude'],
                 'nome_hospital' => $hospital->nome ?? null,
                 'id_hospital' => $hospital?->id_hospital ?? null,
                 'qr_code' => null,
+                'codigo' => $codigo
             ]);
 
-            $qrCode = $this->triageService->gerarQrCodeDoPaciente($paciente->toArray());
+            $resultadoAvaliacao = $this->triageService->avaliarRisco($sintomas, $paciente->id_paciente);
+            
+            $qrCode = $this->triageService->gerarQrCodeDoPaciente($paciente->toArray(), $resultadoAvaliacao, 'pt');
             $qrCodePath = "paciente/qrcodes/paciente_{$paciente->id_paciente}.png";
             Storage::put($qrCodePath, $qrCode);
             $paciente->update(['qr_code' => $qrCodePath]);
@@ -233,7 +240,7 @@ class PacienteController extends Controller
     public function show(int $id): JsonResponse
     {
         try {
-            $paciente = Paciente::with('hospital')->findOrFail($id);
+            $paciente = Paciente::with('hospital', 'avaliacaoRisco')->findOrFail($id);
             $this->authorize('view', $paciente);
 
             return response()->json([
@@ -460,7 +467,7 @@ class PacienteController extends Controller
     public function encaminhamento(int $id): JsonResponse
     {
         try {
-            $paciente = Paciente::findOrFail($id);
+            $paciente = Paciente::with('avaliacaoRisco')->findOrFail($id);
             $this->authorize('encaminhar', $paciente);
 
             $hospital = $this->triageService->encontrarHospitalMaisProximo(
@@ -469,8 +476,11 @@ class PacienteController extends Controller
             );
 
             $paciente->hospital = $hospital;
+            $avaliacaoRisco = $paciente->avaliacaoRisco()->latest()->first();
+            $avaliacaoRisco = json_decode($avaliacaoRisco['resultado'], true);
+            $risco = $avaliacaoRisco['nivel_risco'] ?? null;
 
-            if ($paciente->resultado_triagem === 'baixo_risco') {
+            if ($risco === 'baixo_risco') {
                 return response()->json([
                     'success' => false,
                     'paciente' => $paciente,
@@ -577,4 +587,157 @@ class PacienteController extends Controller
             ], 500);
         }
     }
+
+
+    /**
+ * @OA\Post(
+ *     path="/pacientes/{id}/avaliar-risco",
+ *     summary="Avaliar risco de cólera para um paciente",
+ *     tags={"Pacientes"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID do paciente",
+ *         @OA\Schema(type="integer")
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"sintomas"},
+ *             @OA\Property(
+ *                 property="sintomas",
+ *                 type="array",
+ *                 @OA\Items(type="string"),
+ *                 example={"diarreia_aquosa", "vomito"}
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Avaliação de risco realizada",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="avaliacao", type="object"),
+ *                 @OA\Property(property="paciente", type="object")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Paciente não encontrado"
+ *     ),
+ *     @OA\Response(
+ *         response=422,
+ *         description="Dados inválidos"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Acesso não autorizado"
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro ao avaliar risco"
+ *     )
+ * )
+ */
+public function avaliarRisco(Request $request, int $id): JsonResponse
+{
+    DB::beginTransaction();
+    try {
+        $paciente = Paciente::findOrFail($id);
+        $this->authorize('update', $paciente);
+
+        $validator = Validator::make($request->all(), [
+            'sintomas' => 'required|array',
+            'sintomas.*' => 'string|in:' . implode(',', array_keys(config('triagem.sintomas')))
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        $resultado = $this->triageService->avaliarRisco($validated['sintomas'], $id);
+
+        // Cria a avaliação de risco
+        /*$avaliacao = $paciente->avaliacoesRisco()->create([
+                'sintomas' => $validated['sintomas'],
+                'resultado' => $resultado,
+                'id_paciente' => $paciente->id_paciente,
+                'id_usuario' => auth()->user()->id_usuario,
+                ]);*/
+
+        // Atualiza o paciente com o resultado mais recente (opcional)
+        /*$paciente->update([
+            'resultado_triagem' => $resultado['nivel_risco'],
+            'sintomas' => $validated['sintomas']
+        ]);*/
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'avaliacao' => $resultado,
+                'paciente' => $paciente->fresh()
+            ]
+        ]);
+
+    } catch (AuthorizationException $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'error' => 'Acesso não autorizado.'
+        ], 403);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'error' => 'Paciente não encontrado.'
+        ], 404);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'error' => 'Erro ao avaliar risco: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function historicoAvaliacao(int $id){
+    try {
+        $paciente = Paciente::findOrFail($id);
+        $this->authorize('view', $paciente);
+
+        $avaliacoes = $paciente->avaliacaoRisco()->with('usuario')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $avaliacoes
+        ]);
+    } catch (AuthorizationException $e) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Acesso não autorizado.'
+        ], 403);
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Paciente não encontrado.'
+        ], 404);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => 'Erro ao buscar histórico de avaliações: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }

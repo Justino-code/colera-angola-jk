@@ -44,7 +44,19 @@ class UsuarioController extends Controller
     {
         try {
             $this->authorize('viewAny', Usuario::class);
-            $usuarios = Usuario::all();
+            $usuario = auth()->user();
+            if ($usuario->hasRole('admin')) {
+                $usuarios = Usuario::all();
+            }else{
+                if ($usuario->hasRole('gestor')) {
+                    if($usuario->id_gabinete){
+                        $usuarios = Usuario::where('id_gabinete', '=',$usuario->id_gabinete)->get();
+                    }
+                    else if($usuario->id_hospital){
+                        $usuarios = Usuario::where('id_hospital', '=',$usuario->id_hospital)->get();
+                    }
+                }
+            }
 
             if ($usuarios->isEmpty()) {
                 return response()->json([
@@ -109,7 +121,7 @@ class UsuarioController extends Controller
     {
         try {
             $this->authorize('view', Usuario::class);
-            $usuario = Usuario::find($id);
+            $usuario = Usuario::with('hospital', 'gabinete')->findOrFail($id);
 
             if (!$usuario) {
                 return response()->json([
@@ -183,6 +195,8 @@ class UsuarioController extends Controller
         try {
             $this->authorize('create', Usuario::class);
 
+            $user = auth()->user();
+
             // Validação dos dados de entrada
             $validator = Validator::make($request->all(), [
                 'nome' => 'required|string|max:255',
@@ -208,6 +222,35 @@ class UsuarioController extends Controller
 
             $validated = $validator->validated();
 
+            // Restrição para gestor hospitalar
+            if ($user->role === 'gestor' && $user->id_hospital) {
+                if (
+                    (isset($validated['id_hospital']) && $validated['id_hospital'] != $user->id_hospital) ||
+                    (!isset($validated['id_hospital']) && $validated['role'] !== 'gestor')
+                ) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ['Gestor só pode cadastrar usuários do seu próprio hospital.']
+                    ], 403);
+                }
+                $validated['id_hospital'] = $user->id_hospital;
+            }
+
+            // Restrição para gestor de gabinete
+            $v = isset($validated['id_gabinete']) ? 'sim': 'nao';
+            if ($user->role === 'gestor' && $user->id_gabinete) {
+                if (
+                    (isset($validated['id_gabinete']) && $validated['id_gabinete'] != $user->id_gabinete) ||
+                    (!isset($validated['id_gabinete']) && $validated['role'] !== 'gestor')
+                ) {
+                    return response()->json([
+                        'success' => false,
+                        'errors' => ['Gestor só pode cadastrar usuários do seu próprio gabinete.'. $v]
+                    ], 403);
+                }
+                $validated['id_gabinete'] = $user->id_gabinete;
+            }
+
             $usuario = Usuario::create([
                 'nome' => $validated['nome'],
                 'email' => $validated['email'],
@@ -216,6 +259,7 @@ class UsuarioController extends Controller
                 'permissoes' => $validated['permissoes'],
                 'id_hospital' => $validated['id_hospital'] ?? null,
                 'id_gabinete' => $validated['id_gabinete'] ?? null,
+                'email_verified_at' => now(), // <- pode remover facilmente
             ]);
 
             $token = $usuario->createToken('api-user-token', ['post:read', 'post:create']);

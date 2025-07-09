@@ -18,7 +18,7 @@ class RelatorioPolicy
     }
 
     public function create(Usuario $user): bool {
-        return true;
+        return $user->isAdmin() || $user->isGestor() || $user->isCoordenadorRegional();
     }
 
     public function delete(Usuario $user): bool {

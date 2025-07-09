@@ -64,6 +64,9 @@ const MapaCasos = lazy(() => import("../pages/MapaCasos"));
 // Página 403 Forbidden
 const Forbidden = lazy(() => import("../pages/Forbidden"));
 
+// Triagem
+const Triagem = lazy(() => import("../pages/Paciente/Triagem"));
+
 export default function AppRoutes() {
     return (
         <Suspense fallback={<PageLoader />}>
@@ -94,6 +97,11 @@ export default function AppRoutes() {
                     <Route
                         path="/paciente/:id/encaminhamento"
                         element={<PacienteEncaminhamento />}
+                    />
+                    {/* Triagem */}
+                    <Route
+                        path="/triagem/:id"
+                        element={<Triagem />}
                     />
 
                     {/* Hospital */}

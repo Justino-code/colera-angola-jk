@@ -18,12 +18,13 @@ return new class extends Migration
     $table->string('telefone');
     $table->integer('idade');
     $table->enum('sexo', ['M', 'F']);
-    $table->json('sintomas');
-    $table->string('resultado_triagem');
+    //$table->json('sintomas');
+    //$table->string('resultado_triagem');
     $table->string('qr_code')->unique()->nullable();
     $table->decimal('latitude', 10, 8);
     $table->decimal('longitude', 11, 8);
     $table->string('nome_hospital')->nullable();
+    $table->string('codigo')->nullable(); // Alterado para string para compatibilidade com UUIDs
     $table->unsignedBigInteger('id_hospital')->nullable();
     $table->foreign('id_hospital')->references('id_hospital')->on('hospital')->onDelete('set null');
     $table->timestamps();

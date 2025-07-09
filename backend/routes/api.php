@@ -56,7 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Route::get('/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
     Route::get('/pacientes/{id}/encaminhamento', [PacienteController::class, 'encaminhamento']);
-
+    Route::get('/pacientes/por-hospital/{id}', [PacienteController::class, 'pacientesPorHospital']);
+    Route::put('/pacientes/{id}/triagem', [PacienteController::class, 'avaliarRisco']);
+    Route::get('/pacientes/{id}/historico-avaliacao', [PacienteController::class, 'historicoAvaliacao']);
 
     Route::post('/ambulancia/{ambulancia}/location', [AmbulanciaController::class, 'updateLocation']);
     Route::post('/relatorio/{id}/gerar-pdf', [RelatorioController::class, 'gerarPDF']);

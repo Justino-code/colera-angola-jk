@@ -55,4 +55,13 @@ class Usuario extends Authenticatable implements MustVerifyEmail{
         return $this->hasOne(Gabinete::class, 'id_responsavel', 'id_usuario');
     }
 
+    /**
+     * Relacionamento com o modelo AvaliacaoRisco
+     * Este relacionamento é usado para registrar as avaliações de risco feitas pelo usuário
+     * Pode ser um médico, enfermeiro ou gestor ou um administrador
+     */
+    public function abaliacaoRisco() {
+        return $this->hasMany(AvaliacaoRisco::class, 'id_usuario', 'id_usuario');
+    }
+
 }
