@@ -645,10 +645,11 @@ class PacienteController extends Controller
  */
 public function avaliarRisco(Request $request, int $id): JsonResponse
 {
+    $this->authorize('avaliacaoRisco', Paciente::class);
+    
     DB::beginTransaction();
     try {
         $paciente = Paciente::findOrFail($id);
-        $this->authorize('update', $paciente);
 
         $validator = Validator::make($request->all(), [
             'sintomas' => 'required|array',

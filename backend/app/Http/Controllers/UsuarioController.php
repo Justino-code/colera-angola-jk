@@ -546,6 +546,13 @@ class UsuarioController extends Controller
                 ], 404);
             }
 
+            if($usuario->role === 'admin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não é possível excluir um usuário com a função admin.'
+                ], 403);
+            }
+
             $usuario->delete();
 
             return response()->json([

@@ -22,7 +22,7 @@ class ViaturaPolicy
     }
 
     public function update(Usuario $user) {
-        return $user->isGestor() || $user->isGestor() || $user->isTecnico();
+        return $user->isGestor() || $user->isGestor() || $user->isTecnico() || $user->isAdmin();
     }
 
     public function delete(Usuario $user) {

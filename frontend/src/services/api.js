@@ -53,6 +53,7 @@ async function request(endpoint, options = {}) {
             if (response.status === 403 && !unauthorizedShown) {
                 unauthorizedShown = true;
                 console.log(data);
+                toast.error(data?.message || "Acesso não autorizado.");
                 
                 toast.error("Acesso não autorizado.");
                 setTimeout(() => {

@@ -6,6 +6,10 @@ import * as z from 'zod';
 import api from '../../services/api';
 import Skeleton from '../../components/common/Skeleton';
 import { toast } from 'react-hot-toast';
+import { 
+  FiArrowLeft, FiSave, FiLock, FiUser, FiMail, 
+  FiBriefcase, FiKey, FiCheck, FiX, FiShield 
+} from 'react-icons/fi';
 
 const schema = z
   .object({
@@ -35,13 +39,16 @@ export default function UsuarioEditar() {
   const [gabinetes, setGabinetes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    formState: { errors }
+    setValue,
+    formState: { errors, isDirty }
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -61,6 +68,15 @@ export default function UsuarioEditar() {
   const showGabineteField = ['gestor', 'coordenador_regional'].includes(selectedRole);
 
   useEffect(() => {
+    const usuarioLogado = localStorage.getItem('usuario');
+    if (usuarioLogado) {
+      const parsedUser = JSON.parse(usuarioLogado);
+      setCurrentUser(parsedUser);
+      setIsAdmin(parsedUser.role === 'admin');
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const [userRes, hospRes, gabRes] = await Promise.all([
@@ -76,6 +92,16 @@ export default function UsuarioEditar() {
         }
 
         const userData = userRes.data;
+        
+        if (!isAdmin) {
+          if (currentUser && currentUser.id_hospital) {
+            setValue('id_hospital', currentUser.id_hospital);
+          }
+          if (currentUser && currentUser.id_gabinete) {
+            setValue('id_gabinete', currentUser.id_gabinete);
+          }
+        }
+
         reset({
           nome: userData.nome,
           email: userData.email,
@@ -99,7 +125,7 @@ export default function UsuarioEditar() {
     };
 
     fetchData();
-  }, [id, navigate, reset]);
+  }, [id, navigate, reset, isAdmin, currentUser, setValue]);
 
   const onSubmit = async (data) => {
     setSaving(true);
@@ -135,190 +161,344 @@ export default function UsuarioEditar() {
   if (loading) {
     return (
       <div className="min-h-full w-full bg-gray-50 p-4 md:p-6">
-        <Skeleton />
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-10 bg-gray-200 rounded w-1/3"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-10 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-12 bg-gray-200 rounded w-1/4 ml-auto"></div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const hospitalAtual = hospitais.find(h => h.id_hospital == watch('id_hospital'));
+  const gabineteAtual = gabinetes.find(g => g.id_gabinete == watch('id_gabinete'));
+
+  // Mapear roles para nomes amigáveis
+  const roleNames = {
+    admin: 'Administrador',
+    gestor: 'Gestor',
+    medico: 'Médico',
+    tecnico: 'Técnico',
+    enfermeiro: 'Enfermeiro',
+    epidemiologista: 'Epidemiologista',
+    administrativo: 'Administrativo',
+    agente_sanitario: 'Agente Sanitário',
+    farmaceutico: 'Farmacêutico',
+    analista_dados: 'Analista de Dados',
+    coordenador_regional: 'Coordenador Regional'
+  };
+
+  // Formatar permissões para exibição
+  const formatarPermissoes = (permissoes) => {
+    if (!permissoes) return [];
+    return permissoes.split(',')
+      .map(p => p.trim())
+      .filter(p => p)
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1).replace(/_/g, ' '));
+  };
+
   return (
     <div className="min-h-full w-full bg-gray-50 p-4 md:p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="p-4 md:p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-6 text-white">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800">Editar Usuário</h1>
-              <p className="text-sm text-gray-500 mt-1">Atualize os dados do usuário</p>
+              <h1 className="text-2xl font-bold flex items-center">
+                <FiUser className="mr-3" />
+                Editar Usuário
+              </h1>
+              <p className="text-cyan-100 mt-1">Atualize as informações do usuário</p>
             </div>
             <button
               onClick={() => navigate("/usuario")}
-              className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition flex items-center"
+              className="px-4 py-2 bg-white bg-opacity-20 rounded-lg hover:bg-opacity-30 transition-all flex items-center"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Voltar
+              <FiArrowLeft className="mr-2" />
+              Voltar para Lista
             </button>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-4 md:p-6">
-          <div className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome Completo *
-                  {errors.nome && (
-                    <span className="ml-2 text-red-600 text-xs">{errors.nome.message}</span>
-                  )}
-                </label>
-                <input
-                  type="text"
-                  {...register('nome')}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.nome ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-amber-200'
-                  }`}
-                />
-              </div>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center border-b pb-2">
+                <FiUser className="mr-2 text-cyan-600" />
+                Informações Pessoais
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span>Nome Completo</span>
+                    {errors.nome && (
+                      <span className="ml-2 text-red-600 text-xs flex items-center">
+                        <FiX className="mr-1" /> {errors.nome.message}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      {...register('nome')}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                        errors.nome ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-cyan-200'
+                      }`}
+                    />
+                    <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                  {errors.email && (
-                    <span className="ml-2 text-red-600 text-xs">{errors.email.message}</span>
-                  )}
-                </label>
-                <input
-                  type="email"
-                  {...register('email')}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-amber-200'
-                  }`}
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span>Email</span>
+                    {errors.email && (
+                      <span className="ml-2 text-red-600 text-xs flex items-center">
+                        <FiX className="mr-1" /> {errors.email.message}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      {...register('email')}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                        errors.email ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-cyan-200'
+                      }`}
+                    />
+                    <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Cargo *
-                  {errors.role && (
-                    <span className="ml-2 text-red-600 text-xs">{errors.role.message}</span>
-                  )}
-                </label>
-                <select
-                  {...register('role')}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.role ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-amber-200'
-                  }`}
-                >
-                  <option value="">Selecione um cargo</option>
-                  <option value="admin">Administrador</option>
-                  <option value="gestor">Gestor</option>
-                  <option value="medico">Médico</option>
-                  <option value="tecnico">Técnico</option>
-                  <option value="enfermeiro">Enfermeiro</option>
-                  <option value="epidemiologista">Epidemiologista</option>
-                  <option value="administrativo">Administrativo</option>
-                  <option value="agente_sanitario">Agente Sanitário</option>
-                  <option value="farmaceutico">Farmacêutico</option>
-                  <option value="analista_dados">Analista de Dados</option>
-                  <option value="coordenador_regional">Coordenador Regional</option>
-                </select>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span>Cargo</span>
+                    {errors.role && (
+                      <span className="ml-2 text-red-600 text-xs flex items-center">
+                        <FiX className="mr-1" /> {errors.role.message}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    {isAdmin ? (
+                      <>
+                        <select
+                          {...register('role')}
+                          className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 appearance-none ${
+                            errors.role ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-cyan-200'
+                          }`}
+                        >
+                          <option value="">Selecione um cargo</option>
+                          {Object.entries(roleNames).map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
+                        </select>
+                        <FiBriefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      </>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={roleNames[watch('role')] || watch('role')}
+                          readOnly
+                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed"
+                        />
+                        <FiBriefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            Fixo
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Permissões
-                  <span className="text-xs text-gray-500 ml-1">(separadas por vírgula)</span>
-                </label>
-                <input
-                  type="text"
-                  {...register('permissoes')}
-                  placeholder="Ex: criar_usuario, editar_paciente"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-200"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Permissões
+                  </label>
+                  {isAdmin ? (
+                    <input
+                      type="text"
+                      {...register('permissoes')}
+                      placeholder="Ex: criar_usuario, editar_paciente"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                    />
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-300 rounded-md p-3">
+                      <div className="flex flex-wrap gap-2">
+                        {formatarPermissoes(watch('permissoes')).map((permissao, index) => (
+                          <span 
+                            key={index} 
+                            className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full flex items-center"
+                          >
+                            <FiShield className="mr-1 text-blue-600" size={12} />
+                            {permissao}
+                          </span>
+                        ))}
+                        {!watch('permissoes') && (
+                          <span className="text-gray-500 text-sm">Nenhuma permissão atribuída</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {showHospitalField && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Hospital
-                </label>
-                <select
-                  {...register('id_hospital')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-200"
-                >
-                  <option value="">Selecione um hospital</option>
-                  {hospitais.map(h => (
-                    <option key={h.id_hospital} value={h.id_hospital}>{h.nome}</option>
-                  ))}
-                </select>
+            {(showHospitalField || showGabineteField) && (
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center border-b pb-2">
+                  <FiBriefcase className="mr-2 text-amber-600" />
+                  Associação Institucional
+                </h2>
+                
+                {showHospitalField && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Hospital
+                    </label>
+                    {isAdmin ? (
+                      <select
+                        {...register('id_hospital')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-200"
+                      >
+                        <option value="">Selecione um hospital</option>
+                        {hospitais.map(h => (
+                          <option key={h.id_hospital} value={h.id_hospital}>{h.nome}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={hospitalAtual ? hospitalAtual.nome : 'Não atribuído'}
+                          readOnly
+                          className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            Fixo
+                          </span>
+                        </div>
+                        <input type="hidden" {...register('id_hospital')} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {showGabineteField && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gabinete
+                    </label>
+                    {isAdmin ? (
+                      <select
+                        {...register('id_gabinete')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-200"
+                      >
+                        <option value="">Selecione um gabinete</option>
+                        {gabinetes.map(g => (
+                          <option key={g.id_gabinete} value={g.id_gabinete}>{g.nome}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={gabineteAtual ? gabineteAtual.nome : 'Não atribuído'}
+                          readOnly
+                          className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed"
+                        />
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            Fixo
+                          </span>
+                        </div>
+                        <input type="hidden" {...register('id_gabinete')} />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
-            {showGabineteField && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gabinete
-                </label>
-                <select
-                  {...register('id_gabinete')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-200"
-                >
-                  <option value="">Selecione um gabinete</option>
-                  {gabinetes.map(g => (
-                    <option key={g.id_gabinete} value={g.id_gabinete}>{g.nome}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center border-b pb-2">
+                <FiLock className="mr-2 text-purple-600" />
+                Segurança da Conta
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span>Nova Senha</span>
+                    {errors.senha && (
+                      <span className="ml-2 text-red-600 text-xs flex items-center">
+                        <FiX className="mr-1" /> {errors.senha.message}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      {...register('senha')}
+                      placeholder="Deixe em branco para manter a atual"
+                      className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                        errors.senha ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-purple-200'
+                      }`}
+                    />
+                    <FiKey className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nova Senha
-                  {errors.senha && (
-                    <span className="ml-2 text-red-600 text-xs">{errors.senha.message}</span>
-                  )}
-                </label>
-                <input
-                  type="password"
-                  {...register('senha')}
-                  placeholder="Deixe em branco para manter a atual"
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.senha ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-amber-200'
-                  }`}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirmar Nova Senha
-                  {errors.confirmarSenha && (
-                    <span className="ml-2 text-red-600 text-xs">{errors.confirmarSenha.message}</span>
-                  )}
-                </label>
-                <input
-                  type="password"
-                  {...register('confirmarSenha')}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                    errors.confirmarSenha ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-amber-200'
-                  }`}
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                    <span>Confirmar Nova Senha</span>
+                    {errors.confirmarSenha && (
+                      <span className="ml-2 text-red-600 text-xs flex items-center">
+                        <FiX className="mr-1" /> {errors.confirmarSenha.message}
+                      </span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      {...register('confirmarSenha')}
+                      className={`w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                        errors.confirmarSenha ? 'border-red-500 focus:ring-red-200' : 'border-gray-300 focus:ring-purple-200'
+                      }`}
+                    />
+                    <FiCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-gray-200">
+            <div className="flex justify-end pt-4">
               <button
                 type="button"
                 onClick={() => navigate('/usuario')}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition mr-3"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition mr-3 flex items-center"
               >
-                Cancelar
+                <FiX className="mr-2" /> Cancelar
               </button>
               <button
                 type="submit"
-                disabled={saving}
-                className="px-4 py-2 text-white bg-amber-600 hover:bg-amber-700 rounded-md transition disabled:opacity-70 disabled:cursor-not-allowed min-w-32 flex justify-center"
+                disabled={saving || !isDirty}
+                className={`px-4 py-2 text-white rounded-lg transition min-w-32 flex items-center justify-center ${
+                  saving || !isDirty 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
+                }`}
               >
                 {saving ? (
                   <span className="flex items-center">
@@ -328,7 +508,11 @@ export default function UsuarioEditar() {
                     </svg>
                     Salvando...
                   </span>
-                ) : 'Salvar Alterações'}
+                ) : (
+                  <span className="flex items-center">
+                    <FiSave className="mr-2" /> Salvar Alterações
+                  </span>
+                )}
               </button>
             </div>
           </div>

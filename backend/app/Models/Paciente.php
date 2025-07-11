@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Paciente extends Model {
     protected $table = 'paciente';
@@ -11,14 +12,13 @@ class Paciente extends Model {
 
     protected $fillable = [
         'nome', 'numero_bi', 'telefone', 'idade', 
-        'sexo',/*'sintomas', 'resultado_triagem',*/ 
-        'qr_code', 'latitude', 'longitude', 
+        'sexo', 'qr_code', 'latitude', 'longitude', 
         'nome_hospital', 'id_hospital', 'codigo'
     ];
 
     protected $casts = [
         'sintomas' => 'array',
-        'telefone' => 'encrypted', // Criptografia AES-256
+        'telefone' => 'encrypted',
         'resultado_triagem' => 'encrypted'
     ];
 
@@ -28,5 +28,11 @@ class Paciente extends Model {
 
     public function avaliacaoRisco() {
         return $this->hasMany(AvaliacaoRisco::class, 'id_paciente', 'id_paciente');
+    }
+
+    // Adicione este novo relacionamento
+    public function ultimaAvaliacao(): HasOne {
+        return $this->hasOne(AvaliacaoRisco::class, 'id_paciente', 'id_paciente')
+            ->latestOfMany('created_at');
     }
 }

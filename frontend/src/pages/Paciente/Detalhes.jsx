@@ -101,14 +101,21 @@ export default function PacienteDetalhes() {
   const [loadingQr, setLoadingQr] = useState(false);
   const [modalTriagemIsOpen, setModalTriagemIsOpen] = useState(false);
   const [ultimaAvaliacao, setUltimaAvaliacao] = useState(null);
+  const [userRole, setUserRole] = useState(null); // Estado para armazenar a permissão do usuário
 
   useEffect(() => {
+    // Carrega permissões do usuário do localStorage
+    const usuario = localStorage.getItem('usuario');
+    if (usuario) {
+      const parsedUser = JSON.parse(usuario);
+      setUserRole(parsedUser.role);
+    }
+
     const carregarPaciente = async () => {
       try {
         setLoading(true);
         const res = await api.get(`/pacientes/${id}`);
         console.log("Dados do paciente:", res);
-        
         
         if (res.success) {
           const pacienteData = res.data;
@@ -306,15 +313,19 @@ export default function PacienteDetalhes() {
                 </svg>
                 Editar
               </button>
-              <button
-                onClick={() => navigate(`/triagem/${paciente.id_paciente}`)}
-                className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-all flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-                Fazer Triagem
-              </button>
+              
+              {/* Botão de Fazer Triagem - Somente para admin e enfermeiro */}
+              {(userRole === 'admin' || userRole === 'enfermeiro') && (
+                <button
+                  onClick={() => navigate(`/triagem/${paciente.id_paciente}`)}
+                  className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-all flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  </svg>
+                  Fazer Triagem
+                </button>
+              )}
             </div>
           </div>
         </div>

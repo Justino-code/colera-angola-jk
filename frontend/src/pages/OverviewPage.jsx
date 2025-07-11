@@ -4,9 +4,9 @@ import { toast } from 'react-hot-toast';
 import { 
   FiActivity, FiHeart, FiAlertTriangle, FiPlusCircle,
   FiRefreshCw, FiMap, FiAlertCircle, FiTruck, 
-  FiTrendingUp, FiTrendingDown, FiCircle
+  FiTrendingUp, FiTrendingDown, FiCircle, FiCheck
 } from 'react-icons/fi';
-import { BarChart, PieChart, LineChart } from '../components/Charts';
+import { BarChart } from '../components/Charts';
 
 export default function OverviewPage() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -19,20 +19,21 @@ export default function OverviewPage() {
       setLoading(true);
       setError(null);
       const response = await api.get('/dashboard');
-      console.log(response);
       
-      
+      // A resposta real está em response.data
       if (response.success) {
         setDashboardData(response.data);
         setLastUpdated(new Date());
       } else {
-        setError(response.message || 'Erro ao carregar dados');
-        toast.error(response.message || 'Erro ao carregar dados');
+        const errorMessage = response.message || 'Erro ao carregar dados';
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (err) {
       console.error('Erro ao buscar dados:', err);
-      setError('Erro de conexão com o servidor');
-      toast.error('Erro ao carregar dashboard');
+      const errorMessage = err?.message || 'Erro de conexão com o servidor';
+      setError(errorMessage);
+      toast.error('Erro ao carregar dashboard: ' + errorMessage);
     } finally {
       setLoading(false);
     }
@@ -45,9 +46,10 @@ export default function OverviewPage() {
   // Função para formatar os níveis de risco para exibição
   const formatRiskLevel = (level) => {
     switch(level) {
-      case 'alto': return 'Alto Risco';
-      case 'medio': return 'Médio Risco';
-      case 'baixo': return 'Baixo Risco';
+      case 'alto_risco': return 'Alto Risco';
+      case 'medio_risco': return 'Médio Risco';
+      case 'baixo_risco': return 'Baixo Risco';
+      case 'desconhecido': return 'Desconhecido';
       default: return level;
     }
   };
@@ -63,18 +65,6 @@ export default function OverviewPage() {
                  trendData.tendencia === 'reducao' ? 'down' : 'neutral',
         display: trendData.percentual || '0%',
         details: trendData.detalhes || ''
-      };
-    }
-    
-    // Fallback para formato antigo (se necessário)
-    if (typeof trendData === 'string') {
-      const value = parseFloat(trendData.replace('%', ''));
-      return {
-        value: Math.abs(value),
-        direction: trendData.includes('+') ? 'up' : 
-                 trendData.includes('-') ? 'down' : 'neutral',
-        display: trendData,
-        details: ''
       };
     }
     
@@ -128,9 +118,9 @@ export default function OverviewPage() {
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {loading ? (
-            Array(4).fill(0).map((_, idx) => (
+            Array(5).fill(0).map((_, idx) => (
               <StatCardSkeleton key={idx} />
             ))
           ) : (
@@ -143,8 +133,7 @@ export default function OverviewPage() {
                 color="bg-red-50"
                 additionalInfo={[
                   { label: 'Alto Risco', value: dashboardData?.casos_ativos?.alto_risco || 0 },
-                  { label: 'Médio Risco', value: dashboardData?.casos_ativos?.medio_risco || 0 },
-                  { label: 'Baixo Risco', value: dashboardData?.casos_ativos?.baixo_risco || 0 }
+                  { label: 'Médio Risco', value: dashboardData?.casos_ativos?.medio_risco || 0 }
                 ]}
               />
               <StatCard 
@@ -160,12 +149,19 @@ export default function OverviewPage() {
                 ]}
               />
               <StatCard 
+                title="Recuperados" 
+                value={dashboardData?.recuperados?.total || 0}
+                icon={<FiCheck className="text-green-500" size={24} />}
+                color="bg-green-50"
+                description={dashboardData?.recuperados?.descricao || 'Pacientes que tiveram alto risco e agora têm baixo risco'}
+              />
+              <StatCard 
                 title="Leitos Ocupados" 
                 value={`${dashboardData?.leitos?.ocupados || 0}/${dashboardData?.leitos?.total || 0}`}
                 subValue={`${dashboardData?.leitos?.percentual_ocupacao || 0}%`}
-                icon={<FiHeart className="text-green-500" size={24} />}
+                icon={<FiHeart className="text-purple-500" size={24} />}
                 trend={parseTrendValue(dashboardData?.tendencias?.leitos_ocupados)}
-                color="bg-green-50"
+                color="bg-purple-50"
               />
               <StatCard 
                 title="Ambulâncias" 
@@ -196,38 +192,111 @@ export default function OverviewPage() {
                     data={dashboardData?.distribuicao_risco?.map(item => ({
                       name: formatRiskLevel(item.nivel),
                       value: item.quantidade,
-                      color: item.nivel === 'alto' ? '#ef4444' : 
-                             item.nivel === 'medio' ? '#f59e0b' : '#10b981'
+                      color: item.nivel === 'alto_risco' ? '#ef4444' : 
+                             item.nivel === 'medio_risco' ? '#f59e0b' : 
+                             item.nivel === 'baixo_risco' ? '#10b981' : '#6b7280'
                     })) || []}
-                    colors={['#ef4444', '#f59e0b', '#10b981']}
+                    colors={['#ef4444', '#f59e0b', '#10b981', '#6b7280']}
                   />
                 </div>
               </div>
+              
+              {/* Seção revisada de Ocupação de Recursos */}
               <div className="bg-white p-4 rounded-lg shadow-md border border-gray-100">
                 <h2 className="font-semibold text-lg flex items-center gap-2 mb-4">
                   <FiAlertTriangle className="text-amber-600" /> Ocupação de Recursos
                 </h2>
-                <div className="h-80">
-                  <PieChart 
-                    data={[
-                      { 
-                        name: 'Leitos Ocupados', 
-                        value: dashboardData?.leitos?.ocupados || 0,
-                        color: '#ef4444'
-                      },
-                      { 
-                        name: 'Ambulâncias em Uso', 
-                        value: dashboardData?.ambulancias?.em_uso || 0,
-                        color: '#f59e0b'
-                      },
-                      { 
-                        name: 'Recursos Disponíveis', 
-                        value: (dashboardData?.leitos?.disponiveis || 0) + 
-                               (dashboardData?.ambulancias?.disponiveis || 0),
-                        color: '#10b981'
-                      }
-                    ]}
-                  />
+                
+                <div className="space-y-6">
+                  {/* Card para Leitos */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-2">
+                        <FiHeart className="text-purple-600" size={20} />
+                        <h3 className="font-medium text-gray-700">Leitos Hospitalares</h3>
+                      </div>
+                      <span className="font-bold text-lg">
+                        {dashboardData?.leitos?.ocupados || 0}/{dashboardData?.leitos?.total || 0}
+                      </span>
+                    </div>
+                    
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className="h-2.5 rounded-full bg-purple-600" 
+                        style={{ 
+                          width: `${dashboardData?.leitos?.percentual_ocupacao || 0}%`,
+                          minWidth: '5px' 
+                        }}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-2 text-sm text-gray-600">
+                      <span>Disponíveis: {dashboardData?.leitos?.disponiveis || 0}</span>
+                      <span>{dashboardData?.leitos?.percentual_ocupacao || 0}% ocupados</span>
+                    </div>
+                  </div>
+                  
+                  {/* Card para Ambulâncias */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-2">
+                        <FiTruck className="text-amber-600" size={20} />
+                        <h3 className="font-medium text-gray-700">Ambulâncias</h3>
+                      </div>
+                      <span className="font-bold text-lg">
+                        {dashboardData?.ambulancias?.disponiveis || 0}/{dashboardData?.ambulancias?.total || 0}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Disponíveis</div>
+                        <div className="text-lg font-bold text-green-600">
+                          {dashboardData?.ambulancias?.disponiveis || 0}
+                        </div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Em Uso</div>
+                        <div className="text-lg font-bold text-amber-600">
+                          {dashboardData?.ambulancias?.em_uso || 0}
+                        </div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-sm text-gray-600 mb-1">Manutenção</div>
+                        <div className="text-lg font-bold text-red-600">
+                          {dashboardData?.ambulancias?.manutencao || 0}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Gráfico de barras para ocupação percentual */}
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-3">Comparação de Ocupação</h4>
+                    <div className="h-48">
+                      <BarChart 
+                        data={[
+                          { 
+                            name: 'Leitos', 
+                            value: dashboardData?.leitos?.percentual_ocupacao || 0,
+                            color: '#8b5cf6'
+                          },
+                          { 
+                            name: 'Ambulâncias', 
+                            value: dashboardData?.ambulancias?.total 
+                              ? Math.round(
+                                  (dashboardData.ambulancias.em_uso / dashboardData.ambulancias.total) * 100
+                                )
+                              : 0,
+                            color: '#f59e0b'
+                          }
+                        ]}
+                        colors={['#8b5cf6', '#f59e0b']}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </>
@@ -290,7 +359,7 @@ export default function OverviewPage() {
 }
 
 // Componente StatCard atualizado
-function StatCard({ title, value, subValue, icon, trend, color, additionalInfo }) {
+function StatCard({ title, value, subValue, icon, trend, color, additionalInfo, description }) {
   return (
     <div className={`p-4 rounded-lg shadow-md border border-gray-100 ${color}`}>
       <div className="flex justify-between items-start">
@@ -298,6 +367,7 @@ function StatCard({ title, value, subValue, icon, trend, color, additionalInfo }
           <p className="text-sm text-gray-500">{title}</p>
           <p className="text-2xl font-bold mt-1">{value}</p>
           {subValue && <p className="text-sm text-gray-600 mt-1">{subValue}</p>}
+          {description && <p className="text-xs text-gray-500 mt-1">{description}</p>}
         </div>
         <div className="p-2 rounded-full bg-white shadow-sm">
           {icon}
@@ -334,7 +404,7 @@ function StatCard({ title, value, subValue, icon, trend, color, additionalInfo }
   );
 }
 
-// Componentes de Loading (mantidos iguais)
+// Componentes de Loading
 function StatCardSkeleton() {
   return (
     <div className="p-4 rounded-lg shadow-md bg-gray-100 animate-pulse h-32">

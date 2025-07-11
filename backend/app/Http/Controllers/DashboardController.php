@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Paciente;
-use App\Models\AvaliacaoRisco;
 use App\Models\Hospital;
 use App\Models\Viatura;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -19,33 +17,25 @@ class DashboardController extends Controller
             $ontem = $hoje->copy()->subDay();
             $semanaPassada = $hoje->copy()->subWeek();
 
-            // 1. Dados principais de pacientes (sempre usando a última avaliação)
-            $casosAtivos = $this->getCasosAtivos();
-            $novosCasos24h = $this->getNovosCasos24h($ontem, $hoje);
+            // Carregar todos os dados
+            $dados = $this->carregarDadosCompletos();
             
-            // 2. Dados de leitos
-            $dadosLeitos = $this->getDadosLeitos($casosAtivos['total']);
-            
-            // 3. Dados de ambulâncias
-            $dadosAmbulancias = $this->getDadosAmbulancias();
-
-            // 4. Tendências (considerando a última avaliação em cada período)
-            $tendencias = $this->calcularTendencias($ontem, $semanaPassada);
-
-            // 5. Distribuição por risco (baseado nas últimas avaliações)
-            $distribuicaoRisco = $this->getDistribuicaoRisco();
+            // Processar todos os dados usando arrays
+            $resultados = [
+                'casos_ativos' => $this->getCasosAtivos($dados),
+                'novos_casos_24h' => $this->getNovosCasos24h($dados, $ontem, $hoje),
+                'leitos' => $this->getDadosLeitos($dados),
+                'ambulancias' => $this->getDadosAmbulancias($dados),
+                'tendencias' => $this->calcularTendencias($dados, $ontem, $semanaPassada),
+                'distribuicao_risco' => $this->getDistribuicaoRisco($dados),
+                'recuperados' => $this->getRecuperados($dados),
+                'atualizado_em' => $hoje->toDateTimeString(),
+                'dados_completos' => $dados // Inclui todos os dados para depuração
+            ];
 
             return response()->json([
                 'success' => true,
-                'data' => [
-                    'casos_ativos' => $casosAtivos,
-                    'novos_casos_24h' => $novosCasos24h,
-                    'leitos' => $dadosLeitos,
-                    'ambulancias' => $dadosAmbulancias,
-                    'tendencias' => $tendencias,
-                    'distribuicao_risco' => $distribuicaoRisco,
-                    'atualizado_em' => $hoje->toDateTimeString()
-                ]
+                'data' => $resultados
             ]);
 
         } catch (\Exception $e) {
@@ -56,165 +46,320 @@ class DashboardController extends Controller
         }
     }
 
-    private function getCasosAtivos(): array
+    private function carregarDadosCompletos(): array
     {
-        // Subquery para obter a última avaliação de cada paciente ativo
-        $ultimasAvaliacoes = AvaliacaoRisco::select(
-                'id_paciente',
-                DB::raw('MAX(created_at) as ultima_avaliacao')
-            )
-            ->groupBy('id_paciente');
-
-        // Contagem de pacientes ativos por nível de risco
-        $resultados = DB::table('paciente')
-            ->leftJoinSub($ultimasAvaliacoes, 'ultimas', function($join) {
-                $join->on('paciente.id_paciente', '=', 'ultimas.id_paciente');
-            })
-            ->leftJoin('avaliacao_riscos', function($join) {
-                $join->on('avaliacao_riscos.id_paciente', '=', 'ultimas.id_paciente')
-                    ->on('avaliacao_riscos.created_at', '=', 'ultimas.ultima_avaliacao');
-            })
-            ->whereNull('paciente.id_hospital')
-            ->select(
-                DB::raw('COUNT(paciente.id_paciente) as total'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "alto_risco" THEN 1 ELSE 0 END) as alto_risco'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "medio_risco" THEN 1 ELSE 0 END) as medio_risco'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "baixo_risco" THEN 1 ELSE 0 END) as baixo_risco')
-            )
-            ->first();
-
         return [
-            'total' => $resultados->total ?? 0,
-            'alto_risco' => $resultados->alto_risco ?? 0,
-            'medio_risco' => $resultados->medio_risco ?? 0,
-            'baixo_risco' => $resultados->baixo_risco ?? 0,
-            'resultado' => $resultados
+            'pacientes' => Paciente::with(['avaliacaoRisco' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }])->get()->toArray(),
+            
+            'hospitais' => Hospital::with('pacientes')->get()->toArray(),
+            
+            'ambulancias' => Viatura::where('tipo', 'ambulancia')->get()->toArray()
         ];
     }
 
-    private function getNovosCasos24h(Carbon $inicio, Carbon $fim): array
+    private function processarResultadoAvaliacao(array $avaliacao): array
     {
-        // Subquery para obter a última avaliação de cada paciente
-        $ultimasAvaliacoes = AvaliacaoRisco::select(
-                'id_paciente',
-                DB::raw('MAX(created_at) as ultima_avaliacao')
-            )
-            ->groupBy('id_paciente');
+        // Se já estiver processado, retorna diretamente
+        if (isset($avaliacao['resultado_decoded'])) {
+            return $avaliacao;
+        }
+        
+        // Processar o campo resultado
+        $resultadoString = $avaliacao['resultado'] ?? '{}';
+        $avaliacao['resultado_decoded'] = json_decode($resultadoString, true) ?? [];
+        
+        return $avaliacao;
+    }
 
-        // Contagem de novos pacientes por nível de risco (última avaliação)
-        $resultados = DB::table('paciente')
-            ->leftJoinSub($ultimasAvaliacoes, 'ultimas', function($join) {
-                $join->on('paciente.id_paciente', '=', 'ultimas.id_paciente');
-            })
-            ->leftJoin('avaliacao_riscos', function($join) {
-                $join->on('avaliacao_riscos.id_paciente', '=', 'ultimas.id_paciente')
-                    ->on('avaliacao_riscos.created_at', '=', 'ultimas.ultima_avaliacao');
-            })
-            ->whereBetween('paciente.created_at', [$inicio, $fim])
-            ->select(
-                DB::raw('COUNT(paciente.id_paciente) as total'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "alto_risco" THEN 1 ELSE 0 END) as alto'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "medio_risco" THEN 1 ELSE 0 END) as medio'),
-                DB::raw('SUM(CASE WHEN JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel_risco")) = "baixo_risco" THEN 1 ELSE 0 END) as baixo')
-            )
-            ->first();
+    private function getNivelRisco(array $avaliacao): string
+    {
+        $avaliacao = $this->processarResultadoAvaliacao($avaliacao);
+        return $avaliacao['resultado_decoded']['nivel_risco'] ?? 'desconhecido';
+    }
+
+    private function getCasosAtivos(array $dados): array
+    {
+        $casos = [
+            'total' => 0,
+            'alto_risco' => 0,
+            'medio_risco' => 0,
+            'a' => [],
+        ];
+
+        foreach ($dados['pacientes'] as $paciente) {
+            // Ignorar pacientes internados
+            //if (!empty($paciente['id_hospital'])) continue;
+            
+            $avaliacoes = $paciente['avaliacao_risco'] ?? [];
+            
+            $resultadoAvaliacao = json_decode($avaliacoes[0]['resultado'],true) ?? null;
+            $ultimaAvaliacao = $resultadoAvaliacao ?? null;
+            $casos['a'] = $ultimaAvaliacao;
+            
+            if ($ultimaAvaliacao) {
+                $nivelRisco = $ultimaAvaliacao['nivel_risco'];//$this->getNivelRisco($ultimaAvaliacao);
+                
+                if (in_array($nivelRisco, ['alto_risco', 'medio_risco'])) {
+                    $casos['total']++;
+                    
+                    if ($nivelRisco === 'alto_risco') {
+                        $casos['alto_risco']++;
+                    } elseif ($nivelRisco === 'medio_risco') {
+                        $casos['medio_risco']++;
+                    }
+                }
+            }
+        }
+
+        return $casos;
+    }
+
+    private function getRecuperados(array $dados): array
+    {
+        $recuperados = 0;
+
+        foreach ($dados['pacientes'] as $paciente) {
+            // Ignorar pacientes internados
+            //if (!empty($paciente['id_hospital'])) continue;
+            
+            $avaliacoes = $paciente['avaliacao_risco'] ?? [];
+            $ultimaAvaliacao = $avaliacoes[0] ?? null;
+            
+            // Verificar se a última avaliação é baixo risco
+            if (!$ultimaAvaliacao) continue;
+            
+            $nivelAtual = $this->getNivelRisco($ultimaAvaliacao);
+            if ($nivelAtual !== 'baixo_risco') continue;
+
+            // Verificar histórico de alto risco
+            $teveAltoRisco = false;
+            foreach ($avaliacoes as $avaliacao) {
+                $nivel = $this->getNivelRisco($avaliacao);
+                if ($nivel === 'alto_risco') {
+                    $teveAltoRisco = true;
+                    break;
+                }
+            }
+
+            if ($teveAltoRisco) {
+                $recuperados++;
+            }
+        }
 
         return [
-            'total' => $resultados->total ?? 0,
+            'total' => $recuperados,
+            'descricao' => 'Pacientes recuperados'
+        ];
+    }
+
+    private function getNovosCasos24h(array $dados, Carbon $inicio, Carbon $fim): array
+    {
+        $resultado = [
+            'total' => 0,
             'por_risco' => [
-                'alto' => $resultados->alto ?? 0,
-                'medio' => $resultados->medio ?? 0,
-                'baixo' => $resultados->baixo ?? 0
+                'alto' => 0,
+                'medio' => 0,
+                'baixo' => 0
             ]
         ];
+
+        foreach ($dados['pacientes'] as $paciente) {
+            $criadoEm = Carbon::parse($paciente['created_at']);
+            
+            if ($criadoEm->between($inicio, $fim)) {
+                $resultado['total']++;
+                
+                $avaliacoes = $paciente['avaliacao_risco'] ?? [];
+                $ultimaAvaliacao = $avaliacoes[0] ?? null;
+                $nivelRisco = 'baixo_risco';
+                
+                if ($ultimaAvaliacao) {
+                    $nivelRisco = $this->getNivelRisco($ultimaAvaliacao);
+                }
+                
+                switch ($nivelRisco) {
+                    case 'alto_risco': $resultado['por_risco']['alto']++; break;
+                    case 'medio_risco': $resultado['por_risco']['medio']++; break;
+                    case 'baixo_risco': $resultado['por_risco']['baixo']++; break;
+                }
+            }
+        }
+
+        return $resultado;
     }
 
-    private function getDadosLeitos(int $casosAtivos): array
+    private function getDadosLeitos(array $dados): array
     {
-        $totalLeitos = Hospital::sum('capacidade_leitos');
-        $leitosOcupados = Paciente::whereNotNull('id_hospital')->count();
-        
+        $totalLeitos = 0;
+        $pacientesInternados = 0;
+
+        // Calcular capacidade total de leitos
+        foreach ($dados['hospitais'] as $hospital) {
+            $totalLeitos += $hospital['capacidade_leitos'];
+        }
+
+        // Contar pacientes internados
+        foreach ($dados['pacientes'] as $paciente) {
+            if (!empty($paciente['id_hospital'])) {
+                $pacientesInternados++;
+            }
+        }
+
+        $disponiveis = max(0, $totalLeitos - $pacientesInternados);
+        $percentual = $totalLeitos > 0 ? round(($pacientesInternados / $totalLeitos) * 100, 2) : 0;
+
         return [
             'total' => $totalLeitos,
-            'ocupados' => $leitosOcupados,
-            'disponiveis' => max(0, $totalLeitos - $leitosOcupados),
-            'percentual_ocupacao' => $totalLeitos > 0 ? 
-                round(($leitosOcupados / $totalLeitos) * 100, 2) : 0
+            'ocupados' => $pacientesInternados,
+            'disponiveis' => $disponiveis,
+            'percentual_ocupacao' => $percentual
         ];
     }
 
-    private function getDadosAmbulancias(): array
+    private function getDadosAmbulancias(array $dados): array
     {
-        return [
-            'total' => Viatura::where('tipo', 'ambulancia')->count(),
-            'disponiveis' => Viatura::where('tipo', 'ambulancia')
-                                   ->where('status', 'disponivel')
-                                   ->count(),
-            'em_uso' => Viatura::where('tipo', 'ambulancia')
-                             ->where('status', 'em_uso')
-                             ->count(),
-            'manutencao' => Viatura::where('tipo', 'ambulancia')
-                                 ->where('status', 'manutencao')
-                                 ->count()
+        $resultado = [
+            'total' => 0,
+            'disponiveis' => 0,
+            'em_uso' => 0,
+            'manutencao' => 0
         ];
+
+        foreach ($dados['ambulancias'] as $ambulancia) {
+            $resultado['total']++;
+            
+            switch ($ambulancia['status']) {
+                case 'disponivel': $resultado['disponiveis']++; break;
+                case 'em_uso': $resultado['em_uso']++; break;
+                case 'manutencao': $resultado['manutencao']++; break;
+            }
+        }
+
+        return $resultado;
     }
 
-    private function calcularTendencias(Carbon $ontem, Carbon $semanaPassada): array
+    private function getDistribuicaoRisco(array $dados): array
     {
-        // Casos ativos (considerando última avaliação)
-        $casosAtivosHoje = $this->getContagemPacientesAtivos();
-        $casosAtivosOntem = $this->getContagemPacientesAtivos($ontem);
+        $distribuicao = [];
+
+        foreach ($dados['pacientes'] as $paciente) {
+            $avaliacoes = $paciente['avaliacao_risco'] ?? [];
+            $ultimaAvaliacao = $avaliacoes[0] ?? null;
+            $nivelRisco = 'desconhecido';
+            
+            if ($ultimaAvaliacao) {
+                $nivelRisco = $this->getNivelRisco($ultimaAvaliacao);
+            }
+
+            if (!isset($distribuicao[$nivelRisco])) {
+                $distribuicao[$nivelRisco] = 0;
+            }
+            $distribuicao[$nivelRisco]++;
+        }
+
+        // Converter para formato de saída
+        $resultado = [];
+        foreach ($distribuicao as $nivel => $quantidade) {
+            $resultado[] = [
+                'nivel' => $nivel,
+                'quantidade' => $quantidade
+            ];
+        }
+
+        return $resultado;
+    }
+
+    private function calcularTendencias(array $dados, Carbon $ontem, Carbon $semanaPassada): array
+    {
+        // 1. Casos ativos hoje
+        $casosAtivosHoje = $this->getCasosAtivos($dados)['total'];
         
-        // Novos casos (não precisa de avaliação, pois é por criação)
-        $novosCasosHoje = Paciente::whereBetween('created_at', [$ontem, Carbon::now()])->count();
-        $novosCasosSemanaPassada = Paciente::whereBetween('created_at', [
-            $semanaPassada->copy()->subDay(), 
-            $semanaPassada
-        ])->count();
+        // 2. Casos ativos ontem
+        $casosAtivosOntem = 0;
+        foreach ($dados['pacientes'] as $paciente) {
+            // Ignorar pacientes internados
+            //if (!empty($paciente['id_hospital'])) continue;
+            
+            $criadoEm = Carbon::parse($paciente['created_at']);
+            if ($criadoEm->greaterThan($ontem)) continue;
+            
+            // Encontrar avaliação mais recente antes de ontem
+            $avaliacoes = $paciente['avaliacao_risco'] ?? [];
+            $avaliacaoValida = null;
+            
+            foreach ($avaliacoes as $avaliacao) {
+                $avaliacaoData = Carbon::parse($avaliacao['created_at']);
+                
+                if ($avaliacaoData->lte($ontem)) {
+                    $nivelRisco = $this->getNivelRisco($avaliacao);
+                    if (in_array($nivelRisco, ['alto_risco', 'medio_risco'])) {
+                        $casosAtivosOntem++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // 3. Novos casos hoje
+        $novosCasosHoje = $this->getNovosCasos24h($dados, $ontem, Carbon::now())['total'];
+        
+        // 4. Novos casos semana passada
+        $novosCasosSemanaPassada = 0;
+        $inicioSemanaPassada = $semanaPassada->copy()->subDay();
+        foreach ($dados['pacientes'] as $paciente) {
+            $criadoEm = Carbon::parse($paciente['created_at']);
+            if ($criadoEm->between($inicioSemanaPassada, $semanaPassada)) {
+                $novosCasosSemanaPassada++;
+            }
+        }
+
+        // 5. Leitos ocupados hoje
+        $leitosOcupadosHoje = 0;
+        foreach ($dados['pacientes'] as $paciente) {
+            if (!empty($paciente['id_hospital'])) {
+                $leitosOcupadosHoje++;
+            }
+        }
+        
+        // 6. Leitos ocupados semana passada
+        $leitosOcupadosSemanaPassada = 0;
+        foreach ($dados['pacientes'] as $paciente) {
+            if (!empty($paciente['id_hospital'])) {
+                $criadoEm = Carbon::parse($paciente['created_at']);
+                if ($criadoEm->lte($semanaPassada)) {
+                    $leitosOcupadosSemanaPassada++;
+                }
+            }
+        }
+
+        // 7. Ambulâncias disponíveis hoje
+        $ambulanciasHoje = $this->getDadosAmbulancias($dados)['disponiveis'];
+        
+        // 8. Ambulâncias disponíveis semana passada
+        $ambulanciasSemanaPassada = 0;
+        foreach ($dados['ambulancias'] as $ambulancia) {
+            if ($ambulancia['status'] === 'disponivel') {
+                $criadoEm = Carbon::parse($ambulancia['created_at']);
+                if ($criadoEm->lte($semanaPassada)) {
+                    $ambulanciasSemanaPassada++;
+                }
+            }
+        }
 
         return [
             'casos_ativos' => $this->calcularVariacao($casosAtivosHoje, $casosAtivosOntem),
             'novos_casos' => $this->calcularVariacao($novosCasosHoje, $novosCasosSemanaPassada),
-            'leitos_ocupados' => $this->calcularVariacao(
-                Paciente::whereNotNull('id_hospital')->count(),
-                Paciente::whereNotNull('id_hospital')
-                       ->where('created_at', '<=', $semanaPassada)
-                       ->count()
-            ),
-            'ambulancias_disponiveis' => $this->calcularVariacao(
-                Viatura::where('tipo', 'ambulancia')->where('status', 'disponivel')->count(),
-                Viatura::where('tipo', 'ambulancia')
-                      ->where('status', 'disponivel')
-                      ->where('created_at', '<=', $semanaPassada)
-                      ->count()
-            )
+            'leitos_ocupados' => $this->calcularVariacao($leitosOcupadosHoje, $leitosOcupadosSemanaPassada),
+            'ambulancias_disponiveis' => $this->calcularVariacao($ambulanciasHoje, $ambulanciasSemanaPassada)
         ];
-    }
-
-    private function getContagemPacientesAtivos(?Carbon $dataLimite = null): int
-    {
-        $query = Paciente::whereNull('id_hospital');
-
-        if ($dataLimite) {
-            $query->where('created_at', '<=', $dataLimite);
-        }
-
-        return $query->count();
     }
 
     private function calcularVariacao(float $atual, float $anterior): array
     {
-        if ($anterior == 0) {
-            return [
-                'valor' => $atual,
-                'percentual' => '0%',
-                'tendencia' => $atual > 0 ? 'aumento' : 'estavel',
-                'detalhes' => $atual > 0 ? 'Novos casos registrados' : 'Sem variação'
-            ];
-        }
-
         $variacao = $atual - $anterior;
-        $percentual = ($variacao / $anterior) * 100;
+        $percentual = $anterior != 0 ? ($variacao / $anterior) * 100 : 0;
 
         return [
             'valor' => abs($variacao),
@@ -226,42 +371,12 @@ class DashboardController extends Controller
 
     private function getDescricaoTendencia(float $percentual): string
     {
-        $absPercentual = abs($percentual);
+        $abs = abs($percentual);
+        $tipo = $percentual > 0 ? 'aumento' : 'reducao';
 
-        if ($absPercentual < 5) return 'Estabilidade';
-        if ($absPercentual < 15) return $percentual > 0 ? 'Pequeno aumento' : 'Pequena redução';
-        if ($absPercentual < 30) return $percentual > 0 ? 'Aumento moderado' : 'Redução moderada';
-        return $percentual > 0 ? 'Aumento significativo' : 'Redução significativa';
-    }
-
-    private function getDistribuicaoRisco(): array
-    {
-        // Subquery para obter apenas a última avaliação de cada paciente
-        $subquery = AvaliacaoRisco::select(
-                'id_paciente',
-                DB::raw('MAX(created_at) as ultima_avaliacao')
-            )
-            ->groupBy('id_paciente');
-
-        // Distribuição por nível de risco
-        $resultados = DB::table('avaliacao_riscos')
-            ->joinSub($subquery, 'ultimas', function($join) {
-                $join->on('avaliacao_riscos.id_paciente', '=', 'ultimas.id_paciente')
-                    ->on('avaliacao_riscos.created_at', '=', 'ultimas.ultima_avaliacao');
-            })
-            ->select(
-                DB::raw('JSON_UNQUOTE(JSON_EXTRACT(avaliacao_riscos.resultado, "$.nivel")) as nivel'),
-                DB::raw('COUNT(*) as quantidade')
-            )
-            ->groupBy('nivel')
-            ->orderBy('quantidade', 'desc')
-            ->get();
-
-        return $resultados->map(function($item) {
-            return [
-                'nivel' => $item->nivel,
-                'quantidade' => $item->quantidade
-            ];
-        })->toArray();
+        if ($abs < 5) return 'Estabilidade';
+        if ($abs < 15) return "Pequeno $tipo";
+        if ($abs < 30) return ucfirst("{$tipo} moderado");
+        return ucfirst("{$tipo} significativo");
     }
 }

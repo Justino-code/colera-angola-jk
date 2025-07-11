@@ -52,10 +52,11 @@ export default function UsuarioListar() {
         toast.success('Usuário removido com sucesso!');
       } else {
         toast.error(res.message || 'Erro ao remover usuário');
+        
       }
     } catch (err) {
       console.error('Erro ao remover usuário:', err);
-      toast.error(err.response?.data?.message || 'Erro ao remover usuário');
+      toast.error(err?.data?.message || 'Erro ao remover usuário');
     }
   };
 

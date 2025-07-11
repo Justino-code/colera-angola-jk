@@ -29,6 +29,14 @@ class PacientePolicy
     public function delete(Usuario $user) {
         return $user->isGestor() || $user->isAdmin() || $user->isMedico() || $user->isEnfermeiro();
     }
+
+    /**
+     * Determina se um usuário pode actualizar o histórico de avaliações de risco de um paciente.
+     */
+    public function avaliacaoRisco(Usuario $usuario): bool
+    {
+        return $usuario->isAdmin() || $usuario->isEnfermeiro();
+    }
     /**
      * Determine whether the user can restore the model.
      */

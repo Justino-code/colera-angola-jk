@@ -34,8 +34,17 @@ class ViaturaController extends Controller
     {
         try {
             $this->authorize('viewAny', Viatura::class);
+            $usuario = auth()->user();
 
-            $viaturas = Viatura::with('hospital')->get();
+            if($usuario->hasRole('admin')) {
+                $viaturas = Viatura::with('hospital')->get();
+            } else if($usuario->id_hospital) {
+                // Se o usuário não for admin, filtrar por hospital
+                $viaturas = Viatura::with('hospital')
+                    ->where('id_hospital', $usuario->id_hospital)
+                    ->get();
+            }else
+                $viaturas = Viatura::with('hospital')->get();
 
             return response()->json([
                 'success' => true,
