@@ -129,21 +129,6 @@ npm run dev
 | POST   | `/api/v1/ambulancias` | Solicitar ambulância               |  
 | GET    | `/api/v1/relatorios`  | Buscar dados para gráficos         |  
 
-## 📦 Deploy  
-
-### **Frontend**  
-- GitHub Pages:  
-  ```bash  
-  npm run deploy  
-  ```  
-
-### **Backend**  
-- Heroku:  
-  ```bash  
-  heroku create  
-  git push heroku master  
-  ```  
-
 ## 📝 Licença  
 Este projeto está licenciado sob a **MIT License**. Veja o arquivo [LICENSE](LICENSE) para detalhes.  
 
